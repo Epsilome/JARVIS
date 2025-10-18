@@ -1,0 +1,141 @@
+
+<!-- saved from url=(0041)https://csync.smilewanted.com/?upapi=true -->
+<html><script src="./decode_consent.js.download" type="text/javascript" async=""></script><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/extend-native-history-api.js"></script><script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js"></script><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><script>
+(function(){
+
+    function docReady(fn) {
+        if(document.readyState === "complete" || document.readyState === "interactive"){
+            setTimeout(fn, 1);
+        }else{
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
+    function getSearchParameters() {
+        var prmstr = window.location.search.substr(1);
+        return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+    }
+
+    function loadAsyncScript(src, callback){
+        var script = document.createElement('script');
+        script.src = src;
+        script.type = 'text/javascript';
+        script.async = true;
+        if(callback != null){
+            if (script.readyState) { // IE, incl. IE9
+                script.onreadystatechange = function() {
+                    if (script.readyState == "loaded" || script.readyState == "complete") {
+                        script.onreadystatechange = null;
+                        callback();
+                    }
+                };
+            } else {
+                script.onload = function() { // Other browsers
+                    callback();
+                };
+            }
+        }
+        a=document.getElementsByTagName('script')[0];
+        if(a){
+            a.parentNode.insertBefore(script,a);
+        }
+    }
+
+    function transformToAssocArray( prmstr ) {
+        var params = {};
+        var prmarr = prmstr.split("&");
+        for ( var i = 0; i < prmarr.length; i++) {
+            var tmparr = prmarr[i].split("=");
+            params[tmparr[0]] = tmparr[1];
+        }
+        return params;
+    }
+
+    function create_cookie_sync(url){
+        var ifrm = document.createElement("iframe");
+        ifrm.src = url;
+        ifrm.scrolling = "no";
+        ifrm.frameBorder = 0;
+        ifrm.width = 0;
+        ifrm.height = 0;
+        ifrm.style.margin = 0;
+        ifrm.style.padding = 0;
+        ifrm.style.display = "none";
+        ifrm.style.width = "0px";
+        ifrm.style.height = "0px";
+        document.body.append(ifrm);
+    }
+
+    function call_cookies_sync(){
+        docReady(function() {
+            var count_cookie_sync = 0;
+
+            create_cookie_sync("https://csync.smilewanted.com/drop_cookie_sw.php");
+
+            if(output_list_cookies_sync.length > 0){
+                output_list_cookies_sync.forEach(function(cookie_sync_url){
+                    setTimeout(function(){
+
+                        cookie_sync_url = cookie_sync_url.replaceAll('[USER_ID_SW]', '742a0bca0189728b273ccd98cf00c164');
+                        cookie_sync_url = cookie_sync_url.replaceAll('[GDPR_APPLIES]', gdpr_applies);
+                        cookie_sync_url = cookie_sync_url.replaceAll('[GDPR_CONSENT_STRING]', consent_string);
+
+                        create_cookie_sync(cookie_sync_url);
+                    }, 50*count_cookie_sync);
+
+                    count_cookie_sync++;
+                });
+            }
+        });
+    }
+
+    var list_cookies_sync = {"eskimi":{"order":2,"redirect_url":"https:\/\/ittpx.eskimi.com\/sync?sp_id=148&gdpr=[GDPR_APPLIES]&gdpr_consent=[GDPR_CONSENT_STRING]"},"id5":{"order":7,"redirect_url":"https:\/\/id5-sync.com\/s\/846\/9.gif?puid=[USER_ID_SW]&gdpr=[GDPR_APPLIES]&gdpr_consent=[GDPR_CONSENT_STRING]&callback=https%3A%2F%2Fcsync.smilewanted.com%2Fset_partner_userid_get%2Fid5%2F[USER_ID_SW]"},"openx":{"order":14,"redirect_url":"https:\/\/u.openx.net\/w\/1.0\/cm?id=158474f5-20ec-4fcc-8ba8-4c101c556b25&gdpr=[GDPR_APPLIES]&gdpr_consent=[GDPR_CONSENT_STRING]&r=https%3A%2F%2Fcsync.smilewanted.com%2Fset_partner_userid_get%2Fopenx%2F"},"sharethrough":{"order":15,"redirect_url":"https:\/\/match.sharethrough.com\/universal\/v1?supply_id=GmfSCHMu&gdpr=[GDPR_APPLIES]&gdpr_consent=[GDPR_CONSENT_STRING]"},"sovrn":{"order":16,"redirect_url":"https:\/\/ap.lijit.com\/pixel?gdpr=[GDPR_APPLIES]&gdpr_consent=[GDPR_CONSENT_STRING]&redir=https%3A%2F%2Fcsync.smilewanted.com%2Fset_partner_userid_get%2Fsovrn%2F%24UID"},"onetag":{"order":17,"redirect_url":"https:\/\/onetag-sys.com\/usync\/?pubId=7f5d22b0006ab5a"},"rtbhouse":{"order":22,"redirect_url":"https:\/\/creativecdn.com\/cm-notify?pi=smilewanted"},"33across":{"order":25,"redirect_url":"https:\/\/ssc-cms.33across.com\/ps\/?m=xch&rt=html&id=001Pg000009Gtq2IAC&ru=https%3A%2F%2Fcsync.smilewanted.com%2Fset_partner_userid_get%2F33across%2F33XUSERID33X"}};
+
+    var output_list_cookies_sync = [];
+
+    for(let [key, value] of Object.entries(list_cookies_sync)){
+        output_list_cookies_sync[value.order] = value.redirect_url;
+    }
+
+    var gdpr_applies = 0;
+    var consent_string = '';
+    var params = getSearchParameters();
+    var force_calls = false;
+
+    
+    setTimeout(function(){
+
+        try{
+            if(typeof top.window.__tcfapi !== 'undefined'){
+                top.window.__tcfapi('getTCData', 2, function (tcData, success){
+                    if(success){
+                        gdpr_applies = tcData.gdprApplies ? 1 : 0;
+                        consent_string = tcData.tcString;
+                    }
+                });
+            }else{
+                if(params.gdpr && params.gdpr_consent){
+                    gdpr_applies = params.gdpr;
+                    consent_string = params.gdpr_consent;
+                }else{
+                    force_calls = true;
+                }
+            }
+        }catch(e){
+            if(params.gdpr && params.gdpr_consent){
+                gdpr_applies = params.gdpr;
+                consent_string = params.gdpr_consent;
+            }else{
+                force_calls = true;
+            }
+        }
+
+        loadAsyncScript("https://static.smilewanted.com/js/decode_consent/decode_consent.js", function() {
+            if((sw_consent.vendor_allowed(consent_string, 639) && sw_consent.purpose_allowed(consent_string, 1) && sw_consent.purpose_allowed(consent_string, 2)) || force_calls){
+                call_cookies_sync();
+            }
+        });
+    }, 50);
+})();
+
+</script><script bis_use="true" type="text/javascript" charset="utf-8" data-bis-config="[&quot;facebook.com/&quot;,&quot;twitter.com/&quot;,&quot;youtube-nocookie.com/embed/&quot;,&quot;//vk.com/&quot;,&quot;//www.vk.com/&quot;,&quot;linkedin.com/&quot;,&quot;//www.linkedin.com/&quot;,&quot;//instagram.com/&quot;,&quot;//www.instagram.com/&quot;,&quot;//www.google.com/recaptcha/api2/&quot;,&quot;//hangouts.google.com/webchat/&quot;,&quot;//www.google.com/calendar/&quot;,&quot;//www.google.com/maps/embed&quot;,&quot;spotify.com/&quot;,&quot;soundcloud.com/&quot;,&quot;//player.vimeo.com/&quot;,&quot;//disqus.com/&quot;,&quot;//tgwidget.com/&quot;,&quot;//js.driftt.com/&quot;,&quot;friends2follow.com&quot;,&quot;/widget&quot;,&quot;login&quot;,&quot;//video.bigmir.net/&quot;,&quot;blogger.com&quot;,&quot;//smartlock.google.com/&quot;,&quot;//keep.google.com/&quot;,&quot;/web.tolstoycomments.com/&quot;,&quot;moz-extension://&quot;,&quot;chrome-extension://&quot;,&quot;/auth/&quot;,&quot;//analytics.google.com/&quot;,&quot;adclarity.com&quot;,&quot;paddle.com/checkout&quot;,&quot;hcaptcha.com&quot;,&quot;recaptcha.net&quot;,&quot;2captcha.com&quot;,&quot;accounts.google.com&quot;,&quot;www.google.com/shopping/customerreviews&quot;,&quot;buy.tinypass.com&quot;,&quot;gstatic.com&quot;,&quot;secureir.ebaystatic.com&quot;,&quot;docs.google.com&quot;,&quot;contacts.google.com&quot;,&quot;github.com&quot;,&quot;mail.google.com&quot;,&quot;chat.google.com&quot;,&quot;audio.xpleer.com&quot;,&quot;keepa.com&quot;,&quot;static.xx.fbcdn.net&quot;,&quot;sas.selleramp.com&quot;,&quot;1plus1.video&quot;,&quot;console.googletagservices.com&quot;,&quot;//lnkd.demdex.net/&quot;,&quot;//radar.cedexis.com/&quot;,&quot;//li.protechts.net/&quot;,&quot;challenges.cloudflare.com/&quot;,&quot;ogs.google.com&quot;]" src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/executors/traffic.js"></script></head><body marginwidth="0" marginheight="0" __processed_aec9ccf4-61f1-492e-b5e2-a5d904bbe269__="true" bis_status="ok" bis_frame_id="902"><iframe src="./drop_cookie_sw.html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./sync(3).html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./9.html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./cm(3).html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./v1.html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./pixel.html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./saved_resource(5).html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./cm-notify.html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe><iframe src="./saved_resource(6).html" scrolling="no" frameborder="0" width="0" height="0" style="margin: 0px; padding: 0px; display: none; width: 0px; height: 0px;"></iframe></body></html>

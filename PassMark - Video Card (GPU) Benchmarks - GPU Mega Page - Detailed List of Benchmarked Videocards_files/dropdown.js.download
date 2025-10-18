@@ -1,0 +1,72 @@
+﻿//Open the dropdown menu if the user hovers over it
+		function openBenchmarksDropdown() {
+    jQuery("#benchmarks_dropdown").slideDown(180);
+}
+
+		function openSoftwareDropdown() {
+    jQuery("#software_dropdown").slideDown(180);
+}
+
+		function openHardwareDropdown() {
+    jQuery("#hardware_dropdown").slideDown(180);
+}
+
+		function openAboutDropdown() {
+    jQuery("#about_dropdown").slideDown(180);
+}
+
+window.onclick = function(event) {
+  if (!(jQuery(event.target).attr('id') == 'benchmarks_dropbtn') &&  
+			!(jQuery(event.target).hasClass('benchmarks_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'benchmarks_dropdown')) {
+
+        jQuery("#benchmarks_dropdown").slideUp(200);
+    }
+  if(!(jQuery(event.target).attr('id') == 'software_dropbtn') &&  
+			!(jQuery(event.target).hasClass('software_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'software_dropdown')) {
+
+        jQuery("#software_dropdown").slideUp(200);
+    }
+  if(!(jQuery(event.target).attr('id') == 'hardware_dropbtn') &&  
+			!(jQuery(event.target).hasClass('hardware_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'hardware_dropdown')) {
+
+        jQuery("#hardware_dropdown").slideUp(200);
+    }
+  if(!(jQuery(event.target).attr('id') == 'about_dropbtn') &&  
+			!(jQuery(event.target).hasClass('about_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'about_dropdown')) {
+
+        jQuery("#about_dropdown").slideUp(200);
+    }
+}
+
+// Close the dropdown menu if the user moves outside of it
+window.onmouseover = function(event) {
+  if (!(jQuery(event.target).attr('id') == 'benchmarks_dropbtn') &&  
+			!(jQuery(event.target).hasClass('benchmarks_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'benchmarks_dropdown')) {
+  			
+        jQuery("#benchmarks_dropdown").slideUp(200);
+    }
+  if(!(jQuery(event.target).attr('id') == 'software_dropbtn') &&  
+			!(jQuery(event.target).hasClass('software_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'software_dropdown')) {
+
+        jQuery("#software_dropdown").slideUp(200);
+    }
+  if(!(jQuery(event.target).attr('id') == 'hardware_dropbtn') &&  
+			!(jQuery(event.target).hasClass('hardware_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'hardware_dropdown')) {
+
+        jQuery("#hardware_dropdown").slideUp(200);
+    }
+
+  if(!(jQuery(event.target).attr('id') == 'about_dropbtn') &&  
+			!(jQuery(event.target).hasClass('about_droplink_class')) &&
+  		!(jQuery(event.target).attr('id') == 'about_dropdown')) {
+
+        jQuery("#about_dropdown").slideUp(200);
+    }
+}

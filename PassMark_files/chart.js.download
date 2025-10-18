@@ -1,0 +1,272 @@
+$(".name").click( function(event) {
+	event.preventDefault();
+	return;
+});
+
+function x( event, rank, samples, cores, logicals, price, extra2, tdp, cores2, logicals2 )
+{
+	var span = $(event.currentTarget);
+	var	li = $(event.currentTarget).parent();
+
+	if( $(span).hasClass( "collapse" ) )
+	{
+		$(span).removeClass("collapse");
+		$(li).children( ".row_details" ).remove();
+	}
+	else
+	{
+		$(span).addClass( "collapse" );
+		//var href = $(event.currentTarget).children('.name').attr('href');
+		//var _CPUId = li.attr('id').replace("rk", "");
+
+		var href = $(event.currentTarget).parent().children('a').attr('href');
+
+		const regex = /(\d+)(_(\d+))?/;
+		const matches = li.attr('id').match(regex);
+		var _CPUId = 0;
+		var _CPUCount = 1;
+		if( matches.length == 4 && parseInt(matches[3]) > 1 )
+		{
+			_CPUId  = matches[1];
+			_CPUCount = matches[3];
+		}
+		else if( matches.length > 1 )
+			_CPUId = matches[1];
+
+		//var _CPUName = li[0].children[1].childNodes[1].innerHTML;
+		var _CPUName = $(li).find('.prdname').text();
+		var hrefcmp = '<div class="div-to-display"><button onclick="anim();myCmp.addCPU(' + _CPUId + ", '" + _CPUName + "'" + (parseInt(_CPUCount) > 1 ? (', ' + _CPUCount) : '') + ' );launch_toast();">&gt;&gt; Compare</button></div>';
+
+
+		var leftDiv = document.createElement("DIV");
+		leftDiv.innerHTML = "Rank: " + rank + "<br>";
+		leftDiv.innerHTML += "No. of Samples: " + samples + "<br>";
+
+		let totalCores = cores;
+		let threads = cores * (logicals > 0 ? logicals : 1);
+		if( cores2 && parseInt(cores2) > 0 )
+		{
+			totalCores += parseInt(cores2);
+			threads += parseInt(cores2) * parseInt(logicals2);
+		}
+		if( totalCores > 0 )
+		{
+			leftDiv.innerHTML += "Cores: " + totalCores;
+			if( threads > 0 )
+				leftDiv.innerHTML += " Threads: " + threads;
+
+			leftDiv.innerHTML += "<br>";
+		}
+
+
+		leftDiv.innerHTML += hrefcmp.replace(/\r?\n/g, "");
+
+
+		leftDiv.innerHTML += '<div class="wp-price"> Price: <a href="' + href + '#price">' + price + '</a></div>';
+
+		if( extra2 && extra2.length > 0 )
+		{
+			if( extra2.indexOf('%') != -1 )
+				leftDiv.innerHTML += "Avg Rating Increase: " + extra2 + "<br>";
+			else
+				leftDiv.innerHTML = "Rating: " + extra2 + "<br>" + leftDiv.innerHTML;
+		}
+		if( tdp && tdp.length > 0 )
+			leftDiv.innerHTML += "Max TDP: " + tdp + "W";
+
+
+		var rightDiv = document.createElement("DIV");
+		rightDiv.innerHTML = '<a href="' + href + '"><img src="/images/info_icon.png"></a>';
+		rightDiv.className = "details_icon";
+
+		var newDiv = document.createElement("DIV");
+		newDiv.className = "row_details";
+		newDiv.appendChild( leftDiv );
+		newDiv.appendChild( rightDiv );
+
+		$(li).append( newDiv );
+	}
+}
+
+function xa( event, rank, samples, cores, logicals, price, extra2, tdp )
+{
+	var span = $(event.currentTarget);
+	var	li = $(event.currentTarget).parent();
+
+	if( $(span).hasClass( "collapse" ) )
+	{
+		$(span).removeClass("collapse");
+		$(li).children( ".row_details" ).remove();
+	}
+	else
+	{
+		$(span).addClass( "collapse" );
+		//var href = $(event.currentTarget).children('.name').attr('href');
+		var href = $(event.currentTarget).parent().children('a').attr('href');
+		var _CPUId = li.attr('id').replace("rk", "");
+		//var _CPUName = li[0].children[1].childNodes[1].innerHTML;
+		var _CPUName = $(li).find('.prdname').text();
+		var hrefcmp = '<div class="div-to-display"><button onclick="anim();myCmp.addCPU(' + _CPUId + ", '" + _CPUName + "'" + ' );launch_toast();">&gt;&gt; Compare</button></div>';
+
+		var leftDiv = document.createElement("DIV");
+		leftDiv.innerHTML = "Rank: " + rank + "<br>";
+		leftDiv.innerHTML += "No. of Samples: " + samples + "<br>";
+		leftDiv.innerHTML += "Cores: ";
+		if( logicals > 1 )
+		{
+			leftDiv.innerHTML += (cores * logicals) + " (in " + cores + " phys. modules)";
+		}
+		else
+			leftDiv.innerHTML += cores;
+		leftDiv.innerHTML += "<br>";
+		leftDiv.innerHTML += hrefcmp.replace(/\r?\n/g, "");
+		leftDiv.innerHTML += '<div class="wp-price"> Price: <a href="' + href + '#price">' + price + '</a></div>';
+
+		if( extra2 )
+		{
+			if( extra2.indexOf('%') != -1 )
+				leftDiv.innerHTML += "Avg Rating Increase: " + extra2 + "<br>";
+			else
+				leftDiv.innerHTML = "Rating: " + extra2 + "<br>" + leftDiv.innerHTML;
+		}
+
+		if( tdp )
+			leftDiv.innerHTML += "Max TDP: " + tdp + "W";
+
+		var rightDiv = document.createElement("DIV");
+		rightDiv.innerHTML = '<a href="' + href + '"><img src="/images/info_icon.png"></a>';
+		rightDiv.className = "details_icon";
+
+		var newDiv = document.createElement("DIV");
+		newDiv.className = "row_details";
+		newDiv.appendChild( leftDiv );
+		newDiv.appendChild( rightDiv );
+
+		$(li).append( newDiv );
+	}
+}
+
+function p(  event, rating, rank, samples, cores, logicals, price, extra2, bigLITTLE )
+{
+	var span = $(event.currentTarget);
+	var	li = $(event.currentTarget).parent();
+	var _CPUId = li.attr('id').replace("pk", "");
+	//var _CPUName = li[0].children[1].childNodes[1].innerHTML;
+	var _CPUName = $(li).find('.prdname').text();
+	var hrefcmp = '<div class="div-to-display"><button onclick="anim();myCmp.addCPU(' + _CPUId + ", '" + _CPUName + "'" + ' );launch_toast();">&gt;&gt; Compare</button></div>';
+	if( $(span).hasClass( "collapse" ) )
+	{
+		$(span).removeClass("collapse");
+		$(li).children( ".row_details" ).remove();
+	}
+	else
+	{
+		$(span).addClass( "collapse" );
+		//var href = $(event.currentTarget).children('.name').attr('href');
+		var href = $(event.currentTarget).parent().children('a').attr('href');
+
+		var leftDiv = document.createElement("DIV");
+		leftDiv.innerHTML = "Rating: " + rating + "<br>";
+		leftDiv.innerHTML += "Rank: " + rank + "<br>";
+		leftDiv.innerHTML += "No. of Samples: " + samples + "<br>";
+
+		let totalCores = cores;
+		let threads = cores * (logicals > 0 ? logicals : 1);
+		if( cores2 && parseInt(cores2) > 0 )
+		{
+			cores2 = parseInt(cores2);
+			totalCores += cores2;
+			threads += cores2 * parseInt(logicals2);
+		}
+		if( totalCores > 0 )
+		{
+			leftDiv.innerHTML += "Cores: " + totalCores;
+			if( threads > 0 )
+				leftDiv.innerHTML += " Threads: " + threads;
+
+			leftDiv.innerHTML += "<br>";
+		}
+
+		leftDiv.innerHTML += hrefcmp.replace(/\r?\n/g, "");
+		leftDiv.innerHTML += '<div class="wp-price"> Price: <a href="' + href + '#price">' + price + '</a></div>';
+
+		if( extra2 )
+		{
+			if( extra2.indexOf('%') != -1 )
+				leftDiv.innerHTML += "Avg Rating Increase: " + extra2 + "<br>";
+			else
+			{
+				leftDiv.innerHTML += "Max TDP: " + extra2 + " W<br>";
+			}
+		}
+
+		var rightDiv = document.createElement("DIV");
+		rightDiv.innerHTML = '<a href="' + href + '"><img src="/images/info_icon.png"></a>';
+		rightDiv.className = "details_icon";
+
+		var newDiv = document.createElement("DIV");
+		newDiv.className = "row_details";
+		newDiv.appendChild( leftDiv );
+		newDiv.appendChild( rightDiv );
+
+		$(li).append( newDiv );
+	}
+}
+
+function pa(  event, rating, rank, samples, cores, logicals, price, extra2 )
+{
+	var span = $(event.currentTarget);
+	var	li = $(event.currentTarget).parent();
+	var _CPUId = li.attr('id').replace("pk", "");
+	var _CPUName = $(li).find('.prdname').text();
+	//var _CPUName = li[0].children[1].childNodes[1].innerHTML;
+		var hrefcmp = '<div class="div-to-display"><button onclick="anim();myCmp.addCPU(' + _CPUId + ", '" + _CPUName + "'" + ' );launch_toast();">&gt;&gt; Compare</button></div>';
+	if( $(span).hasClass( "collapse" ) )
+	{
+		$(span).removeClass("collapse");
+		$(li).children( ".row_details" ).remove();
+	}
+	else
+	{
+		$(span).addClass( "collapse" );
+		//var href = $(event.currentTarget).children('.name').attr('href');
+		var href = $(event.currentTarget).parent().children('a').attr('href');
+
+		var leftDiv = document.createElement("DIV");
+		leftDiv.innerHTML = "Rating: " + rating + "<br>";
+		leftDiv.innerHTML += "Rank: " + rank + "<br>";
+		leftDiv.innerHTML += "No. of Samples: " + samples + "<br>";
+		leftDiv.innerHTML += "Cores: "
+		if( logicals > 1 )
+		{
+			leftDiv.innerHTML += (cores * logicals) + " (in " + cores + " phy. modules)";
+		}
+		else
+			leftDiv.innerHTML += cores;
+		leftDiv.innerHTML += "<br>";
+		leftDiv.innerHTML += hrefcmp.replace(/\r?\n/g, "");
+
+		leftDiv.innerHTML += '<div class="wp-price"> Price: <a href="' + href + '#price">' + price + '</a></div>';
+
+		if( extra2 )
+		{
+			if( extra2.indexOf('%') != -1 )
+				leftDiv.innerHTML += "Avg Rating Increase: " + extra2 + "<br>";
+			else
+			{
+				leftDiv.innerHTML += "Max TDP: " + extra2 + " W<br>";
+			}
+		}
+
+		var rightDiv = document.createElement("DIV");
+		rightDiv.innerHTML = '<a href="' + href + '"><img src="/images/info_icon.png"></a>';
+		rightDiv.className = "details_icon";
+
+		var newDiv = document.createElement("DIV");
+		newDiv.className = "row_details";
+		newDiv.appendChild( leftDiv );
+		newDiv.appendChild( rightDiv );
+
+		$(li).append( newDiv );
+	}
+}

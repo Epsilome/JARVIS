@@ -1,0 +1,8 @@
+README.md
+pyproject.toml
+src/assistant_app.egg-info/PKG-INFO
+src/assistant_app.egg-info/SOURCES.txt
+src/assistant_app.egg-info/dependency_links.txt
+src/assistant_app.egg-info/entry_points.txt
+src/assistant_app.egg-info/requires.txt
+src/assistant_app.egg-info/top_level.txt
