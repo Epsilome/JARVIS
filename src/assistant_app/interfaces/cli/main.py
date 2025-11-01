@@ -221,22 +221,21 @@ def movies_watched():
 @app.command("prices-gaming")
 def prices_gaming(
     min_price: int = 500,
-    max_price: int = 1500,
+    max_price: int = 1000,
     limit: int = 10,
     country: str = "FR",
+    explain: bool = False,   # ← NEW: show rating breakdowns
 ):
     """
     Best gaming laptop deals scored by CPU/GPU(TGP)/Display/RAM/SSD/OS
-    and normalized by price. No hard GPU filter; uses value_score.
+    normalized by price. No hard GPU filter; uses value_score.
+
+    Use --explain to print a per-item score breakdown.
     """
 
-    # Use multiple phrasings so we don't depend on one SERP
     queries = [
         "pc portable gamer rtx",
-        "pc portable gamer",
-        "ordinateur portable gamer",
         "gaming laptop rtx",
-        "gaming laptop",
     ]
 
     def _specs_text(p):
@@ -250,29 +249,26 @@ def prices_gaming(
         except Exception:
             return p.title
 
-    # Make generator robust: one bad adapter/regex shouldn't kill the loop
+    # Robust generator: one adapter error shouldn't stop the whole run
     def _safe_iter_search(q: str):
         try:
             for p in search_all(q, country_hint=country):
                 yield p
         except Exception as e:
-            # Keep going even if an adapter explodes (e.g. "no such group")
             typer.secho(f"[prices-gaming] query {q!r} failed: {e}", fg="yellow")
 
-    # Canonicalize URL for de-dupe across queries/adapters
+    # Canonicalize URL for cross-query de-duplication
     def _canon(url: str) -> str:
         if not url:
             return ""
         base = url.split("?", 1)[0].rstrip("/")
-        # strip cdiscount tracking anchors like #mpos=..|cd, keep stable path only
         if "#mpos=" in base:
             base = base.split("#mpos=", 1)[0]
         return base
 
-    seen = set()
-    items = []
-    dbg_counts = {}           # (query, store) -> kept
-    dbg_dropped_price = 0     # dropped due to price filter
+    seen, items = set(), []
+    dbg_counts: dict[tuple[str, str], int] = {}
+    dbg_dropped_price = 0
     dbg_total_seen = 0
 
     for q in queries:
@@ -281,27 +277,23 @@ def prices_gaming(
             dbg_total_seen += 1
             per_query_seen += 1
             price = getattr(p, "price", None)
-
-            # Price gate
             if not price or not (min_price <= price <= max_price):
                 dbg_dropped_price += 1
                 continue
-
             key = _canon(p.url or "")
             if not key or key in seen:
                 continue
             seen.add(key)
             items.append(p)
-
-            # per (query, store) accounting
             k = (q, getattr(p, "store", "?"))
             dbg_counts[k] = dbg_counts.get(k, 0) + 1
-
         typer.secho(f"[prices-gaming] {q!r}: considered {per_query_seen} items", fg="blue")
 
     if not items:
-        typer.echo(f"No deals found between €{min_price}–€{max_price} in {country}. "
-                   f"(saw {dbg_total_seen}, dropped by price: {dbg_dropped_price})")
+        typer.echo(
+            f"No deals found between €{min_price}–€{max_price} in {country}. "
+            f"(saw {dbg_total_seen}, dropped by price: {dbg_dropped_price})"
+        )
         raise typer.Exit(0)
 
     # ---- rank & print --------------------------------------------------------
@@ -311,25 +303,62 @@ def prices_gaming(
     )
     results = items[:limit]
 
-    # helpful summary so you can see “who contributed”
+    # Helpful summary of which queries contributed
     typer.secho("Breakdown by query/store (kept after price filter & de-dupe):", fg="cyan")
     for (q, store), n in sorted(dbg_counts.items(), key=lambda x: (-x[1], x[0][0], x[0][1])):
-        typer.echo(f"  • {store:10s}  {n:3d}  from {q!r}")
-    typer.secho(f"Totals: kept={len(items)}  seen={dbg_total_seen}  dropped_by_price={dbg_dropped_price}\n", fg="cyan")
+        typer.echo(f"  • {store:10s} {n:3d} from {q!r}")
+    typer.secho(
+        f"Totals: kept={len(items)}  seen={dbg_total_seen}  dropped_by_price={dbg_dropped_price}\n",
+        fg="cyan",
+    )
+
+    # Small helper to print a readable breakdown line
+    def _pretty_breakdown(title: str, specs_text: str, price_eur: float) -> str:
+        try:
+            bd = value_breakdown(title, specs_text, price_eur)
+        except Exception as e:
+            # Keep output resilient if the scorer throws
+            return f"     ↳ (breakdown unavailable: {e})"
+
+        # Compute component contributions (raw × weight) when present
+        gpu_contrib = bd.get("gpu_raw", 0) * bd.get("gpu_w", 0)
+        cpu_contrib = bd.get("cpu_raw", 0) * bd.get("cpu_w", 0)
+        ram_contrib = bd.get("ram_tier", 0) * bd.get("ram_w", 0)
+        # Optional fields (display, ssd, os, panel, etc.) are model-dependent
+        disp_raw = bd.get("disp_raw")
+        disp_w   = bd.get("disp_w", 0)
+        disp_contrib = (disp_raw or 0) * disp_w
+        penalty  = bd.get("penalty", 0.0)
+        score    = bd.get("score", 0.0)
+
+        parts = [
+            f"gpu={bd.get('gpu_raw', 0):.1f}×{bd.get('gpu_w', 0):.2f}={gpu_contrib:.1f}",
+            f"cpu={bd.get('cpu_raw', 0):.1f}×{bd.get('cpu_w', 0):.2f}={cpu_contrib:.1f}",
+            f"ram_tier={bd.get('ram_tier', 0)}×{bd.get('ram_w', 0):.2f}={ram_contrib:.1f}",
+        ]
+        if disp_raw is not None:
+            parts.append(f"display={disp_raw:.1f}×{disp_w:.2f}={disp_contrib:.1f}")
+        parts.append(f"penalty={penalty:.2f}")
+        parts.append(f"→ total={score:.3f}")
+        # A tiny value/€ hint
+        parts.append(f"(score/€={score/max(price_eur,1):.4f})")
+        return "     ↳ " + " | ".join(parts)
 
     typer.echo(f"🎯 Best gaming laptop deals in {country} — €{min_price}–€{max_price}:")
     for i, p in enumerate(results, 1):
         gpu = p.specs.get("gpu") if isinstance(p.specs, dict) else None
         cpu = p.specs.get("cpu") if isinstance(p.specs, dict) else None
-        score = value_score(p.title, _specs_text(p), p.price or 0.0)
+        specs_text = _specs_text(p)
+        score = value_score(p.title, specs_text, p.price or 0.0)
         typer.echo(
             f"{i:2d}. [{p.store}] {p.title}\n"
             f"    {p.price:.0f} € — score {score:.3f}"
             f" — GPU: {gpu or '?'} — CPU: {cpu or '?'}\n"
-            f"    {p.url}\n"
+            f"    {p.url}"
         )
-
-
+        if explain:
+            typer.echo(_pretty_breakdown(p.title, specs_text, p.price or 0.0))
+        typer.echo("")  # blank line for readability
 
 
 @app.command("prices-debug")
