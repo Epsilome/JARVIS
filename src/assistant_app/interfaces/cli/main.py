@@ -1,5 +1,7 @@
+# trunk-ignore-all(isort)
 # src/assistant_app/interfaces/cli/main.py
-import asyncio
+import asyncio, json
+from pathlib import Path
 from datetime import datetime, timedelta
 import typer
 from collections import defaultdict
@@ -176,11 +178,16 @@ def movies_list(limit: int = 15, year_from: int = 2000, min_votes: int = 200, sh
     rows = top_horror(limit=limit, year_from=year_from, min_votes=min_votes)
     for idx, m in enumerate(rows, 1):
         star = "✓" if (m.imdb_id and m.imdb_id in seen) else " "
-        rating = m.imdb_rating if m.imdb_rating is not None else m.tmdb_vote
-        src = "IMDb" if m.imdb_rating is not None else "TMDb"
+        if m.imdb_rating is not None and 0 < m.imdb_rating <= 10:
+            rating = m.imdb_rating
+            src = "IMDb"
+        else:
+            rating = m.tmdb_vote
+            src = "TMDb (fallback)"
         typer.echo(f"{idx:2d}. [{star}] {m.title} ({m.year}) — {rating:.1f} {src}  [tmdb:{m.tmdb_id}{f', {m.imdb_id}' if m.imdb_id else ''}]")
         if show_overview and m.overview:
             typer.echo(f"    {m.overview}")
+    
 
 @movies_app.command("mark")
 def movies_mark(imdb_id: str = "", tmdb_id: str = "", title: str = "", year: str = ""):
@@ -220,11 +227,12 @@ def movies_watched():
 
 @app.command("prices-gaming")
 def prices_gaming(
-    min_price: int = 500,
-    max_price: int = 1000,
-    limit: int = 10,
+    min_price: int = 1000,
+    max_price: int = 2000,
+    limit: int = 15,
     country: str = "FR",
-    explain: bool = False,   # ← NEW: show rating breakdowns
+    explain: bool = False,
+    out: str | None = None,
 ):
     """
     Best gaming laptop deals scored by CPU/GPU(TGP)/Display/RAM/SSD/OS
@@ -235,19 +243,24 @@ def prices_gaming(
 
     queries = [
         "pc portable gamer rtx",
-        "gaming laptop rtx",
+        # "gaming laptop rtx",
     ]
 
     def _specs_text(p):
-        try:
-            if isinstance(p.specs, dict):
-                tgp = p.specs.get("tgp_w")
-                pairs = " ".join(f"{k}:{v}" for k, v in p.specs.items() if v)
-                extra = f" TGP {tgp}W" if tgp else ""
-                return (p.title + " " + pairs + extra).strip()
-            return (p.title + " " + str(p.specs or "")).strip()
-        except Exception:
-            return p.title
+            try:
+                if isinstance(p.specs, dict):
+                    # Safely get TGP if it exists
+                    tgp = p.specs.get("tgp_w")
+                    # Create a string of "key:value" for valid spec items
+                    pairs = " ".join(f"{k}:{v}" for k, v in p.specs.items() if v)
+                    extra = f" TGP {tgp}W" if tgp else ""
+                    # Combine Title + Specs + Extra info
+                    return (p.title + " " + pairs + extra).strip()
+                
+                # Fallback if specs is not a dict
+                return (p.title + " " + str(p.specs or "")).strip()
+            except Exception:
+                return p.title
 
     # Robust generator: one adapter error shouldn't stop the whole run
     def _safe_iter_search(q: str):
@@ -314,35 +327,36 @@ def prices_gaming(
 
     # Small helper to print a readable breakdown line
     def _pretty_breakdown(title: str, specs_text: str, price_eur: float) -> str:
-        try:
-            bd = value_breakdown(title, specs_text, price_eur)
-        except Exception as e:
-            # Keep output resilient if the scorer throws
-            return f"     ↳ (breakdown unavailable: {e})"
+            try:
+                bd = value_breakdown(title, specs_text, price_eur)
+            except Exception as e:
+                return f"     ↳ (breakdown unavailable: {e})"
 
-        # Compute component contributions (raw × weight) when present
-        gpu_contrib = bd.get("gpu_raw", 0) * bd.get("gpu_w", 0)
-        cpu_contrib = bd.get("cpu_raw", 0) * bd.get("cpu_w", 0)
-        ram_contrib = bd.get("ram_tier", 0) * bd.get("ram_w", 0)
-        # Optional fields (display, ssd, os, panel, etc.) are model-dependent
-        disp_raw = bd.get("disp_raw")
-        disp_w   = bd.get("disp_w", 0)
-        disp_contrib = (disp_raw or 0) * disp_w
-        penalty  = bd.get("penalty", 0.0)
-        score    = bd.get("score", 0.0)
+            # Compute component contributions (raw × weight)
+            # Compute component contributions (raw × weight)
+            # NOTE: benchmarks.py returns the *weighted* contribution in *_w keys.
+            # We do NOT need to multiply raw * weight again.
+            gpu_c = bd.get("gpu_w", 0)
+            cpu_c = bd.get("cpu_w", 0)
+            ram_c = bd.get("ram_w", 0)
+            disp_c = bd.get("disp_w", 0)
+            ssd_c = bd.get("ssd_w", 0)
+            os_c = bd.get("os_w", 0)
 
-        parts = [
-            f"gpu={bd.get('gpu_raw', 0):.1f}×{bd.get('gpu_w', 0):.2f}={gpu_contrib:.1f}",
-            f"cpu={bd.get('cpu_raw', 0):.1f}×{bd.get('cpu_w', 0):.2f}={cpu_contrib:.1f}",
-            f"ram_tier={bd.get('ram_tier', 0)}×{bd.get('ram_w', 0):.2f}={ram_contrib:.1f}",
-        ]
-        if disp_raw is not None:
-            parts.append(f"display={disp_raw:.1f}×{disp_w:.2f}={disp_contrib:.1f}")
-        parts.append(f"penalty={penalty:.2f}")
-        parts.append(f"→ total={score:.3f}")
-        # A tiny value/€ hint
-        parts.append(f"(score/€={score/max(price_eur,1):.4f})")
-        return "     ↳ " + " | ".join(parts)
+            penalty  = bd.get("penalty", 0.0)
+            score    = bd.get("score", 0.0)
+
+            parts = [
+                f"GPU({bd.get('gpu_raw',0):.0f})={gpu_c:.1f}",
+                f"CPU({bd.get('cpu_raw',0):.0f})={cpu_c:.1f}",
+                f"RAM(T{bd.get('ram_tier',0)})={ram_c:.1f}",
+                f"SCR({bd.get('hz',0)}Hz/{bd.get('panel','')})={disp_c:.1f}",
+                f"SSD({bd.get('storage_gb',0)})={ssd_c:.1f}",
+                f"OS={os_c:.1f}",
+            ]
+            
+            line = " | ".join(parts)
+            return f"     ↳ {line} | Pen={penalty:.2f} → TOTAL={score:.3f}"
 
     typer.echo(f"🎯 Best gaming laptop deals in {country} — €{min_price}–€{max_price}:")
     for i, p in enumerate(results, 1):
@@ -359,6 +373,43 @@ def prices_gaming(
         if explain:
             typer.echo(_pretty_breakdown(p.title, specs_text, p.price or 0.0))
         typer.echo("")  # blank line for readability
+        # Build a clean, serializable payload for streamlit / later reuse
+    payload = []
+    for rank, p in enumerate(results, 1):
+        specs_text = _specs_text(p)
+        score = value_score(p.title, specs_text, p.price or 0.0)
+        item = {
+            "rank": rank,
+            "store": p.store,
+            "country": p.country,
+            "title": p.title,
+            "price_eur": float(p.price or 0.0),
+            "currency": p.currency,
+            "url": p.url,
+            "specs": (p.specs if isinstance(p.specs, dict) else {"raw": str(p.specs)}),
+            "score": float(score),
+        }
+        if explain:
+            try:
+                item["breakdown"] = value_breakdown(p.title, specs_text, p.price or 0.0)
+            except Exception:
+                item["breakdown"] = None
+        payload.append(item)
+
+    # Decide output path
+    if out:
+        out_path = Path(out)
+    else:
+        out_dir = Path(".scraper_artifacts")
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        out_path = out_dir / f"prices_gaming_{ts}.json"
+
+    with open(out_path, "w", encoding="utf-8") as f:
+        # ensure_ascii=False writes real UTF-8 (no \uXXXX escapes), good for FR text. :contentReference[oaicite:0]{index=0}
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+
+    typer.secho(f"Saved {len(payload)} rows → {out_path}", fg="green")
 
 
 @app.command("prices-debug")

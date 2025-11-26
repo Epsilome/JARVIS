@@ -7,12 +7,18 @@ name = "assistant-app"
 version = "0.1.0"
 description = "CLI assistant with price scrapers"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
   "playwright",
   "beautifulsoup4",
   "lxml",
   "pydantic",
+  "typer",
+  "APScheduler",
+  "SQLAlchemy",
+  "python-dotenv",
+  "dateparser",
+  "requests",
 ]
 
 [project.scripts]

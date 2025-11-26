@@ -2,3 +2,9 @@ playwright
 beautifulsoup4
 lxml
 pydantic
+typer
+APScheduler
+SQLAlchemy
+python-dotenv
+dateparser
+requests

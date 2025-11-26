@@ -2,12 +2,18 @@ Metadata-Version: 2.4
 Name: assistant-app
 Version: 0.1.0
 Summary: CLI assistant with price scrapers
-Requires-Python: >=3.12
+Requires-Python: >=3.11
 Description-Content-Type: text/markdown
 Requires-Dist: playwright
 Requires-Dist: beautifulsoup4
 Requires-Dist: lxml
 Requires-Dist: pydantic
+Requires-Dist: typer
+Requires-Dist: APScheduler
+Requires-Dist: SQLAlchemy
+Requires-Dist: python-dotenv
+Requires-Dist: dateparser
+Requires-Dist: requests
 
 # Assistant (Desktop, Python)
 

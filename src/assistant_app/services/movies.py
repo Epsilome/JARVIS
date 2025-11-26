@@ -1,9 +1,41 @@
-import os, time, requests, hashlib
+import json, os, time, requests, hashlib
 from dataclasses import dataclass
+from pathlib import Path
 from assistant_app.config.settings import settings
 
 TMDB = "https://api.themoviedb.org/3"
 OMDB = "https://www.omdbapi.com"
+
+# Simple on-disk cache for HTTP JSON responses
+CACHE_DIR = Path(".http_cache")
+CACHE_DIR.mkdir(parents=True, exist_ok=True)
+
+def _cache_path(prefix: str, key_parts: dict) -> Path:
+    """Build a stable filename from a prefix + sorted key parts."""
+    raw = prefix + json.dumps(key_parts, sort_keys=True, separators=(",", ":"))
+    h = hashlib.sha1(raw.encode("utf-8")).hexdigest()
+    return CACHE_DIR / f"{prefix}_{h}.json"
+
+
+def _cache_load(path: Path, ttl_seconds: int | None) -> dict | None:
+    """Return cached JSON if fresh enough."""
+    if not path.exists():
+        return None
+    if ttl_seconds is not None:
+        age = time.time() - path.stat().st_mtime
+        if age > ttl_seconds:
+            return None
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+
+
+def _cache_save(path: Path, data: dict) -> None:
+    try:
+        path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
+    except Exception:
+        pass
 
 @dataclass
 class Movie:
@@ -15,30 +47,70 @@ class Movie:
     imdb_rating: float | None
     overview: str
 
-def _tmdb_get(path: str, params: dict):
+def _tmdb_get(path: str, params: dict, *, cache_ttl: int | None = None):
+    """
+    GET helper for TMDb, with optional JSON cache.
+
+    cache_ttl in seconds:
+      - None  -> no caching
+      - 3600  -> 1 hour, etc.
+    """
     params = dict(params or {})
     if not settings.TMDB_API_KEY:
         raise RuntimeError("TMDB_API_KEY missing. Put it in .env")
     params["api_key"] = settings.TMDB_API_KEY
+
+    cache_key = {"path": path, "params": params}
+    cache_file = _cache_path("tmdb", cache_key)
+
+    if cache_ttl is not None:
+        cached = _cache_load(cache_file, cache_ttl)
+        if cached is not None:
+            return cached
+
     r = requests.get(f"{TMDB}{path}", params=params, timeout=20)
     r.raise_for_status()
-    return r.json()
+    data = r.json()
+
+    if cache_ttl is not None:
+        _cache_save(cache_file, data)
+    return data
+
 
 def _tmdb_external_ids(tmdb_id: str) -> dict:
-    return _tmdb_get(f"/movie/{tmdb_id}/external_ids", {})
+    # External IDs almost never change; cache for 30 days
+    return _tmdb_get(f"/movie/{tmdb_id}/external_ids", {}, cache_ttl=30 * 24 * 3600)
+
 
 def _omdb_rating(imdb_id: str) -> float | None:
     key = os.getenv("OMDB_API_KEY", "")
-    if not key: return None
+    if not key:
+        return None
+
+    cache_key = {"imdb_id": imdb_id}
+    cache_file = _cache_path("omdb", cache_key)
+
+    # 1. If cached, we return IMMEDIATELY (No sleep!)
+    cached = _cache_load(cache_file, ttl_seconds=7 * 24 * 3600)
+    if isinstance(cached, dict) and "rating" in cached:
+        return cached["rating"]
+
     try:
         r = requests.get(OMDB, params={"i": imdb_id, "apikey": key}, timeout=20)
         r.raise_for_status()
+        
+        # 2. MOVE SLEEP HERE. Only sleep if we actually hit the API.
+        time.sleep(0.2) 
+        
         data = r.json()
         val = data.get("imdbRating")
-        try: return float(val) if val and val != "N/A" else None
-        except: return None
+        rating = float(val) if val and val != "N/A" else None
     except Exception:
-        return None
+        rating = None
+
+    _cache_save(cache_file, {"rating": rating})
+    return rating
+
 
 def top_horror(limit: int = 20, year_from: int = 2000, min_votes: int = 200) -> list[Movie]:
     """Fetch horror list from TMDb; enrich with IMDb ratings when possible."""
@@ -50,7 +122,9 @@ def top_horror(limit: int = 20, year_from: int = 2000, min_votes: int = 200) -> 
         "language": "en-US",
         "page": 1,
         "primary_release_date.gte": f"{year_from}-01-01",
-    })["results"]
+    },
+    cache_ttl=6 * 3600,  # 6 hours cache for the list
+    )["results"]
 
     picks = data[:limit]
     out: list[Movie] = []
@@ -67,8 +141,6 @@ def top_horror(limit: int = 20, year_from: int = 2000, min_votes: int = 200) -> 
             imdb_id = ext.get("imdb_id")
             if imdb_id:
                 imdb = _omdb_rating(imdb_id)
-                # polite tiny delay so we don't hammer OMDb free tier
-                time.sleep(0.2)
         except Exception:
             pass
 

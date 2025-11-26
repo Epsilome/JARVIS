@@ -1,17 +1,29 @@
 # assistant_app/domain/benchmarks.py
 from __future__ import annotations
-import math, re, json, pathlib
+import math
+import re
+import json
+import pathlib
+import sys
 from typing import Optional, Dict
 
-# ----------------------------
-# Cache location for big CPU table (written by benchmarks_loader.refresh_cpu_cache)
-# ----------------------------
-DATA_DIR = pathlib.Path(".bench_cache")
-DATA_DIR.mkdir(parents=True, exist_ok=True)
+CURRENT_FILE = pathlib.Path(__file__).resolve()
+PROJECT_ROOT = CURRENT_FILE.parents[3] # Goes up to 'JARVIS'
+
+# We explicitly look for the cache in the project root
+DATA_DIR = PROJECT_ROOT / ".bench_cache"
+
+# Fallback: check CWD if the above doesn't exist (e.g. if running flat)
+if not DATA_DIR.exists():
+    DATA_DIR = pathlib.Path(".bench_cache")
+
 CPU_CACHE_PATH = DATA_DIR / "cpu_ranks.json"
 GPU_CACHE_PATH = DATA_DIR / "gpu_ranks.json"
 
 REFRESH_RE = re.compile(r"(\d{2,3})\s*hz", re.I)
+STORAGE_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(tb|to|t|gb|go)\s*(?:ssd|nvme)?", re.I)
+TGP_RE = re.compile(r"(\d{2,3})\s*W", re.I)
+RAM_RE = re.compile(r"(\d{1,3})\s*(?:go|gb)\b", re.I)
 
 
 # ----------------------------
@@ -112,26 +124,26 @@ GPU_ALIASES = {
 # Seed CPU table (common laptop parts). The big table from cache will overlay this.
 # ----------------------------
 CPU_BASE_SEED: Dict[str, float] = {
-    # Intel 12th gen H/HX
+    # Intel
     "i5-12450h": 47, "i5-12500h": 50, "i7-12650h": 54, "i7-12700h": 59, "i7-12800h": 63,
     "i9-12900h": 67, "i9-12900hx": 71,
-    # Intel 13th gen H/HX
     "i5-13420h": 50, "i5-13500h": 56, "i7-13620h": 59, "i7-13650hx": 67, "i7-13700h": 67, "i7-13700hx": 71,
     "i9-13900h": 73, "i9-13900hx": 79,
-    # Intel 14th gen H/HX
     "i7-14650hx": 73, "i7-14700h": 71, "i7-14700hx": 83, "i9-14900hx": 89,
-    # Intel Core Ultra (Meteor Lake-H)
     "ultra 5 125h": 57, "ultra 7 155h": 69, "ultra 9 185h": 76,
-    # AMD Ryzen 5000 H/HS/HX
+    
+    # AMD
     "ryzen 5 5600h": 44, "ryzen 7 5800h": 53, "ryzen 9 5900hx": 58,
-    # AMD Ryzen 6000 H/HS/HX
     "ryzen 5 6600h": 47, "ryzen 7 6800h": 57, "ryzen 9 6900hx": 62,
-    # AMD Ryzen 7000 (Phoenix/Dragon Range)
     "ryzen 5 7535hs": 53, "ryzen 7 7735hs": 59, "ryzen 7 7840hs": 71, "ryzen 9 7940hs": 77,
     "ryzen 7 7845hx": 79, "ryzen 9 7945hx": 92,
-    # AMD Ryzen 8000 HS
     "ryzen 7 8840hs": 73, "ryzen 7 8845hs": 75,
-    # Helpful aliases that appear in titles
+    
+    # NEW 2025 Models (Hawk Point Refresh) - Estimated
+    "ryzen 7 260": 71.0,  # ~Eq to 7840HS/8845HS
+    "ryzen 7 255": 70.0,
+    
+    # Aliases
     "core ultra 5 125h": 57, "core ultra 7 155h": 69, "core ultra 9 185h": 76,
 }
 
@@ -142,6 +154,7 @@ CPU_PATTERNS = [
     r"(?:intel(?:\(r\))?\s*core(?:™)?\s*)?(i[3579])[-\s]?(\d{4,5})(h|hx)\b",
     r"(?:intel(?:\(r\))?\s*core(?:™)?\s*)?(ultra)[-\s]?([579])[-\s]?(\d{3})h\b",
     r"(ryzen)[-\s]?([579])[-\s]?(\d{4,5})(hs|hx|h)\b",
+    r"ryzen\s*[3579]\s*(\d{3,4})(hs|hx|h|u)?\b",
 ]
 
 GPU_PATTERNS = [
@@ -175,20 +188,12 @@ GPU_PATTERNS = [
     r"(quadro\s*(?:rtx|p|t|m)\s*\w+(?:\s*with\s*max[-\s]?q\s*design)?)",
 ]
 
-TGP_RE = re.compile(r"(\d{2,3})\s*W", re.I)
 
 def _norm(s: str) -> str:
     return re.sub(r"\s+", " ", (s or "")).strip().lower()
 
 def match_cpu(text: str) -> Optional[str]:
-    """
-    Return a *normalized* CPU key when we can. We include many families so that
-    titles like "Intel Core 5 210H", "Apple M4 Pro 12-Core", "Snapdragon X Elite"
-    and "Ryzen AI 9 HX 370" are recognized.
 
-    NOTE: We keep the string fairly complete (vendor + family) so it can
-    match your cached PassMark keys by substring either way.
-    """
     n = _norm(text)
 
     # ---- Apple M-series -----------------------------------------------------
@@ -225,34 +230,36 @@ def match_cpu(text: str) -> Optional[str]:
     if m:
         return f"{m.group(1)}-{m.group(2)}{m.group(3)}".lower()
 
-    # ---- AMD Ryzen AI family (with HX/H/U, PRO, MAX/MAX+) --------------------
-    # e.g., "Ryzen AI 9 HX 370", "Ryzen AI Max+ Pro 385", "Ryzen AI 5 340"
+# ---- AMD Ryzen AI family (FIXED) --------------------
+    # Matches: "Ryzen AI 9 HX 370", "Ryzen AI 7 360", "Ryzen 7 AI 350" (some retailers flip it)
+    # We made 'hx/h/u' optional, and 'max/pro' optional.
+    # This handles the "Ryzen AI 7 360" case where '360' is the number and there is no suffix.
     m = re.search(
-        r"ryzen\s*ai(?:\s*(max\+?|max\+\s*pro|max\s*pro|pro))?\s*([3579])\s*(hx|h|u)?\s*(\d{3})\b",
+        r"ryzen\s*(?:ai\s*([3579])|([3579])\s*ai)\s*(?:(max\+?|max\+\s*pro|max\s*pro|pro)\s*)?(?:(hx|h|u)\s*)?(\d{3})\b",
         n, re.I
     )
     if m:
-        flavor = m.group(1) or ""
+        # Group 1 or 2 is the tier (e.g. "7" or "9")
+        tier = m.group(1) or m.group(2)
+        flavor = m.group(3) or ""  # max/pro
         flavor = flavor.replace("+ ", "+").replace("  ", " ").strip()
-        tier = m.group(2)
-        suffix = m.group(3) or ""   # hx/h/u sometimes omitted
-        num = m.group(4)
+        suffix = m.group(4) or ""  # hx/h/u (can be empty)
+        num = m.group(5)           # 370, 360, 350
+            
         pieces = ["amd ryzen ai"]
-        if flavor:
-            pieces.append(flavor)
-        pieces.append(f"{tier}")
-        if suffix:
-            pieces.append(suffix)
+        if flavor: pieces.append(flavor)
+        pieces.append(tier)
+        if suffix: pieces.append(suffix)
         pieces.append(num)
         return " ".join(pieces).strip()
 
-    # ---- AMD Ryzen classic (H/HS/HX/U) incl. PRO -----------------------------
-    m = re.search(r"ryzen\s*([3579])\s*(\d{3,4}0)(hs|hx|h|u)\b(?:\s*pro)?", n, re.I)
+    # ---- AMD Ryzen classic (Catch 4-digit, optional suffix)
+    m = re.search(r"ryzen\s*([3579])\s*(\d{4})(h|hs|hx|u|c)?\b", n, re.I)
     if m:
         return f"amd ryzen {m.group(1)} {m.group(2)}{m.group(3)}"
 
-    # Some low-end/older oddballs like "AMD Ryzen 5 5500H", "Ryzen 5 240"
-    m = re.search(r"ryzen\s*([3579])\s*(\d{2,4})(h|hs|hx|u)?\b", n, re.I)
+    # ---- AMD Ryzen 3-digit (e.g. Ryzen 7 260)
+    m = re.search(r"ryzen\s*([3579])\s*(\d{3})(h|hs|hx|u)?\b", n, re.I)
     if m:
         suf = m.group(3) or ""
         return f"amd ryzen {m.group(1)} {m.group(2)}{suf}".strip()
@@ -355,20 +362,52 @@ def parse_panel_kind(text: str) -> str:
     if "mini led" in t or "mini-led" in t or "miniled" in t:
         return "miniled"
     # treat IPS/VA as "ips" bucket for our purposes
-    if "ips" in t or "va " in t or " va" in t:
+    # Added WVA, UWVA, EWV, SVA, IGZO, Retina as IPS-like
+    if any(x in t for x in ("ips", "va ", " va", "wva", "uwva", "ewv", "sva", "igzo", "retina")):
         return "ips"
     return ""
 
-STORAGE_RE = re.compile(r"(\d+(?:\.\d+)?)\s*(tb|to|t|gb|go)\s*(?:ssd)?", re.I)
+# Improved RAM regex: looks for digits followed by "go" or "gb"
+def ram_tier_from_text(text: str) -> int:
+    n = _norm(text)
+    # Exclude VRAM (often listed near GPU) by trying to skip "rtx ... 8gb"
+    # But simple approach first: find MAX memory mentioned that is a power of 2 usually
+    best = 0
+    for m in RAM_RE.finditer(n):
+        val = int(m.group(1))
+        # Sanity check: RAM is usually 8, 16, 24, 32, 48, 64
+        if 8 <= val <= 128:
+            best = max(best, val)
+    
+    if best >= 48: return 3
+    if best >= 24: return 2
+    if best >= 16: return 1
+    return 0
+
+# Improved storage regex to catch "512 Go", "1 To", "1TB"
 def parse_storage_gb(text: str) -> int:
-    # rough: pick the largest capacity mentioned (most listings have only one)
     best = 0
     for m in STORAGE_RE.finditer(_norm(text)):
         num = float(m.group(1))
         unit = m.group(2).lower()
-        gb = int(num * 1024) if unit.startswith(("t", "to")) else int(num)
-        if gb > best:
-            best = gb
+        # If unit is small (GB/Go) use as is
+        if unit.startswith(("g")):
+            gb = int(num)
+        else: # TB/To/T
+            gb = int(num * 1024)
+        
+        # Filter out unlikely numbers (e.g. "16 go" is ram)
+        # SSDs are usually 256, 512, 1000, 1024, 2000, 4000
+        if gb >= 200 and gb < 16000:
+            best = max(best, gb)
+            
+    # Fallback: look for "SSD <number>" without unit (common in some titles like "SSD 512")
+    if best == 0:
+        for m in re.finditer(r"ssd\s*(\d{3,4})\b", _norm(text)):
+            gb = int(m.group(1))
+            if gb >= 120 and gb < 16000:
+                best = max(best, gb)
+                
     return best
 
 def parse_os_bonus(text: str) -> float:
@@ -376,7 +415,8 @@ def parse_os_bonus(text: str) -> float:
     # very small nudge if Windows is included; 0 if "sans windows", FreeDOS, etc.
     if "sans windows" in t or "freedos" in t or "no os" in t:
         return 0.0
-    if "windows 11" in t or "win11" in t or "windows" in t:
+    # Added win10/w10/w11 variants
+    if any(x in t for x in ("windows", "win11", "win10", "w11", "w10", "win 11", "win 10")):
         return 0.2
     return 0.0
 # ----------------------------
@@ -384,6 +424,7 @@ def parse_os_bonus(text: str) -> float:
 # ----------------------------
 def _load_cpu_cache() -> Dict[str, float]:
     if not CPU_CACHE_PATH.exists():
+        print(f"Warning: CPU cache file not found at {CPU_CACHE_PATH.resolve()}", file=sys.stderr)
         return {}
     try:
         data = json.loads(CPU_CACHE_PATH.read_text(encoding="utf-8"))
@@ -395,19 +436,16 @@ def _load_cpu_cache() -> Dict[str, float]:
         return {}
 
 def _load_gpu_cache() -> Dict[str, float]:
-    try:
-        from .benchmarks import GPU_CACHE_PATH  # already defined above
-    except Exception:
-        return {}
     if not GPU_CACHE_PATH.exists():
+        print(f"Warning: GPU cache file not found at {GPU_CACHE_PATH.resolve()}", file=sys.stderr)
         return {}
     try:
         data = json.loads(GPU_CACHE_PATH.read_text(encoding="utf-8"))
-        # accept {"ranks": {...}} or a flat dict
-        if isinstance(data, dict) and "ranks" in data and isinstance(data["ranks"], dict):
+        if isinstance(data, dict) and "ranks" in data:
             data = data["ranks"]
         return { _norm(k): float(v) for k, v in data.items() }
-    except Exception:
+    except Exception as e:
+        print(f"Error loading GPU cache: {e}", file=sys.stderr)
         return {}
 
 def _cpu_base() -> Dict[str, float]:
@@ -510,15 +548,6 @@ def gpu_score(gpu_name: str | None, context_text: str | None = None) -> float:
 
     return base * factor
 
-def ram_tier_from_text(text: str) -> int:
-    n = _norm(text)
-    m = re.search(r"(\d{2,3})\s*(?:go?|gb)\b", n)
-    gb = int(m.group(1)) if m else 0
-    if gb >= 48: return 3
-    if gb >= 24: return 2
-    if gb >= 16: return 1
-    return 0
-
 def value_score(title: str, specs_text: str, price_eur: float) -> float:
     """
     Priority: CPU > GPU (TGP-aware) > Display > RAM > SSD > OS (tiny).
@@ -561,6 +590,8 @@ def value_score(title: str, specs_text: str, price_eur: float) -> float:
         s_bonus = 0.35
     elif s_gb >= 512:
         s_bonus = 0.2
+    elif s_gb >= 256:
+        s_bonus = 0.1
     else:
         s_bonus = 0.0
 
@@ -600,6 +631,7 @@ def value_breakdown(title: str, specs_text: str, price_eur: float) -> dict:
     if s_gb >= 2000: s_bonus = 0.5
     elif s_gb >= 1000: s_bonus = 0.35
     elif s_gb >= 512: s_bonus = 0.2
+    elif s_gb >= 256: s_bonus = 0.1
     else: s_bonus = 0.0
     o_w = parse_os_bonus(base_text)
 
@@ -613,6 +645,7 @@ def value_breakdown(title: str, specs_text: str, price_eur: float) -> dict:
     pen = math.log(max(price_eur, 300.0), 1.7)
     return {
         "cpu_raw": c, "gpu_raw": g, "panel": panel, "hz": hz, "ram_tier": r_tier,
+        "storage_gb": s_gb, "disp_raw": disp,
         "gpu_w": g_w, "cpu_w": c_w, "disp_w": d_w, "ram_w": r_w, "ssd_w": s_w, "os_w": o_w,
         "penalty": pen, "score": raw / pen
     }
@@ -651,6 +684,7 @@ def value_score_work(title: str, specs_text: str, price_eur: float) -> float:
     if   s_gb >= 2000: s_bonus = 0.6
     elif s_gb >= 1000: s_bonus = 0.45
     elif s_gb >=  512: s_bonus = 0.25
+    elif s_gb >=  256: s_bonus = 0.1
     else:              s_bonus = 0.0
     o_bonus = parse_os_bonus(base_text)  # 0.0 or 0.2
 
