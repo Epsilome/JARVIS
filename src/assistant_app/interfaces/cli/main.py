@@ -1,6 +1,6 @@
 # trunk-ignore-all(isort)
 # src/assistant_app/interfaces/cli/main.py
-import asyncio, json
+import asyncio, json, logging, signal, sys
 from pathlib import Path
 from datetime import datetime, timedelta
 import typer
@@ -31,7 +31,18 @@ from assistant_app.domain.benchmarks_loader import refresh_gpu_cache
 
 from assistant_app.services.prices import search_all
 from assistant_app.usecases.search_prices import search_all_async
+
+from assistant_app.adapters.nlu.speech_recognition import listen_and_recognize
+from assistant_app.services.voice_command import process_voice_command
 # ────────────────────────────────────────────────────────────────────────────────
+
+# Configure logging
+logging.basicConfig(
+    level=settings.LOG_LEVEL,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
 
 app = typer.Typer(help="Local Desktop Assistant")
 movies_app = typer.Typer(help="Movie suggestions & watched list")
@@ -46,7 +57,7 @@ def _start():
             try:
                 j.func(**(j.kwargs or {}))
             except Exception as e:
-                print("[catchup]", j.id, e)
+                logger.error(f"[catchup] Job {j.id} failed: {e}")
     if not scheduler.running:
         scheduler.start()
 
@@ -54,13 +65,41 @@ def _start():
 def start():
     """Keep the assistant running in the background (scheduler, etc.)."""
     typer.echo("Assistant running. Press Ctrl+C to exit.")
+    
+    stop_event = asyncio.Event()
+
+    def signal_handler(sig, frame):
+        typer.echo("\nShutting down...")
+        scheduler.shutdown()
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+
+    # Keep main thread alive
     try:
+        signal.pause()
+    except AttributeError:
+        # Windows doesn't support signal.pause()
         import time
         while True:
-            time.sleep(2)
-    except KeyboardInterrupt:
-        typer.echo("Shutting down...")
-        scheduler.shutdown()
+            time.sleep(1)
+
+@app.command()
+def listen(loop: bool = True):
+    """
+    Start listening for voice commands.
+    """
+    typer.echo("Listening for commands... (say 'stop' to exit)")
+    while True:
+        text = listen_and_recognize()
+        if text:
+            try:
+                process_voice_command(text)
+            except typer.Exit:
+                break
+        if not loop:
+            break
 
 @app.command()
 def pref(key: str, value: str):
@@ -158,7 +197,7 @@ def prices(query: str, country: str = ""):
 @app.command("pray")
 def pray(city: str = "", country: str = "", method: int = 2, school: int = 0, schedule: bool = False):
     """Show today's prayer times and optionally schedule the remaining ones."""
-    city = city or "Casablanca"
+    city = city or settings.DEFAULT_CITY or "Casablanca"
     country = country or settings.DEFAULT_COUNTRY or "MA"
     times = get_today_timings(city, country, method, school)
     typer.echo(f"Prayer times for {city}, {country} (method {method}):")
@@ -229,7 +268,7 @@ def movies_watched():
 def prices_gaming(
     min_price: int = 1000,
     max_price: int = 2000,
-    limit: int = 15,
+    limit: int = 10,
     country: str = "FR",
     explain: bool = False,
     out: str | None = None,
@@ -356,7 +395,12 @@ def prices_gaming(
             ]
             
             line = " | ".join(parts)
-            return f"     ↳ {line} | Pen={penalty:.2f} → TOTAL={score:.3f}"
+            
+            # Show the formula: (sum of weighted components) / penalty
+            raw_sum = gpu_c + cpu_c + ram_c + disp_c + ssd_c + os_c
+            formula = f"({raw_sum:.2f} / {penalty:.2f})"
+            
+            return f"     ↳ {line} | Sum={raw_sum:.2f} | Pen={penalty:.2f} → {formula} = {score:.3f}"
 
     typer.echo(f"🎯 Best gaming laptop deals in {country} — €{min_price}–€{max_price}:")
     for i, p in enumerate(results, 1):

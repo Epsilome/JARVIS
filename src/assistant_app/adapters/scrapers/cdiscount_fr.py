@@ -82,7 +82,7 @@ async def _search_async(query: str) -> list[Product]:
         data = []
         try:
             data = await page.evaluate(
-                """
+                r"""
                 () => {
                 const items = [];
                 const seen = new Set();
@@ -92,7 +92,7 @@ async def _search_async(query: str) -> list[Product]:
                 ));
 
                 // Looks like "699,99 €", "1 199,00 €" etc.
-                const EUR_RE = /\d[\d u00A0 u202F]{0,6}(?:[.,]\d{1,2})?\s*€/;
+                const EUR_RE = /\d[\d\u00A0\u202F]{0,6}(?:[.,]\d{1,2})?\s*€/;
 
                 for (const card of cards) {
                     // Skip obvious sponsor slots

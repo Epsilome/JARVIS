@@ -8,3 +8,11 @@ SQLAlchemy
 python-dotenv
 dateparser
 requests
+SpeechRecognition
+pyaudio
+pyttsx3
+thefuzz
+google-generativeai
+ollama
+edge-tts
+pygame

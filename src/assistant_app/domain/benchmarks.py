@@ -26,22 +26,6 @@ TGP_RE = re.compile(r"(\d{2,3})\s*W", re.I)
 RAM_RE = re.compile(r"(\d{1,3})\s*(?:go|gb)\b", re.I)
 
 
-# ----------------------------
-# GPU baseline (laptop) — includes 50/40/30 series
-# ----------------------------
-GPU_BASE: dict[str, float] = {
-    # Ada 50-series (laptop)
-    "rtx 5070": 86.0,
-    "rtx 5060": 72.0,
-    "rtx 5050": 60.0,
-    # Ada 40-series (laptop)
-    "rtx 4090": 100.0, "rtx 4080": 94.0, "rtx 4070": 80.0, "rtx 4060": 67.0, "rtx 4050": 54.0,
-    # Ampere fallbacks (laptop)
-    "rtx 3080 ti": 82.0, "rtx 3080": 76.0, "rtx 3070 ti": 70.0, "rtx 3070": 64.0, "rtx 3060": 52.0,
-    "rtx 3050 ti": 38.0, "rtx 3050": 34.0,
-    # safety when title only says “RTX”
-    "rtx": 45.0,
-}
 GPU_ALIASES = {
     # Normalize spacing/case and make sure we include “geforce”/“laptop gpu” where needed
     # 50-series
@@ -118,33 +102,6 @@ GPU_ALIASES = {
     "radeon 660m": "radeon 660m",
     "radeon 610m": "radeon 610m",
     "intel arc a770m": "intel arc a770m",
-}
-
-# ----------------------------
-# Seed CPU table (common laptop parts). The big table from cache will overlay this.
-# ----------------------------
-CPU_BASE_SEED: Dict[str, float] = {
-    # Intel
-    "i5-12450h": 47, "i5-12500h": 50, "i7-12650h": 54, "i7-12700h": 59, "i7-12800h": 63,
-    "i9-12900h": 67, "i9-12900hx": 71,
-    "i5-13420h": 50, "i5-13500h": 56, "i7-13620h": 59, "i7-13650hx": 67, "i7-13700h": 67, "i7-13700hx": 71,
-    "i9-13900h": 73, "i9-13900hx": 79,
-    "i7-14650hx": 73, "i7-14700h": 71, "i7-14700hx": 83, "i9-14900hx": 89,
-    "ultra 5 125h": 57, "ultra 7 155h": 69, "ultra 9 185h": 76,
-    
-    # AMD
-    "ryzen 5 5600h": 44, "ryzen 7 5800h": 53, "ryzen 9 5900hx": 58,
-    "ryzen 5 6600h": 47, "ryzen 7 6800h": 57, "ryzen 9 6900hx": 62,
-    "ryzen 5 7535hs": 53, "ryzen 7 7735hs": 59, "ryzen 7 7840hs": 71, "ryzen 9 7940hs": 77,
-    "ryzen 7 7845hx": 79, "ryzen 9 7945hx": 92,
-    "ryzen 7 8840hs": 73, "ryzen 7 8845hs": 75,
-    
-    # NEW 2025 Models (Hawk Point Refresh) - Estimated
-    "ryzen 7 260": 71.0,  # ~Eq to 7840HS/8845HS
-    "ryzen 7 255": 70.0,
-    
-    # Aliases
-    "core ultra 5 125h": 57, "core ultra 7 155h": 69, "core ultra 9 185h": 76,
 }
 
 # ----------------------------
@@ -533,16 +490,14 @@ def gpu_score(gpu_name: str | None, context_text: str | None = None) -> float:
                 base = max(base, v)
 
     # --- 2) Fallback to coarse built-in buckets if cache miss
-    if base <= 0:
-        for k, v in GPU_BASE.items():
-            if k in gkey:
-                base = max(base, v)
-
+    # (Removed as GPU_BASE is now empty)
+    
     if base <= 0:
         return 0.0
 
     # --- TGP-aware adjustment (keep same curve you had)
-    tgp = parse_tgp_w((context_text or "") + " " + (gpu_name or "")) or 90
+    # Default to 115W for gaming laptops if not specified (was 90W)
+    tgp = parse_tgp_w((context_text or "") + " " + (gpu_name or "")) or 115
     tgp = max(60, min(140, tgp))
     factor = 0.84 + (tgp - 60) * (0.28 / 80.0)
 

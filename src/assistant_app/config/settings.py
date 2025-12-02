@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()  # loads .env into process env
+# print(f"DEBUG: DEFAULT_COUNTRY in env: {os.environ.get('DEFAULT_COUNTRY')}")
 
 class Settings(BaseModel):
     APP_ENV: str = os.getenv("APP_ENV", "dev")
@@ -12,6 +13,8 @@ class Settings(BaseModel):
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///assistant.db")
 
     TMDB_API_KEY: str | None = os.getenv("TMDB_API_KEY")
+    GEMINI_API_KEY: str | None = os.getenv("GEMINI_API_KEY")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral:7b")
 
     # Scraper tuning
     SCRAPER_USER_AGENT: str = os.getenv("SCRAPER_USER_AGENT", "assistant/1.0 (+local)")
@@ -19,6 +22,7 @@ class Settings(BaseModel):
     SCRAPER_MAX_CONCURRENCY: int = int(os.getenv("SCRAPER_MAX_CONCURRENCY", "3"))
     ROTATING_PROXY_URL: str | None = os.getenv("ROTATING_PROXY_URL")
 
-    DEFAULT_COUNTRY: str = os.getenv("DEFAULT_COUNTRY", "FR")
+    DEFAULT_COUNTRY: str = os.getenv("DEFAULT_COUNTRY", "MA")
+    DEFAULT_CITY: str = os.getenv("DEFAULT_CITY", "Casablanca")
 
 settings = Settings()
