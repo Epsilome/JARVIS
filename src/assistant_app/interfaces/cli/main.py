@@ -1,6 +1,6 @@
 # trunk-ignore-all(isort)
 # src/assistant_app/interfaces/cli/main.py
-import asyncio, json, logging, signal, sys
+import asyncio, json, logging, signal, sys, time
 from pathlib import Path
 from datetime import datetime, timedelta
 import typer
@@ -43,6 +43,10 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
+
+# Global suppression of annoying third-party logs
+logging.getLogger("phonemizer").setLevel(logging.CRITICAL)
+logging.getLogger("phonemizer.backend.espeak.wrapper").setLevel(logging.CRITICAL)
 
 app = typer.Typer(help="Local Desktop Assistant")
 movies_app = typer.Typer(help="Movie suggestions & watched list")
@@ -96,6 +100,8 @@ def listen(loop: bool = True):
         if text:
             try:
                 process_voice_command(text)
+                # Short pause to prevent mic from hearing the end of the TTS response
+                time.sleep(0.5) 
             except typer.Exit:
                 break
         if not loop:

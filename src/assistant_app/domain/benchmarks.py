@@ -26,6 +26,33 @@ TGP_RE = re.compile(r"(\d{2,3})\s*W", re.I)
 RAM_RE = re.compile(r"(\d{1,3})\s*(?:go|gb)\b", re.I)
 
 
+# Lazy-loaded registries
+_CPU_REGISTRY = None
+_GPU_REGISTRY = None
+
+def get_cpu_registry():
+    global _CPU_REGISTRY
+    if _CPU_REGISTRY is None:
+        try:
+            from assistant_app.domain.cpu_registry import LaptopCPUBase
+            _CPU_REGISTRY = LaptopCPUBase.get_instance()
+        except ImportError:
+            _CPU_REGISTRY = False # Marker for failed load
+    return _CPU_REGISTRY if _CPU_REGISTRY else None
+
+def get_gpu_registry():
+    global _GPU_REGISTRY
+    if _GPU_REGISTRY is None:
+        try:
+            from dbgpu.src import DBGPU
+            import contextlib, io
+            # Suppress initialization noise
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                _GPU_REGISTRY = DBGPU()
+        except ImportError:
+            _GPU_REGISTRY = False
+    return _GPU_REGISTRY if _GPU_REGISTRY else None
+
 GPU_ALIASES = {
     # Normalize spacing/case and make sure we include “geforce”/“laptop gpu” where needed
     # 50-series
@@ -152,7 +179,7 @@ def _norm(s: str) -> str:
 def match_cpu(text: str) -> Optional[str]:
 
     n = _norm(text)
-
+    
     # ---- Apple M-series -----------------------------------------------------
     # e.g., "Apple M4 Pro 12 Core", "Apple M3 8-Core"
     m = re.search(r"apple\s*m(\d)\s*(max|pro)?\s*(\d+)?\s*core?", n, re.I)
@@ -379,129 +406,137 @@ def parse_os_bonus(text: str) -> float:
 # ----------------------------
 # CPU table: seed + (optional) cached big table
 # ----------------------------
-def _load_cpu_cache() -> Dict[str, float]:
-    if not CPU_CACHE_PATH.exists():
-        print(f"Warning: CPU cache file not found at {CPU_CACHE_PATH.resolve()}", file=sys.stderr)
-        return {}
-    try:
-        data = json.loads(CPU_CACHE_PATH.read_text(encoding="utf-8"))
-        # accept {"ranks": {...}} or a flat dict
-        if isinstance(data, dict) and "ranks" in data and isinstance(data["ranks"], dict):
-            data = data["ranks"]
-        return { _norm(k): float(v) for k, v in data.items() }
-    except Exception:
-        return {}
+# ----------------------------
+# Database Queries
+# ----------------------------
+import sqlite3
 
-def _load_gpu_cache() -> Dict[str, float]:
-    if not GPU_CACHE_PATH.exists():
-        print(f"Warning: GPU cache file not found at {GPU_CACHE_PATH.resolve()}", file=sys.stderr)
-        return {}
+DB_PATH = PROJECT_ROOT / "assistant.db"
+
+def _get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def get_cpu_specs(name: str) -> Optional[dict]:
+    """Query the database for CPU specs."""
+    conn = _get_db_connection()
     try:
-        data = json.loads(GPU_CACHE_PATH.read_text(encoding="utf-8"))
-        if isinstance(data, dict) and "ranks" in data:
-            data = data["ranks"]
-        return { _norm(k): float(v) for k, v in data.items() }
-    except Exception as e:
-        print(f"Error loading GPU cache: {e}", file=sys.stderr)
-        return {}
+        # Try exact match first
+        row = conn.execute("SELECT * FROM cpu_benchmarks WHERE name = ? COLLATE NOCASE", (name,)).fetchone()
+        if not row:
+            # Fetch all potentially relevant rows
+            rows = conn.execute("SELECT * FROM cpu_benchmarks WHERE name LIKE ?", (f"%{name}%",)).fetchall()
+            if rows:
+                # Rank matches: prefer shortest name that contains the query (e.g. "Core i5" vs "Core i5-1234")
+                # But careful: "i5" matches "i5-12400", "i5-13400".
+                # Best approach: Use levenshtein or just sort by length if query is specific?
+                # Let's use simple logic: Sort by length of name (ascending), then score (descending)
+                rows = [dict(r) for r in rows]
+                rows.sort(key=lambda x: (len(x['name']), -x['mark']))
+                return rows[0]
+            row = None
+        
+        if row:
+            return dict(row)
+        return None
+    finally:
+        conn.close()
+
+def get_cached_specs(name: str) -> Optional[dict]:
+    """Query the `hardware_specs` table."""
+    conn = _get_db_connection()
+    try:
+        row = conn.execute("SELECT specs_json FROM hardware_specs WHERE name = ?", (name,)).fetchone()
+        if row:
+            import json
+            return json.loads(row["specs_json"])
+        return None
+    finally:
+        conn.close()
+
+def save_cached_specs(name: str, specs: dict):
+    """Save specs to the `hardware_specs` table."""
+    conn = _get_db_connection()
+    try:
+        import json
+        conn.execute("INSERT OR REPLACE INTO hardware_specs (name, specs_json) VALUES (?, ?)", 
+                     (name, json.dumps(specs)))
+        conn.commit()
+    finally:
+        conn.close()
+
+def get_gpu_specs(name: str) -> Optional[dict]:
+    """Query the database for GPU specs."""
+    conn = _get_db_connection()
+    try:
+        # Try exact match first
+        row = conn.execute("SELECT * FROM gpu_benchmarks WHERE name = ? COLLATE NOCASE", (name,)).fetchone()
+        if not row:
+            # Fetch all candidates
+            # "LIMIT 20" to avoid huge dumps if query is "RTX"
+            rows = conn.execute("SELECT * FROM gpu_benchmarks WHERE name LIKE ? LIMIT 50", (f"%{name}%",)).fetchall()
+            if rows:
+                candidates = [dict(r) for r in rows]
+                # Filter: The name MUST contain the query (SQLite LIKE is case insensitive but verify)
+                # Sort:
+                # 1. Exact phrase match usually best?
+                # 2. Shortest length (e.g. "RTX 3080" < "RTX 3080 Ti")
+                # 3. Higher mark (tie-breaker)
+                candidates.sort(key=lambda x: (len(x['name']), -x['mark']))
+                
+                # Check if we have a "Ti" or "Super" mismatch issue
+                # If query doesn't have "Ti", but result does, it should be penalized if a non-Ti version exists.
+                # The length sort handles this: "RTX 3080" (len 8) < "RTX 3080 Ti" (len 11)
+                
+                return candidates[0]
+            row = None
+            
+        if row:
+            return dict(row)
+        return None
+    finally:
+        conn.close()
 
 def _cpu_base() -> Dict[str, float]:
-    return _load_cpu_cache()
+    # Legacy support if needed, or remove
+    return {}
 
 def _gpu_cache() -> Dict[str, float]:
-    return _load_gpu_cache()
+    # Legacy support if needed, or remove
+    return {}
 
 # ----------------------------
 # Scoring
 # ----------------------------
 def cpu_score(cpu_name: str | None) -> float:
-    """
-    Score CPUs using the big cached PassMark table:
-    1) try exact key hit,
-    2) then substring both directions (key in text OR text in key),
-    3) then a lightweight alias comparison that drops vendor words.
-    Keeps the *max* score found.
-    """
-    if not cpu_name:
-        return 0.0
-
-    base = _cpu_base()
-    if not base:
-        return 0.0
-
-    # Normalize target text (prefer explicit match from match_cpu)
-    raw = match_cpu(cpu_name) or cpu_name
-    ckey = _norm(raw)
-
-    # 1) exact
-    if ckey in base:
-        return float(base[ckey])
-
-    best = 0.0
-
-    # 2) substring both ways
-    for k, v in base.items():
-        if k in ckey or ckey in k:
-            best = max(best, v)
-
-    if best > 0:
-        return best
-
-    # 3) vendor-agnostic token match (drop common words; compare condensed)
-    def strip_vendor(s: str) -> str:
-        s = re.sub(r"\b(intel|amd|qualcomm|apple|core|ryzen|snapdragon|processor|mobile|cpu|tm|™|®)\b", " ", s)
-        s = re.sub(r"[^a-z0-9+\- ]", " ", s)
-        return _norm(re.sub(r"\s+", " ", s))
-
-    a = strip_vendor(ckey)
-    for k, v in base.items():
-        b = strip_vendor(k)
-        if not a or not b:
-            continue
-        # Require all short tokens in A to be present in B (very light fuzzy)
-        atoks = [t for t in a.split() if len(t) >= 2]
-        if atoks and all(t in b for t in atoks):
-            best = max(best, v)
-
-    return best
+    if not cpu_name: return 0.0
+    
+    # Try normalized match first
+    matched = match_cpu(cpu_name) or cpu_name
+    
+    # Query DB
+    spec = get_cpu_specs(matched)
+    if spec:
+        return float(spec['mark'])
+        
+    return 0.0
 
 def gpu_score(gpu_name: str | None, context_text: str | None = None) -> float:
-    """
-    Score a laptop GPU on a 0..~115 scale (after TGP factor).
-    Priority:
-      1) If present in the cached PassMark GPU ranks (0..100), use that.
-      2) Else fall back to the built-in GPU_BASE buckets.
-
-    We still apply a modest TGP factor because laptop parts vary with power.
-    """
-    if not gpu_name:
-        return 0.0
-
-    # Normalize and try to canonicalize (e.g., "RTX 4070 Laptop GPU")
-    gkey = _norm(match_gpu(gpu_name) or gpu_name)
-
-    # --- 1) Try cache first (names are like "geforce rtx 4090 laptop gpu", "rtx 5000 ada generation laptop gpu")
-    cache = _gpu_cache()
-    base = 0.0
-    if cache:
-        # containment both ways makes this tolerant to slight wording differences
-        for k, v in cache.items():
-            if k in gkey or gkey in k:
-                base = max(base, v)
-
-    # --- 2) Fallback to coarse built-in buckets if cache miss
-    # (Removed as GPU_BASE is now empty)
+    if not gpu_name: return 0.0
     
-    if base <= 0:
-        return 0.0
-
-    # --- TGP-aware adjustment (keep same curve you had)
-    # Default to 115W for gaming laptops if not specified (was 90W)
-    tgp = parse_tgp_w((context_text or "") + " " + (gpu_name or "")) or 115
-    tgp = max(60, min(140, tgp))
-    factor = 0.84 + (tgp - 60) * (0.28 / 80.0)
-
-    return base * factor
+    matched = match_gpu(gpu_name) or gpu_name
+    spec = get_gpu_specs(matched)
+    
+    if spec:
+        base = float(spec['mark'])
+        # TGP adjustment
+        tgp = parse_tgp_w((context_text or "") + " " + (gpu_name or "")) or 115
+        tgp = max(60, min(140, tgp))
+        factor = 0.84 + (tgp - 60) * (0.28 / 80.0)
+        return base * factor
+        
+    return 0.0
 
 def value_score(title: str, specs_text: str, price_eur: float) -> float:
     """
@@ -513,6 +548,61 @@ def value_score(title: str, specs_text: str, price_eur: float) -> float:
     # 1) Core performance
     c = cpu_score(base_text)         # 0..100
     g = gpu_score(base_text, base_text)  # 0..~115 after TGP factor
+    
+    # --- DEEP SPECS BONUS (New) ---
+    # Give bonuses for VRAM and Core counts if available
+    deep_bonus = 0.0
+    
+    # GPU VRAM Bonus
+    # Heuristic: 8GB is the new standard. 6GB is bare minimum.
+    # +5 pts for 8GB, +10 for 12GB+, +15 for 16GB+
+    try:
+        gpu_reg = get_gpu_registry()
+        if gpu_reg:
+            gpu_name = match_gpu(base_text)
+            if gpu_name:
+                import contextlib, io
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    spec = gpu_reg.get_gpu(gpu_name)
+                
+                if spec:
+                    # VRAM
+                    # Check 'memory_size_gb' or 'vram'
+                    vram = getattr(spec, 'memory_size_gb', None) or getattr(spec, 'vram', None)
+                    if vram:
+                        # Parse regex if string "8 GB"
+                        if isinstance(vram, str):
+                            m_v = re.search(r"(\d+)", vram)
+                            vram = int(m_v.group(1)) if m_v else 0
+                        
+                        if vram >= 16: deep_bonus += 15.0
+                        elif vram >= 12: deep_bonus += 10.0
+                        elif vram >= 8: deep_bonus += 5.0
+                        elif vram < 6: deep_bonus -= 5.0 # Penalty for 4GB in 2024
+    except Exception:
+        pass # specific lookup failed, ignore
+        
+    # CPU Cores Bonus
+    # Heuristic: 6 cores is min for gaming. 8 is good. 14+ (P+E) is great.
+    try:
+        cpu_reg = get_cpu_registry()
+        if cpu_reg:
+            cpu_name = match_cpu(base_text)
+            if cpu_name:
+                spec = cpu_reg.get_cpu(cpu_name)
+                if spec:
+                    cores = spec.get('cores')
+                    # 'cores' might be "14" or "6" (int or str)
+                    try:
+                        if cores and str(cores).lower() != 'n/a':
+                            ic = int(float(cores))
+                            if ic >= 14: deep_bonus += 8.0
+                            elif ic >= 10: deep_bonus += 5.0
+                            elif ic >= 8: deep_bonus += 2.0
+                            elif ic < 6: deep_bonus -= 5.0
+                    except: pass
+    except Exception:
+        pass
 
     # 2) Display
     panel = parse_panel_kind(base_text)

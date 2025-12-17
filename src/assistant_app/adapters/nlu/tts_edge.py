@@ -25,7 +25,19 @@ def speak(text: str):
             temp_filename = fp.name
 
         # Generate audio (async)
-        asyncio.run(_generate_audio(text, temp_filename))
+        # Sanitize text: remove newlines and excessive whitespace for TTS stability
+        clean_text = " ".join(text.split())
+        if not clean_text:
+            logger.warning("TTS received empty text, skipping.")
+            return
+
+        try:
+            asyncio.run(_generate_audio(clean_text, temp_filename))
+        except Exception as e:
+            logger.error(f"TTS generation failed: {e}")
+            logger.info("Falling back to offline TTS (pyttsx3)...")
+            _speak_offline(text)
+            return
 
         # Play audio using pygame
         try:
@@ -43,12 +55,30 @@ def speak(text: str):
         except Exception as e:
             logger.error(f"Audio playback error: {e}")
         finally:
-            # Clean up temporary file
-            try:
-                os.remove(temp_filename)
-            except Exception as e:
-                logger.warning(f"Could not remove temp file {temp_filename}: {e}")
+            # Clean up temporary file with retry
+            for _ in range(3):
+                try:
+                    os.remove(temp_filename)
+                    break
+                except Exception:
+                    time.sleep(0.5)
+            else:
+                logger.warning(f"Could not remove temp file {temp_filename} after retries.")
 
     except Exception as e:
         logger.error(f"Edge TTS error: {e}")
-        # Fallback to pyttsx3 could be added here if needed
+        logger.info("Falling back to offline TTS (pyttsx3)...")
+        _speak_offline(text)
+
+def _speak_offline(text: str):
+    """Fallback using pyttsx3 (offline)."""
+    try:
+        import pyttsx3
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 170)
+        engine.setProperty('volume', 1.0)
+        engine.say(text)
+        engine.runAndWait()
+        engine.stop()
+    except Exception as e:
+        logger.error(f"Offline TTS error: {e}")

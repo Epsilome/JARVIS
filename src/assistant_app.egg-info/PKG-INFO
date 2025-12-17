@@ -22,6 +22,9 @@ Requires-Dist: google-generativeai
 Requires-Dist: ollama
 Requires-Dist: edge-tts
 Requires-Dist: pygame
+Requires-Dist: duckduckgo-search
+Requires-Dist: beautifulsoup4
+Requires-Dist: faster-whisper
 
 # Assistant (Desktop, Python)
 

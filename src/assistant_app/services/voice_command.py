@@ -2,15 +2,15 @@ import re
 import typer
 from thefuzz import process as fuzz_process
 
-from assistant_app.services.movies import top_horror
-from assistant_app.services.prices import search_all
-from assistant_app.domain.benchmarks import value_score, value_score_work
+# from assistant_app.services.movies import top_horror
+# from assistant_app.services.prices import search_all
+# from assistant_app.domain.benchmarks import value_score, value_score_work
 from assistant_app.services.reminders import add_once, list_jobs, add_daily, cancel_prefix
 from assistant_app.adapters.nlu.time_parse import parse_when
 from assistant_app.services.prayer import get_today_timings
 from assistant_app.services.movies_seen import all_seen
 from assistant_app.config.settings import settings
-from assistant_app.adapters.nlu.tts_edge import speak
+from assistant_app.adapters.nlu.tts_kokoro import speak
 from assistant_app.adapters.nlu.ollama_adapter import ask_ollama
 
 
@@ -32,8 +32,6 @@ def process_voice_command(text: str):
         "watched_movies": ["watched movies", "movies i have seen", "seen movies", "what did i watch"],
         "eye_care": ["start eye care", "enable eye care", "eye protection"],
         "list_reminders": ["show reminders", "list reminders", "my reminders", "what do i have to do"],
-        "recommend_movie": ["recommend movie", "horror movie", "suggest a movie", "good movie"],
-        "prices": ["check prices", "laptop price", "search laptop", "gaming laptop", "work laptop", "price for"],
         "remind": ["remind me", "set reminder", "remember to"],
         "stop": ["stop", "exit", "quit", "shut down", "terminate"]
     }
@@ -58,7 +56,7 @@ def process_voice_command(text: str):
     # --- Logic Dispatch ---
 
     # Prayer Times
-    if matched_intent == "prayer" or "prayer" in text or "fajr" in text:
+    if matched_intent == "prayer":
         city = settings.DEFAULT_CITY or "Casablanca"
         country = settings.DEFAULT_COUNTRY or "MA"
         times = get_today_timings(city, country, 2, 0)
@@ -100,49 +98,7 @@ def process_voice_command(text: str):
                 typer.echo(f"  • {jid} | {next_run}")
         return
 
-    # Movies (Recommendation)
-    if matched_intent == "recommend_movie" or "movie" in text:
-        respond("Searching for top horror movies...")
-        movies = top_horror(limit=5)
-        for m in movies:
-            typer.echo(f"{m.title} ({m.year}) ★ {m.tmdb_vote}")
-        speak(f"I found {len(movies)} movies. {movies[0].title} seems good.")
-        return
 
-    # Prices / Laptop
-    if matched_intent == "prices" or "laptop" in text or "price" in text:
-        is_work = "work" in text or "office" in text or "business" in text
-        
-        query = "gaming laptop"
-        match = re.search(r"(price|search) (for|of) (.+)", text)
-        if match:
-            query = match.group(3)
-        elif is_work:
-             query = "work laptop"
-
-        respond(f"Searching prices for {query}...")
-        results = search_all(query, country_hint="FR")
-        
-        if not results:
-            respond("I couldn't find any results.")
-            return
-
-        if is_work:
-            def _score_work(p):
-                specs = str(p.specs)
-                return value_score_work(p.title, specs, p.price or 0.0)
-            results.sort(key=_score_work, reverse=True)
-        else:
-            def _score_gaming(p):
-                specs = str(p.specs)
-                return value_score(p.title, specs, p.price or 0.0)
-            results.sort(key=_score_gaming, reverse=True)
-        
-        top_result = results[0]
-        respond(f"Found {len(results)} deals. The best one is {top_result.title} for {top_result.price} euros.")
-        for p in results[:5]:
-             typer.echo(f"[{p.store}] {p.title} — {p.price} €")
-        return
 
     # Reminders (Set new) - Keep regex/keyword for this as it has variable content
     if "remind" in text or matched_intent == "remind":

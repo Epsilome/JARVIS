@@ -14,7 +14,7 @@ class Settings(BaseModel):
 
     TMDB_API_KEY: str | None = os.getenv("TMDB_API_KEY")
     GEMINI_API_KEY: str | None = os.getenv("GEMINI_API_KEY")
-    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "mistral:7b")
+    OLLAMA_MODEL: str = os.getenv("OLLAMA_MODEL", "llama3.1")
 
     # Scraper tuning
     SCRAPER_USER_AGENT: str = os.getenv("SCRAPER_USER_AGENT", "assistant/1.0 (+local)")

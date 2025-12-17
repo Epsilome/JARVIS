@@ -27,6 +27,9 @@ dependencies = [
   "ollama",
   "edge-tts",
   "pygame",
+  "duckduckgo-search",
+  "beautifulsoup4",
+  "faster-whisper",
 ]
 
 [project.scripts]
