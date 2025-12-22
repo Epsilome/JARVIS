@@ -1,5 +1,6 @@
 import os, sys, shutil
 from pathlib import Path
+import argparse
 
 def startup_folder() -> Path:
     # %APPDATA%\Microsoft\Windows\Start Menu\Programs\Startup
@@ -24,7 +25,7 @@ def remove_startup_shortcut():
         print("No startup entry found.")
 
 if __name__ == "__main__":
-    import argparse
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--install", action="store_true")
     ap.add_argument("--remove", action="store_true")

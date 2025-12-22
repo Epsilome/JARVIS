@@ -1,0 +1,471 @@
+Brand,Model,Interface,Form Factor,Capacities,Controller,Configuration,DRAM,HMB,NAND Brand,NAND Type,Layers,"R/W (Up to, in MB/s)",Categories
+WD,AN1500,x8 PCIe 3.0/NVMe,AIC,1TB-4TB,2xWD + 88NR2241,2xSN750 controller + RAID,Yes,No,SanDisk,TLC,,6500/4100,High-End NVMe
+Acer,GM9000,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,SMI SM2508,,Yes,N/A,Micron,TLC,232,14000/13000,High-End NVMe
+ADATA,Legend 970,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,232,10000/10000,High-End NVMe
+ADATA,Legend 970 PRO,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,InnoGrit IG5666,,Yes,N/A,Micron,TLC,232,14000/11000,High-End NVMe
+ADATA,Mars 970 Blade,x4 PCIe 5.0/NVMe,M.2,4TB,,,,,,,,14000/12000,
+ADATA,Mars 970 Storm,x4 PCIe 5.0/NVMe,M.2,8TB,,,,,,,,14000/12000,
+ADATA,Mars 980 Blade,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,SMI SM2508,,Yes,N/A,,,,14000/13000,
+ADATA,Project Blackbird,x4 PCIe 5.0/NVMe,M.2,,InnoGrit IG5666,,,,,,,,
+ADATA,Project NeonStorm,x4 PCIe 5.0/NVMe,M.2,1TB-8TB,SMI SM2508,,Yes,No,Micron,TLC,232,14000/12000,High-End NVMe
+ADATA,Project Nighthawk,x4 PCIe 5.0/NVMe,M.2,,SMI SM2508,,,,,,,14000/?,
+Apacer,AS2280F4,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,232,12400/11500,High-End NVMe
+Apacer,AS2280F5,x4 PCIe 5.0/NVMe,M.2,,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,232,13000/12000,High-End NVMe
+Biwin,X570 PRO,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,SMI SM2508,,Yes,N/A,YMTC,TLC,232,14000/13000,High-End NVMe
+CFD Gaming,PG5NFZ,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,232,10000/9500,High-End NVMe
+Corsair,MP700,x4 PCIe 5.0/NVMe,M.2,2TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/9500,High-End NVMe
+Corsair,MP700 Elite,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E31T,,No,Yes,Kioxia,TLC,218,10000/8500,High-End NVMe
+Corsair,MP700 Micro,x4 PCIe 5.0/NVMe,M.2,2TB-4TB,Phison E31T,,No,Yes,Sandisk,TLC,218,10000/8500,
+Corsair,MP700 PRO,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12400/11800,High-End NVMe
+Corsair,MP700 PRO SE,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,14000/14000,High-End NVMe
+Corsair,MP700 PRO XT,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E28,,Yes,N/A,Sandisk,TLC,218,14900/14500,High-End NVMe
+Crucial,T700,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12400/11800,High-End NVMe
+Crucial,T705,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,14500/12700,High-End NVMe
+Crucial,T710,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,Yes,N/A,Micron,TLC,276,14900/13800,High-End NVMe
+Essencore,E540,x4 PCIe 5.0/NVMe,M.2,,Maxio MAP1806A,,No,Yes,,,,,
+Essencore,E550,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,14000/12500,
+Galax,HOF 5.0,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/9500,High-End NVMe
+Gigabyte,Gen5 Aorus 10000,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,9500/8500,High-End NVMe
+Gigabyte,Gen5 Aorus 12000,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12000/12000,High-End NVMe
+Gigabyte,Gen5 Aorus 14000,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,14500/12700,High-End NVMe
+Goodram,IRDM Ultimate,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,,,,,High-End NVMe
+Hynix,Platinum P51,x4 PCIe 5.0/NVMe,M.2,500GB-2TB,Alistair,R8,Yes,N/A,Hynix,TLC,238,14700/13400,High-End NVMe
+Inland,TD510,x4 PCIe 5.0/NVMe,M.2,2TB-4TB,Phison E26,"Dual R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/9500,High-End NVMe
+Kingston,Renegade G5,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,SMI SM2508,,Yes,N/A,Micron,TLC,232,14800/1400,High-end NVMe
+Kioxia,Exceria Plus G4,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E31T,,,,Kioxia,TLC,,10000/8200,
+KLEVV,CRAS C950,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12000/?,High-End NVMe
+KLEVV,G530,x4 PCIe 5.0/NVMe,M.2,,,,,,,,,10300/8600,
+KLEVV,Genuine G560,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,14000/12000,High-End NVMe
+Lenovo,SL7000 50E,x4 PCIe 5.0/NVMe,M.2,512GB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12400/?,High-End NVMe
+Lexar,ARES PRO,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,14000/11000,
+Lexar,NM990,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,14000/11000,High-End NVMe
+Lexar,NM1090,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,14000/12000,High-End NVMe
+Lexar,NM1090 Pro,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,SMI SM2508,,,,,,,14000/13000,High-End NVMe
+MSI,M560,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E31T,"Single R5 + CoX, 4-CH, 4-CE/ch",No,Yes,,,,,
+MSI,M570,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/10000,High-End NVMe
+MSI,M570 Pro,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12400/10000,High-End NVMe
+Neo Forza,NFP455,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/10000,High-End NVMe
+Nextorage,NE5N,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,,High-End NVMe
+Nextorage,NN5Pro,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12400/11800,High-End NVMe
+Patriot,PD573,x4 PCIe 5.0/NVMe,M.2,1TB-8TB,Maxio MAP1802,,No,Yes,,TLC,,14000/12000,High-End NVMe
+Patriot,PV553,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12400/11800,High-End NVMe
+Patriot,PV563,x4 PCIe 5.0/NVMe,M.2,,,,,,,,,14000/11500,
+Patriot,PV593,x4 PCIe 5.0/NVMe,M.2,,,,,,,,,14000/10000,
+PNY,CS3150,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12000/11000,High-End NVMe
+PNY,CS3250,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E28,,Yes,N/A,Sandisk,TLC,218,14900/14000,High-End NVMe
+Sabrent,Rocket 5,x4 PCIe 5.0/NVMe,M.2,1TB-8TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,,High-End NVMe
+Samsung,9100 Pro,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Samsung Presto,,Yes,N/A,Samsung,TLC,236L,14700/13400,
+Seagate,FireCuda 540,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/10000,High-End NVMe
+Silicon Power,US85,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,,,,,,,,10300/8600,High-End NVMe
+Silicon Power,XS80,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,10000/10000,High-End NVMe
+Silicon Power,XS90,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,,
+Team,GA Pro,x4 PCIe 5.0/NVMe,M.2,1TB-2TB,InnoGrit IG5666,,,,,TLC,232,10000/8500,
+Team,GC Pro,x4 PCIe 5.0/NVMe,M.2,2TB-4TB,InnoGrit IG5666,,Yes,N/A,YMTC,TLC,232,12500/11000,
+Team,GE Pro,x4 PCIe 5.0/NVMe,M.2,,InnoGrit IG5666,,Yes,No,Micron,TLC,232,14000/12000,High-End NVMe
+Team,GC Pro,x4 PCIe 5.0/NVMe,M.2,2TB-4TB,,,,,,,,12500/11000,
+Team,I54,x4 PCIe 5.0/NVMe,M.2,,,,,,,,,,
+Team,ME Pro,x4 PCIe 5.0/NVMe,M.2,,SMI SM2508,,Yes,N/A,,TLC,,14000/12000,
+Team,NV10000,x4 PCIe 5.0/NVMe,M .2,1TB-4TB,Phison E31T,,No,Yes,Kioxia,TLC,218,10000/8500,
+Team,Z540,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,232,12000/10000,High-End NVMe
+Team,Z54A,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,InnoGrit IG5666,,Yes,No,Micron,TLC,232,14000/11000,High-End NVMe
+Team,Z54A4,x4 PCIe 5.0/NVMe,M.2,,Maxio MAP1806,,,,YMTC,TLC,,14000/12000,
+Team,Z54E,x4 PCIe 5.0/NVMe,M.2,,Phison E28,,,,Kioxia,TLC,218,14000/14000,
+Transcend,MTE260S,x4 PCIe 5.0/NVMe,M.2,1TB-4TB,,,,,,,,14000/11000,
+Verbatim,Vi12000,x4 PCIe 5.0/NVMe,M.2,,,,,,,,,,
+Acer,FA200,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,QLC,232,7200/6200,
+Acer,GM7,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,TLC,,7400/7300,
+Acer,GM7000 (Predator),x4 PCIe 4.0/NVMe,M.2,512GB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,No,Micron,TLC,176,7400/6400,High-End NVMe
+ADATA,ATOM 40,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,,,,,,,,3500/3000,Mid-Range NVMe
+ADATA,ATOM 50,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,Micron,TLC,176,5000/4500,Mid-Range NVMe
+ADATA,Legend 800,x4 PCIe 4.0/NVMe,M.2,,SMI SM2267XT,"Dual R5, 4x4",,,,,,3500/2800,Entry-Level NVMe
+ADATA,Legend 820,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,,,,,,,,5000/4500,
+ADATA,Legend 840,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,Micron,TLC,176,5000/4500,Mid-Range NVMe
+ADATA,Legend 850,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,SMI SM2269XT,"Dual-core R8, 4-ch",No,Yes,,TLC,,5000/4500,Mid-Range NVMe
+ADATA,Legend 850 Lite,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,SMI SM2269XT,"Dual-core R8, 4-ch",No,Yes,,TLC,,5000/4200,Mid-Range NVMe
+ADATA,Legened 860,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,,,,,,,,6000/5000,
+ADATA,Legend 900,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,TLC,232,7000/5400,
+ADATA,Legend 960/Max,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,SMI SM2264,"QC (12nm R8), 8-ch, 8-CE/ch",Yes,No,Micron,TLC,176,7400/6800,High-End NVMe
+ADATA,Premium,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,No,Micron,TLC,176,7400/6800,High-End NVMe
+ADATA,S50,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+ADATA,S50 Lite,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,SMI SM2267,"DC (28nm R5), 4-ch, 8-CE/ch",Yes,No,Micron,TLC,96,3900/3200,Mid-Range NVMe
+ADATA,S65G,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,,,,,,,,6000/5000,
+ADATA,S70/S70 Blade,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Innogrit IG5236,"Quad-core, 8-ch",Yes,No,Micron,TLC,96,7400/6400,High-End NVMe
+ADATA,XPG Indigo,x4 PCIe 4.0/NVMe,M.2,Up to 4TB,SMI SM2264,"QC (12nm R8), 8-ch, 8-CE/ch",Yes,No,,,,7000/6000,
+ADATA,XPG Pearl,x4 PCIe 4.0/NVMe,M.2,Up to 4TB,SMI SM2267,"DC (28nm R5), 4-ch, 8-CE/ch",Yes,No,,,,4000/3000,
+ADATA,XPG Sage,x4 PCIe 4.0/NVMe,M.2,Up to 4TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,No,,,96,7000/6100,High-End NVMe
+Addlink,A90,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,176,5000/4400,Mid-Range NVMe
+Addlink,A90 Lite,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,,,No,Yes,,,,5000/4200,Mid-Range NVMe
+Addlink,A92,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,4900/3600,Mid-Range NVMe
+Addlink,A93,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Maxio MAP1602,"R5, 4x8",,,,,,7400/6500,
+Addlink,A95,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7400/7000,High-End NVMe
+Addlink,G55,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E31T,,No,Yes,Kioxia,TLC,218,"10,300/9000",
+Addlink,S90,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Addlink,S90 Lite,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,5000/4500,Mid-Range NVMe
+Addlink,S91,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,5000/3200,Mid-Range NVMe
+Addlink,S92,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,QLC,96,4900/3600,Mid-Range NVMe
+Addlink,S93,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Maxio MAP1602,"R5, 4x8",,,,,,7400/6500,
+Addlink,S95,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7100/6800,High-End NVMe
+Apacer,AS2280Q4,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,,TLC,,5000/4400,Mid-Range NVMe
+Apacer,AS2280Q4U,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7400/7000,High-End NVMe
+Asgard,AN4,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,YMTC,TLC,128,7500/5500,High-End NVMe
+ASUS,Strix SQ7,x4 PCIe 4.0/NVMe,M.2,1TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/6000,High-End NVMe
+Biostar,M800,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Maxio MAP1602,"R5, x58",,,,,,5000/4450,Mid-Range NVMe
+Biwin,NV7200,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,SMI SM2268XT2,,No,Yes,YMTC,QLC,232,7200/6200,
+Biwin,NV7400,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,Maxio MAP1602,,No,Yes,YMTC,TLC,232,7400/6500,
+Biwin,X570,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Maxio MAP1806A,,No,Yes,YMTC,TLC,232,,
+Colorful,CN700,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Maxio MAP1602,"Dual R5, 4x4",No,Yes,YMTC,TLC,128,5000/4500,Mid-Range NVMe
+Corsair,MP600,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,4950/4250,Mid-Range NVMe
+Corsair,MP600 CORE,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,4950/3950,Mid-Range NVMe
+Corsair,MP600 CORE MINI,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,,Entry-Level NVMe
+Corsair,MP600 Core XT,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,5000/4400,Entry-Level NVMe
+Corsair,MP600 Elite,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E27T,"Single R5 + CoX, 4-CH, 4-CE/ch",No,Yes,Kioxia,TLC,162,7000/6500,
+Corsair,MP600 GS,x4 PCIe 4.0/NVMe,M.2,500GB-1TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,4800/3900,Entry-Level NVMe
+Corsair,MP600 Micro,x4 PCIe 4.0/NVMe,M.2,1TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,5100/4300,Entry-Level NVMe
+Corsair,MP600 Mini,x4 PCIe 4.0/NVMe,M.2,1TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,4800/4800,Mid-Range NVMe
+Corsair,MP600 PRO,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+Corsair,MP600 PRO NH,x4 PCIe 4.0/NVMe,M.2,500GB-8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/6500,High-End NVMe
+Corsair,MP600 Pro Hydro X,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+Corsair,MP600 Pro LPX,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7100/6800,High-End NVMe
+Corsair,MP600 PRO XT,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7300/6900,High-End NVMe
+Corsair,MP600 PRO XT Hydro X,x4 PCIe 4.0/NVMe,M.2,2TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7100/6800,High-End NVMe
+Crucial,P310,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E27T,,No,Yes,Micron,QLC,232,7000/6100,Mid-range NVMe
+Crucial,P3 Plus,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,5000/4200,Entry-Level NVMe
+Crucial,P5 Plus,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Micron DM02A1,Cortex-R5 + Cortex-M3,Yes,No,Micron,TLC,176,6600/5000,High-End NVMe
+Crucial,T500,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E25,Dual R5 + CoX,Yes,N/A,Micron,TLC,232,7400/7000,High-End NVMe
+Essencore,ECT455,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,4800/4000,Mid-Range NVMe
+Galax,HOF 4.0,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,4800/4000,Mid-Range NVMe
+Galax,HOF 4.0 Extreme,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+Gigabyte,Gen4 4000E,x4 PCIe 4.0/NVMe,M.2,250GB-1TB,,,,,,,,4000/3900,Entry-Level NVMe
+Gigabyte,Gen4 Aorus,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Gigabyte,Gen4 Aorus v2/Premium,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+Gigabyte,Gen4 Aorus 5000E,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,,TLC,,5000/4600,Mid-Range NVMe
+Gigabyte,Gen4 Aorus 7300,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7300/6850,High-End NVMe
+Goodram,IRDM Pro,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/6850,High-End NVMe
+Goodram,IRDM Ultimate X,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4500,Mid-Range NVMe
+Goodram,PX600,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,,,,,,,,5000/4200,Mid-Range NVMe
+Goodram,PX700,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,,,,,,,,7400/6500,
+Fantom,VENOM8,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,,High-End NVMe
+Fantom,VENOMX,x4 PCIe 4.0/NVMe,,1TB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,5100/2600,Mid-Range NVMe
+HP,FX700,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,Maxio MAP1602,,No,Yes,YMTC,QLC,232,7200/6200,Mid-Range NVMe
+HP,FX900,x4 PCIe 4.0/NVMe,M.2,256GB-2TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,Micron,TLC,176L,5000/4800,Mid-Range NVMe
+HP,FX900 Plus,x4 PCIe 4.0/NVMe,M.2,,Maxio MAP1602,Cortex-R5,No,Yes,YMTC,TLC,,7100/6300,
+HP,FX900 Pro,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,Micron,TLC,176,7400/6700,High-End NVMe
+Hynix,Platinum P41,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Aries,"R8 + M7 + 2xR8, 8x4",Yes,No,Hynix,TLC,176,7000/6500,High-End NVMe
+Inland,Gaming Perf. Plus,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/6850,High-End NVMe
+Inland,Performance,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4300,Mid-Range NVMe
+Inland,Performance Plus,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+Inland,TN436,x4 PCIe 4.0/NVMe,M.2,1TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,112,3400/2400,Entry-Level NVMe
+Inland,TN446,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,Phison E21T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,,TLC,,4700/3700,Mid-Range NVMe
+Inland,TN450,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E21T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,,TLC,,5000/5000,Mid-Range NVMe
+Inland,TN470,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E27T,"Single R5 + CoX, 4-CH, 4-CE/ch",No,Yes,Kioxia,TLC,162,7300/6400,
+Inland,QN446,x4 PCIe 4.0/NVMe,M.2,2TB,Phison E21T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Micron,QLC,176,5000/3200,Entry-Level NVMe
+KingMax,PQ4480,x4 PCIe 4.0/NVMe,M.2,250GB-1TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,,TLC,,3600/3000,Entry-Level NVMe
+KingMax,PX4480,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Kingston,Fury Renegade,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7300/7000,High-End NVMe
+Kingston,Ghost Tree,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,,,,,,,,7000/7000,
+Kingston,Grandview ES,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Marvell Whistler Plus,4-ch,,,,,,,
+Kingston,KC3000,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/7000,High-End NVMe
+Kingston,NV2,x4 PCIe 4.0/NVMe,M.2,250GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Kioxia,TLC,112,3500/2800,Entry-Level NVMe
+Kingston,NV3,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,SMI SM2268XT,,No,Yes,Kioxia,QLC,162,6000/5000,Entry-Level NVMe
+Kingspec,XG 7000 Pro,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,InnoGrit IG5236,"Quad-core, 4-Ch, 8-CE/ch",Yes,N/A,,TLC,,7500/6500,High-End NVMe
+Kioxia,Exceria Plus G3,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E21T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,112,5000/3900,Mid-Range NVMe
+Kioxia,Exceria Pro,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Kioxia,TLC,112,7300/6400,High-End NVMe
+KLEVV,CRAS C910,x4 PCIe 4.0/NVMe,M.2,500GB-1TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,,,,5000/4800,Mid-Range NVMe
+KLEVV,CRAS C910 Lite,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E21T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,,,,5000/4200,Mid-Range NVMe
+KLEVV,CRAS C920,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,,TLC,96,7000/6850,High-End NVMe
+KLEVV,CRAS C925,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Maxio MAP1602,"R5, 4x8",No,Yes,Hynix,TLC,238,7400/6500,High-End NVMe
+KLEVV,CRAS C930,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,,,,7400/6800,High-End NVMe
+Lexar,EQ790,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,,,,,,,,7000/6000,
+Lexar,NM710,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Maxio MAP1602,"4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,5000/4500,Mid-Range NVMe
+Lexar,NM760,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,SMI SM2269XT,"Dual-core R8, 4-ch",No,Yes,Micron,TLC,176,5300/4500,Mid-Range NVMe
+Lexar,NM790,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,TLC,232,7400/6500,
+Lexar,NM800 (NM800PRO),x4 PCIe 4.0/NVMe,M.2,512GB-1TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,Micron,TLC,176,7400/5800,High-End NVMe
+Lexar,NQ780,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,,,,,,,,7000/6000,
+Lexar,NQ790,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,QLC,232,7000/6000,Mid-Range NVMe
+Lexar,PLAY 2230,x4 PCIe 4.0/NVMe,M.2,1TB,SMI SM2269XT,,No,Yes,,TLC,,5200/4700,
+Lexar,PLAY 2280,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,Maxio MAP1602,,No,Yes,,,,,
+Micron,2400,x4 PCIe 4.0/NVMe,M.2,,SMI SM2269XT,"Dual R5, 4x4",No,Yes,Micron,QLC,176,,
+MSI,M450,x4 PCIe 4.0/NVMe,M.2,250GB-1TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,96+,3600/3000,Entry-Level NVMe
+MSI,M452,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,,,,3500/2700,Entry-Level NVMe
+MSI,M453,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,,,,3600/2800,Entry-Level NVMe
+MSI,M461,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,,,,5000/4200,Mid-Range NVMe
+MSI,M470,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+MSI,M471,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,4850/3600,Mid-Range NVMe
+MSI,M480,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+MSI,M480 PRO,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7400/7000,High-End NVMe
+MSI,M482,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E27T,"Single R5 + CoX, 4-CH, 4-CE/ch",No,Yes,Kioxia,TLC,162,7300/6400,
+Mushkin,DELTA,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,,QLC,,4975/3975,Mid-Range NVMe
+Mushkin,EON,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,SMI SM2267,"DC (28nm R5), 4-ch, 8-CE/ch",Yes,No,,,,4000/3000,
+Mushkin,EON Pro,x4 PCIe 4.0/NVMe,M.2,Up to 16TB,SMI SM2264,"QC (12nm R8), 8-ch, 8-CE/ch",Yes,No,,,,6400/3900,
+Mushkin,GAMMA,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7175/6800,High-End NVMe
+Mushkin,Redline Vortex,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Innogrit IG5236,"Quad-core, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7415/6800,High-End NVMe
+Mushkin,Vortex LX,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Innogrit IG5220,"Tri-core R5, 4x8",No,Yes,,TLC,,4985/4775,Mid-Range NVMe
+Neo Forza,NFP400,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Innogrit IG5236,"Quad-core, 4-Ch, 8-CE/ch",Yes,N/A,YMTC,TLC,128,7400/6800,High-End NVMe
+Neo Forza,NFP495,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,TenaFe TC2201,"Dual Cortex-M7, 4-ch, 4-CE/ch",No,Yes,YMTC,TLC,232,7200/6500,High-End NVMe
+Netac,NV5000,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Netac,NV5000-t,x4 PCIe 4.0/NVMe,M.2,500GB-1TB,TenaFe TC2200,"Dual M7, 4x4",No,Yes,YMTC,TLC,128,4800/4600,Mid-Range NVMe
+Netac,NV7000,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7200/6850,High-End NVMe
+Netac,NV7000-t,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,,,,,,,,7300/6700,
+Netac,NV7000-Q,x4 PCIe 4.0/NVMe,M.2,1TB,Maxio MAP1602,,No,Yes,YMTC,QLC,232,7100/6200,
+Nextorage,G Series ME,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E27T,,No,Yes,Kioxia,TLC,162,7400/6200,
+Nextorage,NEM-PA,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/6850,High-End NVMe
+Patriot,P400,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,Micron,TLC,176,5000/4800,Mid-Range NVMe
+Patriot,P400 V4,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,,,,,,,,6200,
+Patriot,PVP30,x4 PCIe 4.0/NVMe,M.2,,,,,,,,,,
+Patriot,Viper VP4100,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,4800/4000,Mid-Range NVMe
+Patriot,Viper VP4300,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,Micron,TLC,96,7400/6800,High-End NVMe
+Patriot,Viper VP4300 Lite,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Maxio MAP1602,"ARM, 2x8",No,Yes,YMTC,TLC,232,7400/6400,
+Patriot,Viper VPR400,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,Micron,TLC,176,5000/4600,Mid-Range NVMe
+Patriot,VP4000 Mini,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,5000/3500,
+Plextor,M10e,x4 PCIe 4.0/NVMe,M.2,256GB-1TB,SM2267XT,"Dual R5, 4x4",No,Yes,Kioxia,TLC,112,3700/2600,Entry-Level NVMe
+Plextor,M10P,x4 PCIe 4.0/NVMe,M.2 & AIC,512GB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,Kioxia,TLC,96,7000/5000,High-End NVMe
+PNY,CS2140,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,176,3600/3200,Entry-Level NVMe
+PNY,CS2142,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E21T,,No,Yes,Micron,QLC,176,5000/3200,
+PNY,CS2241,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,5000/4200,Mid-Range NVMe
+PNY,CS2342,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,,,,,,,,7300/6000,
+PNY,CS3040,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5600/4300,Mid-Range NVMe
+PNY,CS3140,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7500/6850,High-End NVMe
+PNY,CS4040,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,4800/4000,Mid-Range NVMe
+Sabrent,Rocket 2230,x4 PCIe 4.0/NVMe,M.2,256GB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,4750/4300,Mid-Range NVMe
+Sabrent,Rocket 2242,x4 PCIe 4.0/NVMe,M.2,1TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Hynix,TLC,176,5100/4800,Mid-Range NVMe
+Sabrent,Rocket 4.0,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Sabrent,Rocket 4 (New/4L),x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E27T,,No,Yes,Kioxia,TLC,162,7400/6400,
+Sabrent,Rocket 4 Plus,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6850,High-End NVMe
+Sabrent,Rocket 4 Plus (8TB),x4 PCIe 4.0/NVMe,M.2,8TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Kioxia,TLC,112,7400/6600,High-End NVMe
+Sabrent,Rocket 4 Plus-G,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7000/6850,High-End NVMe
+Sabrent,Rocket Q4,x4 PCIe 4.0/NVMe,M.2,2TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,4900/3500,Mid-Range NVMe
+Samsung,980 Pro,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,Samsung Elpis,"Cortex-R8, 8x8",Yes,N/A,Samsung,TLC,128 (136),7000/5000,High-End NVMe
+Samsung,990 EVO,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Samsung Piccolo,"Hexa-core R8 + R5, 4x4",No,Yes,Samsung,TLC,133,5000/4200,Mid-Range NVMe
+Samsung,990 EVO Plus,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Samsung Piccolo,"Hexa-core R8 + R5, 4x4",No,Yes,Samsung,TLC,236,7250/6300,Mid-Range NVMe
+Samsung,990 Pro,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Samsung Pascal,"Cortex-R8, 8x8",Yes,N/A,Samsung,TLC,176,7450/6900,High-End NVMe
+Seagate,520N,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,,,,,,,,5000/4800,Mid-Range NVMe
+Seagate,FireCuda 520,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5500/4400,Mid-Range NVMe
+Seagate,FireCuda 530,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7300/6900,High-End NVMe
+Seagate,Game Drive PS5,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",,,,,,,
+Silicon Power,ED90,x4 PCIe 4.0/NVMe,M.2,,,,,,,,,5000/4800,
+Silicon Power,ES75,x4 PCIe 4.0/NVMe,M.2,,,,,,,,,7000/6500,
+Silicon Power,UD85,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,YMTC,TLC,,3600/2800,Entry-Level NVMe
+Silicon Power,UD90,x4 PCIe 4.0/NVMe,M.2,250GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,4800/4200,Mid-Range NVMe
+Silicon Power,UD90 2230,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,5000/3200,Mid-Range NVMe
+Silicon Power,US70,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Silicon Power,US75,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,TLC,232,7000/6500,
+Silicon Power,XS70,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7300/6800,High-End NVMe
+Solidigm,P41 Plus,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,SMI SM2269XT,"Dual-core R8, 4-ch",No,Yes,Solidigm,QLC,144,4125/3325,Entry-Level NVMe
+Solidigm,P42 Plus,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,SMI SM2269XT,"Dual-core R8, 4-ch",No,Yes,Solidigm,QLC,192,,
+Solidigm,P44 Pro,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Aries,"R8 + M7 + 2xR8, 8x4",Yes,No,Hynix,TLC,176,7000/6500,High-End NVMe
+Team,Cardea A440,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,96,7000/6900,High-End NVMe
+Team,Cardea A440 Lite,x4 PCIe 4.0/NVMe,M.2,,Phison E27T,"Single R5 + CoX, 4-CH, 4-CE/ch",No,Yes,Kioxia,TLC,162,7400/6400,
+Team,Cardea A440 Pro,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7400/7000,High-End NVMe
+Team,Cardea Ceramic C440,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Team,Cardea Z44Q,x4 PCIe 4.0/NVMe,M.2,2TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Intel,QLC,96,5000/4000,Mid-Range NVMe
+Team,Cardea Zero,x4 PCIe 4.0/NVMe,M.2,256GB-1TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,4800/4000,Mid-Range NVMe
+Team,Cardea Zero Z440,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Team,G50,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,,"Quad-core, 8-ch",No,Yes,,,,5000/4800,Mid-Range NVMe
+Team,G50 PRO,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,,,,5000/4800,Mid-Range NVMe
+Team,G70,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,,"Quad-core, 8-ch",No,Yes,,,,7400/6800,High-End NVMe
+Team,G70 PRO,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,InnoGrit IG5236,"Quad-core, 8-ch",Yes,N/A,,,,7400/6800,High-End NVMe
+Team,MP34S,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,,,,,,,,2500/2200,Entry-Level NVMe
+Team,MP44,x4 PCIe 4.0/NVMe,M.2,512GB-8TB,Maxio MAP1602,,No,Yes,YMTC,TLC,232,7400/6900,High-End NVMe
+Team,MP44L,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,176,5000/4500,Mid-Range NVMe
+Team,MP44S,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,,,,,,,,5000/3500,Mid-Range NVMe
+Team,MP44Q,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,Maxio MAP1602,"R5, 4x8",No,Yes,YMTC,QLC,232,7400/6500,Mid-Range NVMe
+Team,NV5000,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,,,,,,,,5000/3000,
+Team,T-Create Classic (NVMe 2),x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Team,T-Create Classic PCIe 4.0 DL,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,,,No,Yes,,TLC,,5000/4500,Mid-Range NVMe
+Team,T-Create Classic C43,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,,,,,,,,3500/3200,Entry-Level Nvme
+Team,T-Create Classic C45,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,,,,,,,,5000/4500,Mid-Range NVMe
+Team,T-Create Classic C47,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,,,,,,,,7400/7000,High-End NVMe
+Team,Z440,x4 PCIe 4.0/NVMe,M.2,1TB-2TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,5000/4400,Mid-Range NVMe
+Team,Z44A5,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Maxio MAP1602,,No,Yes,Hynix,TLC,176,5000/4500,
+Team,Z44L,x4 PCIe 4.0/NVMe,M.2,250GB-1TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,SanDisk,TLC,96,3500/3000,Entry-Level NVMe
+Team,Z44Q,x4 PCIe 4.0/NVMe,M.2,2TB-4TB,Phison E16,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Intel,QLC,96,5000/3700,Mid-Range NVMe
+Transcend,MTE310S,x4 PCIe 4.0/NVMe,M.2,512GB-1TB,,,,,,,,5000/3500,
+Transcend,SSD 240S,x4 PCIe 4.0/NVMe,M.2,500GB-1TB,SMI SM2267,"DC (28nm R5), 4-ch, 8-CE/ch",Yes,No,Micron,TLC,96,3800/3200,Mid-Range NVMe
+Transcend,SSD 245S,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,Realtek RTS5772DL,,,,,,,5300/4000,
+Transcend,SSD 250S/MTE250S/250H,x4 PCIe 4.0/NVMe,M.2,1TB-4TB,SMI SM2264,"QC (12nm R8), 8-ch, 8-CE/ch",Yes,N/A,Kioxia,TLC,112,7500/6700,High-End NVMe
+Verbatim,Vi7000G,x4 PCIe 4.0/NVMe,M.2,,,,,,,,,,
+VisionTek,DLX4,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,InnoGrit IG5220,"Tri-core R5, 4x8",No,Yes,,,,5200/4775,Mid-Range NVMe
+VisionTek,DLX4 Pro,x4 PCIe 4.0/NVMe,M.2,512GB-4TB,,,Yes,N/A,,,,7415/6800,High-End NVMe
+Acer,FA100,x4 PCIe 3.0/NVMe,M.2,128GB-2TB,Innogrit IG5216,"Dual-core, 4x4",No,Yes,Micron,TLC,176,3300/2700,Entry-Level NVMe
+Acer,GM3500,x4 PCIe 3.0/NVMe,M.2,512GB-1TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,96+,3400/3000,Mid-Range NVMe
+ADATA,ATOM 30,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,Realtek RTS5766DL,4-Ch,No,Yes,,,,2500/2000,Entry-Level NVMe
+ADATA,Falcon,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Realtek RTS5762DL,"Dual-core, 8-ch, 4-CE/ch",No,Yes,Micron,TLC,96,3100/1500,Entry-Level NVMe
+ADATA,Legend 710,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Realtek RTS5766DL,4-Ch,No,Yes,,,,2400/1800,Entry-Level NVMe
+ADATA,Legend 740,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,Realtek RTS5766DL,4-Ch,No,Yes,,,,2500/2000,Entry-Level NVMe
+ADATA,Legend 750,x4 PCIe 3.0/NVMe,M.2,500GB-1TB,Maxio MAP1202,"Dual R5, 4x4",No,Yes,,,,3500/3000,Mid-Range NVMe
+ADATA,S20G,x4 PCIe 3.0/NVMe,M.2,500GB-1TB,Realtek RTS5763DL,"Dual-core, 4-ch, 8-CE/ch",No,Yes,,TLC,,2500/1800,Entry-Level NVMe
+ADATA,S40G,x4 PCIe 3.0/NVMe,M.2,256GB-4TB,Realtek RTS5762,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64/96,3500/3000,Mid-Range NVMe
+ADATA,Swordfish,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Realtek RTS5763DL,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,96,1800/1200,Entry-Level NVMe
+ADATA,SX6000 Lite,x4 PCIe 3.0/NVMe,M.2,128GB-1TB,Realtek RTS5763DL,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,64,1700/1100,Entry-Level NVMe
+ADATA,SX6000 Pro/S5,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Realtek RTS5763DL,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,64,2100/1500,Entry-Level NVMe
+ADATA,SX7000,x4 PCIe 3.0/NVMe,M.2,128GB-512GB,SMI SM2260,"Dual R5, 8x4",Yes,No,,TLC,,1800/850,Entry-Level NVMe
+ADATA,SX8100/S7,x4 PCIe 3.0/NVMe,M.2,512GB-4TB,Realtek RTS5762,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64/96,3500/3000,Mid-Range NVMe
+ADATA,SX8200/S11,x4 PCIe 3.0/NVMe,M.2,240GB-960GB,SMI SM2262,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3200/1700,Mid-Range NVMe
+ADATA,SX8200 Pro/S11 Pro,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3500/3000,Mid-Range NVMe
+ADATA,SX8800,x4 PCIe 3.0/NVMe,M.2,512GB-1TB,Realtek RTS5762,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64/96,3500/2700,Mid-Range NVMe
+Addlink,S68,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,96,2500/2100,Entry-Level NVMe
+Addlink,S70,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3000,Mid-Range NVMe
+Addlink,X70,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/2500,Mid-Range NVMe
+Apacer,AS2280P4U,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,,TLC,,3500/3000,Mid-Range NVMe
+Apacer,AS2280P4U Pro,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,,TLC,,3500/3000,Mid-Range NVMe
+Asgard,AN1/AN2,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2000/1600,Entry-Level NVMe
+Asgard,AN3,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3300/3000,Mid-Range NVMe
+Asgard,AN3+,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Starblaze STAR1000P,"Quad-core, 8-ch, 4-CE/ch",Yes,No,Intel,TLC,64+,3500/3000,Mid-Range NVMe
+Asura,Genesis Xtreme,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3500/3000,Mid-Range NVMe
+Biostar,M700,x4 PCIe 3.0/NVMe,M.2,256GB-512GB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2000/1600,Entry-Level NVMe
+Colorful,CN600,x4 PCIe 3.0/NVMe,M.2,128GB-512GB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2000/1600,Entry-Level NVMe
+Colorful,CN600 Pro,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Maxio MAP1202,"Dual R5, 4x4",No,Yes,,TLC,,3400/3100,Mid-Range NVMe
+Corsair,MP400,x4 PCIe 3.0/NVMe,M.2,1TB-8TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Intel,QLC,96,3400/3000,Mid-Range NVMe
+Corsair,MP510,x4 PCIe 3.0/NVMe,M.2,240GB-4TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3480/3000,Mid-Range NVMe
+Crucial,P1,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,SMI SM2263,"Dual-core, 4-ch, 4-CE/ch",Yes,No,Micron,QLC,64,2000/1700,Entry-Level NVMe
+Crucial,P2,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Micron,TLC/QLC,96,2400/1900,Entry-Level NVMe
+Crucial,P3,x4 PCIe 3.0/NVMe,M.2,500GB-4TB,Phison E21T,"Single R5, 4-ch, 4-CE/ch",No,Yes,Micron,QLC,176,3500/3000,Entry-Level NVMe
+Crucial,P5,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Micron DM01B2,"Dual-core R5 + M3, 8-ch",Yes,No,Micron,TLC,96,3400/3000,Mid-Range NVMe
+DigiFast,Ace,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3470/3000,Mid-Range NVMe
+Drevo,D1 Xtreme,x4 PCIe 3.0/NVMe,M.2,256GB-512GB,SMI SM2262,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3200/3150,Mid-Range NVMe
+Foresee,P800,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Marvell 88SS1092,"Tri-core, 8-ch, 8-CE/ch",Yes,N/A,Longsys,TLC,,3200/1900,Mid-Range NVMe
+Galax,HOF,x4 PCIe 3.0/NVMe,M.2 & AIC,512GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3000,Mid-Range NVMe
+Gigabyte,Aorus,x4 PCIe 3.0/NVMe,M.2 (512GB) & AIC,256GB-1TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3480/2000,Mid-Range NVMe
+Gigabyte,M30,x4 PCIe 3.0/NVMe,M.2,512GB-1TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,,TLC,,3500/3000,Mid-Range NVMe
+Gigabyte,NVMe v2,x4 PCIe 3.0/NVMe,M.2,128GB-1TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,2500/2100,Entry-Level NVMe
+Goodram,PX500,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2050/1650,Entry-Level NVMe
+Greenliant,ArmourDrive,x4 PCIe 3.0/NVMe,M.2,128GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,,,,2500/2100,Entry-Level NVMe
+HIKVision,C2000,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3500/3000,Mid-Range NVMe
+HP,EX900,x4 PCIe 3.0/NVMe,M.2,120GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2100/1500,Entry-Level NVMe
+HP,EX900 Plus,x4 PCIe 3.0/NVMe,M.2,128GB-2TB,Innogrit IG5216,"Dual-core, 4x4",No,Yes,Micron,TLC,,3300/2700,Entry-Level NVMe
+HP,EX900 Pro,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2263,"Dual-core, 4-ch, 4-CE/ch",Yes,N/A,Micron,TLC,,2095/1965,Entry-Level NVMe
+HP,EX920,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2262,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3200/1800,Mid-Range NVMe
+HP,EX950,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3500/2900,Mid-Range NVMe
+Hynix,Gold P31,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Cepheus II,"Dual R5, 4x4",Yes,No,Hynix,TLC,128,3500/3200,Mid-Range NVMe
+Inland,Platinum,x4 PCIe 3.0/NVMe,M.2,1TB-8TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,3400/3000,Mid-Range NVMe
+Inland,Premium (NVMe),x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3100/2900,Mid-Range NVMe
+Inland,Prime,x4 PCIe 3.0/NVMe,M.2,1TB,Phison E15T,"Single-core R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,176,3300/3000,Mid-Range NVMe
+Inland,Pro QLC (NVMe),x4 PCIe 3.0/NVMe,M.2,1TB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,QLC,96,2000/1900,Entry-Level NVMe
+Inland,TN325,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,,,,,,,,2400/2100,
+Inland,QN322,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Intel,QLC,96,2300/1800,Entry-Level NVMe
+Intel,660p,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,SMI SM2263,"Dual-core, 4-ch, 4-CE/ch",Yes,No,Intel,QLC,64,1800/1800,Entry-Level NVMe
+Intel,665p,x4 PCIe 3.0/NVMe,M.2,1TB-2TB,SMI SM2263,"Dual-core, 4-ch, 4-CE/ch",Yes,No,Intel,QLC,96,2000/2000,Entry-Level NVMe
+Intel,670p,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,SMI SM2265,"Dual-core R5, 4-ch, 4-CE/ch",Yes,No,Intel,QLC,144,3500/2700,Entry-Level NVMe
+Intel,760p,x4 PCIe 3.0/NVMe,M.2,128GB-2TB,SMI SM2262,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Intel,TLC,64,3230/1625,Mid-Range NVMe
+KingMax,PX3480,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3400,Mid-Range NVMe
+Kingston,A2000,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,SMI SM2263,"Dual-core, 4-ch, 4-CE/ch",Yes,No,Micron,TLC,64/96,2200/2000,Entry-Level NVMe
+Kingston,KC2000,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,3200/2200,Mid-Range NVMe
+Kingston,KC2500,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,3500/2900,Mid-Range NVMe
+Kingston,NV1,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,,TLC/QLC,,2100/1700,Entry-Level NVMe
+Kingston,Seccos ES,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,,,,,,,,3500/3000,
+KingSpec,NX,x4 PCIe 3.0/NVMe,M.2,128GB-1TB,Maxio MAP1202,"Dual R5, 4x4",No,Yes,,TLC,,3400/3100,Entry-Level NVMe
+Kioxia,Excercia,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,Phison E12C,"Dual R5 + CoX, 4-ch, 4-CE/ch",Yes,N/A,Kioxia,TLC,96,1700/1600,Entry-Level NVMe
+Kioxia,Exceria Plus,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Kioxia,TLC,96,3400/3200,Mid-Range NVMe
+KLEVV,CRAS C700/RGB,x4 PCIe 3.0/NVMe,M.2,120GB-480GB,SMI SM2263,"Dual-core, 4-ch, 4-CE/ch",Yes,No,Hynix,TLC,72,1500/1300,Entry-Level NVMe
+KLEVV,CRAS C710,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2100/1650,Entry-Level NVMe
+KLEVV,CRAS C720,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,,TLC,96,3400/3100,Mid-Range NVMe
+KLEVV,CRAS C730,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Realtek RTS5762,"Dual-core, 8-ch, 4-CE/ch",Yes,No,,,,3700/2800,Mid-Range NVMe
+Lexar,NM600,x4 PCIe 3.0/NVMe,M.2,240GB-480GB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2100/1600,Entry-Level NVMe
+Lexar,NM610,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2100/1600,Entry-Level NVMe
+Lexar,NM610 Pro,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Maxio MAP1202,"Dual R5, 4x4",No,Yes,,TLC,,3300/2600,Entry-Level NVMe
+Lexar,NM620,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Innogrit IG5216,"Dual-core, 4x4",No,Yes,Micron,TLC,96,3300/3000,Entry-Level NVMe
+Lexar,NM700,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Marvell 88SS1092,"Tri-core, 8-ch, 8-CE/ch",Yes,N/A,Kioxia,TLC,96,3500/2000,Mid-Range NVMe
+MDSSD,BPX Pro,x4 PCIe 3.0/NVMe,M.2,240GB-960GB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3100,Mid-Range NVMe
+MDSSD,SBXe (2nd Gen),x4 PCIe 3.0/NVMe,M.2,120GB-960GB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,2500/2100,Entry-Level NVMe
+MSI,M370,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,96,2400/1850,Entry-Level NVMe
+MSI,M371,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Intel,QLC,96,2000/1800,Entry-Level NVMe
+MSI,M372,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,,,,2400/2000,Entry-Level NVMe
+MSI,M390,x4 PCIe 3.0/NVMe,M.2,500GB-1TB,Phison E15T,"Single-core R5 + CoX, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,176,3300/3000,Entry-Level NVMe
+Mushkin,Alpha,x4 PCIe 3.0/NVMe,M.2,4TB-8TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,3300/3000,Mid-Range NVMe
+Mushkin,Helix-L,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2110/1700,Entry-Level NVMe
+Mushkin,Helix-LT,x4 PCIe 3.0/NVMe,M.2,500GB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Intel,QLC,,2100/850,Garbage
+Mushkin,Pilot,x4 PCIe 3.0/NVMe,M.2,120GB-2TB,SMI SM2262,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,2710/1775,Mid-Range NVMe
+Mushkin,Pilot-E,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,96,3500/3100,Mid-Range NVMe
+Mushkin,Tempest,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,InnoGrit IG5216,"Dual-core, 4x4",No,Yes,,TLC,96+,3300/2900,Entry-Level NVMe
+Netac,NV3000,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,Realtek RTS5766DL,4-Ch,No,Yes,YMTC,TLC,64/96+,3500/2100,Entry-Level NVMe
+Orico,V500,x4 PCIe 3.0/NVMe,M.2,128GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,2070/1668,Entry-Level NVMe
+Patriot,P300,x4 PCIe 3.0/NVMe,M.2,128GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,96,2100/1650,Entry-Level NVMe
+Patriot,P310,x4 PCIe 3.0/NVMe,M.2,240GB-1.92TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Micron,TLC,176,2100/1800,Entry-Level NVMe
+Patriot,Viper VPN100,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3000,Mid-Range NVMe
+Patriot,Viper VPN110,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,,TLC,,3300/3000,Mid-Range NVMe
+Patriot,Viper VPR100,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3300/2900,Mid-Range NVMe
+Pioneer,APS-SE20G,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3000,Mid-Range NVMe
+Pioneer,APS-SE20Q,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,3400/3000,Mid-Range NVMe
+Plextor,M9P+,x4 PCIe 3.0/NVMe,M.2 & AIC,256GB-1TB,Marvell 88SS1092,"Tri-core, 8-ch, 8-CE/ch",Yes,N/A,Kioxia,TLC,96,3400/2200,Mid-Range NVMe
+Plextor,M9PeY/G/GN,x4 PCIe 3.0/NVMe,M.2 & AIC,256GB-1TB,Marvell 88SS1093,"Tri-core, 8-ch, 8-CE/ch",Yes,N/A,Kioxia,TLC,64,3200/2100,Mid-Range NVMe
+PNY,CS1030,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,YMTC,TLC/QLC,64+,2100/1900,Entry-Level NVMe
+PNY,CS1031,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,,TLC,,2400/1750,Entry-Level NVMe
+PNY,CS2130,x4 PCIe 3.0/NVMe,M.2,500GB-4TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Intel,QLC,96,3500/3000,Mid-Range NVMe
+PNY,CS2230,x4 PCIe 3.0/NVMe,M.2,500GB-1TB,Maxio MAP1202,"Dual R5, 4x4",No,Yes,Micron,TLC,176,3300/2600,Entry-Level NVMe
+PNY,CS3030,x4 PCIe 3.0/NVMe,M.2,250GB-4TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3500/3100,Mid-Range NVMe
+Sabrent,Rocket,x4 PCIe 3.0/NVMe,M.2,256GB-4TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3000,Mid-Range NVMe
+Sabrent,Rocket 2242,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,96,2500/2100,Entry-Level NVMe
+Sabrent,Rocket Q,x4 PCIe 3.0/NVMe,M.2,500GB-8TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,3300/3000,Mid-Range NVMe
+Samsung,960 EVO,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Samsung Polaris,"Penta-core, 8-ch, 8-CE/ch",Yes,No,Samsung,TLC,48,3200/1900,Mid-Range NVMe
+Samsung,960 Pro,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Samsung Polaris,"Penta-core, 8-ch, 8-CE/ch",Yes,No,Samsung,MLC,48,3500/2100,Mid-Range NVMe
+Samsung,970 EVO,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Samsung Phoenix,"Penta-core, 8-ch, 8-CE/ch",Yes,No,Samsung,TLC,64,3500/2500,Mid-Range NVMe
+Samsung,970 EVO Plus,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Samsung Phoenix,"Penta-core, 8-ch, 8-CE/ch",Yes,No,Samsung,TLC,96 (92),3500/3300,Mid-Range NVMe
+Samsung,970 Pro,x4 PCIe 3.0/NVMe,M.2,512GB-1TB,Samsung Phoenix,"Penta-core, 8-ch, 8-CE/ch",Yes,No,Samsung,MLC,64,3500/2700,Mid-Range NVMe
+Samsung,980,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,Samsung Pablo,"Cortex-R5, 4x4",No,Yes,Samsung,TLC,128,3500/3000,Entry-Level NVMe
+SanDisk,Extreme Pro NVMe,x4 PCIe 3.0/NVMe,M.2,500GB-1TB,WD Proprietary,"Tri-core, 8-ch, 8-CE/ch",Yes,No,SanDisk,TLC,64,3400/2800,High-End NVMe
+SanDisk,Extreme Pro NVMe v2,x4 PCIe 3.0/NVMe,M.2,1TB-2TB,WD Proprietary,"Tri-core, 8-ch, 8-CE/ch",Yes,No,SanDisk,TLC,96,2000/2000,Mid-Range NVMe
+SanDisk,SSD Plus (NVMe),x4 PCIe 3.0/NVMe,M.2,250GB-2TB,WD Proprietary,,No,Yes,SanDisk,,112,3200/3000,Entry-Level NVMe
+SanDisk,Ultra,x4 PCIe 3.0/NVMe,M.2,250GB-1TB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",No,Yes,SanDisk,TLC,96,2400/1950,Entry-Level NVMe
+Seagate,BarraCuda 510,x4 PCIe 3.0/NVMe,M.2,256GB-512GB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/2180,Mid-Range NVMe
+Seagate,FireCuda 510,x4 PCIe 3.0/NVMe,M.2,1TB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3450/3200,Mid-Range NVMe
+Seagate,BarraCuda Q5,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Intel,QLC,96,2400/1800,Entry-Level NVMe
+Silicon Power,P34A60,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron/Kioxia,TLC,96,2200/1600,Entry-Level NVMe
+Silicon Power,P34A80,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3200/3000,Mid-Range NVMe
+Silicon Power,UD70,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,QLC,96,3400/3000,Mid-Range NVMe
+Silicon Power,UD80,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,Innogrit IG5216,"Dual-core, 4x4",No,Yes,,TLC,,3400/3000,Entry-Level NVMe
+Silicon Power,XD80,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,96,3400/3000,Mid-Range NVMe
+Team,Cardea II,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3400/3000,Mid-Range NVMe
+Team,IOPS,x4 PCIe 3.0/NVMe,M.2,1TB,,,Yes,No,,TLC,,3400/3000,Mid-Range NVMe
+Team,Cardea Liquid,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3400/3000,Mid-Range NVMe
+Team,Cardea Zero Z330,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64/96,2100/1700,Entry-Level NVMe
+Team,MP33,x4 PCIe 3.0/NVMe,M.2,128GB-2TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64/96,1800/1500,Entry-Level NVMe
+Team,MP33 Pro,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,96,2100/1700,Entry-Level NVMe
+Team,MP33Q,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,,QLC,,2500/2100,Entry-Level NVMe
+Team,MP34,x4 PCIe 3.0/NVMe,M.2,256GB-4TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,64,3500/2900,Mid-Range NVMe
+Team,MP34Q,x4 PCIe 3.0/NVMe,M.2,2TB-8TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Intel,QLC,96,3400/3000,Mid-Range NVMe
+Team,T-Create Classic (NVMe),x4 PCIe 3.0/NVMe,M.2,1TB-2TB,Realtek RTS5763DL,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,96,2100/1700,Entry-Level NVMe
+Team,T-Create Expert,x4 PCIe 3.0/NVMe,M.2,1TB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,64,3400/3000,High-End NVMe
+Team,Z330,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64/96,2100/1700,Entry-Level NVMe
+Team,Z340,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,,3400/3000,Mid-Range NVMe
+Toshiba/Kioxia,RC500,x4 PCIe 3.0/NVMe,M.2,250GB-500GB,Phison E12S,"Dual R5 + CoX, 8x4",Yes,N/A,Kioxia,TLC,96,1700/1600,Entry-Level NVMe
+Toshiba/Kioxia,RD500,x4 PCIe 3.0/NVMe,M.2,500GB-2TB,Phison E12S,"Dual R5 + CoX, 8x4",Yes,N/A,Kioxia,TLC,96,3400/3200,Mid-Range NVMe
+Transcend,MTE400S,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2263XTV,"Dual-core, 4-ch, 4-CE/ch",No,Yes,,TLC,,2000/1700,Entry-Level NVMe
+Transcend,MTE652T2,x4 PCIe 3.0/NVMe,M.2,128GB-512GB,,,Yes,No,,TLC,,2100/1000,Entry-Level NVMe
+Transcend,SSD 110S,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,SMI SM2263XT,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Micron,TLC,64,1700/1500,Entry-Level NVMe
+Transcend,SSD 220S,x4 PCIe 3.0/NVMe,M.2,256GB-2TB,SMI SM2262EN,"Dual-core, 8-ch, 4-CE/ch",Yes,No,Micron,TLC,64,3300/2800,Mid-Range NVMe
+Verbatim,Vi3000,x4 PCIe 3.0/NVMe,M.2,256GB-1TB,Phison E13T,"Single-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,96,3100/2900,Entry-Level NVMe
+WD,Black (later SN750),x4 PCIe 3.0/NVMe,M.2,250GB-2TB,WD Proprietary,"Tri-core, 8-ch, 8-CE/ch",Yes,No,SanDisk,TLC,64,3470/3000,Mid-Range NVMe
+Apacer,AS2280P2,x2 PCIe 3.0/NVMe,M.2,120GB-480GB,Phison E8T,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,1580/950,Entry-Level NVMe
+Apacer,AS2280P2 Pro,x2 PCIe 3.0/NVMe,M.2,120GB-480GB,Phison E8T,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,1580/950,Entry-Level NVMe
+Corsair,MP300,x2 PCIe 3.0/NVMe,M.2,120GB-960GB,Phison E8,"Dual-core, 4-ch, 8-CE/ch",Yes,No,Kioxia,TLC,64,1600/1080,Entry-Level NVMe
+Gigabyte,NVMe,x2 PCIe 3.0/NVMe,M.2,128GB-512GB,Phison E8T,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,1550/850,Entry-Level NVMe
+Inland,Basic,x2 PCIe 3.0/NVMe,M.2,256GB,Phison E8T,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,1100/600,Entry-Level NVMe
+Inland,Pro. (NVMe),x2 PCIe 3.0/NVMe,M.2,128GB-1TB,Phison E8,"Dual-core, 4-ch, 8-CE/ch",Yes,No,Kioxia,TLC,64,1550/1000,Entry-Level NVMe
+Kingston,A1000,x2 PCIe 3.0/NVMe,M.2,240GB-960GB,Phison E8,"Dual-core, 4-ch, 8-CE/ch",Yes,No,Kioxia,TLC,64,1500/1000,Entry-Level NVMe
+Lexar,NM500,x2 PCIe 3.0/NVMe,M.2,128GB-512GB,Marvell 88NV1160,"Dual-core, 4-ch, 4-CE/ch",No,Yes,Kioxia,TLC,64,1650/1000,Entry-Level NVMe
+Lexar,NM520,x2 PCIe 3.0/NVMe,M.2,128GB-512GB,,,No,Yes,,,,1650/1000,Entry-Level NVMe
+MDSSD,SBX,x2 PCIe 3.0/NVMe,M.2,128GB-1TB,Phison E8,"Dual-core, 4-ch, 8-CE/ch",Yes,No,Kioxia,TLC,64,1600/1300,Entry-Level NVMe
+MDSSD,SBXe,x2 PCIe 3.0/NVMe,M.2,120GB-480GB,Phison E8T,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,1600/1000,Entry-Level NVMe
+Patriot,Scorch,x2 PCIe 3.0/NVMe,M.2,128GB-512GB,Phison E8,"Dual-core, 4-ch, 8-CE/ch",Yes,No,Kioxia,TLC,64,1700/950,Entry-Level NVMe
+Silicon Power,P32A80,x2 PCIe 3.0/NVMe,M.2,128GB-512GB,Phison E8T,"Dual-core, 4-ch, 8-CE/ch",No,Yes,Kioxia,TLC,64,1600/1000,Entry-Level NVMe
+Team,MP32,x2 PCIe 3.0/NVMe,M.2,128GB-1TB,Phison E8,"Dual-core, 4-ch, 8-CE/ch",Yes,No,Kioxia,TLC,64,1550/950,Entry-Level NVMe
+ADATA,SX6000,x2 PCIe 2.0/NVMe,M.2,128GB-1TB,Realtek RTS5760,"Dual-core, 4-ch, 8-CE/ch",Yes,Yes,Micron,TLC,32,1000/800,Garbage
+WD,SA500/Red,SATA/AHCI,"2.5"" & M.2",500GB-4TB,Marvell 88SS1074,"Dual-core, 4-ch, 8-CE/ch",Yes,N/A,SanDisk,TLC,?,560/530,High-End SATA
+WD,SA510/Blue,SATA/AHCI,"2.5"" & M.2",250GB-1TB,SanDisk A101,"Single-core, 2-ch, 8-CE/ch",No,N/A,SanDisk,TLC,112,560/520,Entry-Level SATA
+WD,SN500,x2 PCIe 3.0/NVMe,M.2,250GB-500GB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",No,No,SanDisk,TLC,64,1700/1450,Entry-Level NVMe
+WD,SN350,x4 PCIe 3.0/NVMe,M.2,240GB-2TB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",No,Yes,SanDisk,TLC,96,2400/1900,Entry-Level NVMe
+WD,SN5000,x4 PCIe 4.0/NVMe,M.2,500GB-4TB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",No,Yes,SanDisk,TLC,112,5500/5000,Mid-Range NVMe
+WD,SN550,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",No,Yes,SanDisk,TLC,96,2400/1950,Entry-Level NVMe
+WD,SN570,x4 PCIe 3.0/NVMe,M.2,250GB-2TB,WD Proprietary,"R5, 4x4",No,Yes,SanDisk,TLC,112,3500/3000,Entry-Level NVMe
+WD,SN580,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,WD Proprietary,"R5, 4x4",No,Yes,SanDisk,TLC,112,4150/4150,Entry-Level NVMe
+WD,SN7100,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,WD Proprietary,,No,Yes,SanDisk,TLC,162,7250/6900,Mid-Range NVMe
+WD,SN750,x4 PCIe 3.0/NVMe,M.2,250GB-4TB,WD Proprietary,"Tri-core, 8-ch, 8-CE/ch",Yes,No,SanDisk,TLC,64,3470/3000,Mid-Range NVMe
+WD,SN750 SE,x4 PCIe 4.0/NVMe,M.2,250GB-1TB,Phison E19T,"Single R5 + CoX, 4-ch, 8-CE/ch",No,Yes,SanDisk,TLC,96,3600/2830,Entry-Level NVMe
+WD,SN770,x4 PCIe 4.0/NVMe,M.2,250GB-2TB,WD Proprietary,"R5, 4x4",No,Yes,SanDisk,TLC,112,5150/4900,Mid-Range NVMe
+WD,SN8100,x4 PCIe 5.0/NVMe,M.2,1TB-8TB,SMI SM2508,,Yes,N/A,SanDisk,TLC,212,14900/14000,High-End NVMe
+WD,SN850,x4 PCIe 4.0/NVMe,M.2,500GB-2TB,WD Proprietary,"R5, 8x4",Yes,No,SanDisk,TLC,,7000/5300,High-End NVMe
+WD,SN850X,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",Yes,N/A,SanDisk,TLC,112,7300,High-End NVMe
+WD,SN850P,x4 PCIe 4.0/NVMe,M.2,1TB-8TB,WD Proprietary,"Tri-core, 4-ch, 8-CE/ch",Yes,N/A,SanDisk,TLC,112,7300,High-End NVMe
+Zadak,Spark,x4 PCIe 3.0/NVMe,M.2,512GB-2TB,Phison E12S,"Dual R5 + CoX, 8-ch, 4-CE/ch",Yes,No,Kioxia,TLC,,3400/3000,Mid-Range NVMe
+Zadak,TWSG4S,x4 PCIe 4.0/NVMe,M.2,512GB-2TB,Phison E18,"Triple R5 + CoX, 8-ch, 4-CE/ch",Yes,N/A,Micron,TLC,176,7400/7000,High-End NVMe
+Zadak,TWSG5,x4 PCIe 5.0/NVMe,M.2,,Phison E26,"Dual DC R5 + 3xCoX, 8-ch, 4-CE/ch",Yes,N/A,,,,13000/12000,

@@ -1,8 +1,10 @@
 from __future__ import annotations
-import importlib, math
-from typing import Iterable
+import importlib, math, asyncio, inspect
+from typing import Iterable, List
 from assistant_app.adapters.scrapers import ALL as SCRAPERS  # dict[str, scraper]
 from assistant_app.domain.benchmarks import value_score
+from assistant_app.domain.models import Product
+from assistant_app.services.cache import load_store_results, save_store_results
 
 
 
@@ -39,7 +41,6 @@ def _iter_scrapers():
 def _run_scraper(scraper, query: str):
     if hasattr(scraper, "search") and callable(scraper.search):
         return scraper.search(query)
-    import asyncio
     if hasattr(scraper, "search_async") and callable(scraper.search_async):
         return asyncio.run(scraper.search_async(query))
     if hasattr(scraper, "_search_async") and callable(scraper._search_async):
@@ -67,3 +68,60 @@ def search_all(query: str, country_hint: str | None = None):
         seen.add(key)
         out.append(p)
     return out
+
+async def _run_scraper_async(scraper, name: str, query: str) -> List[Product]:
+    try:
+        # Prefer explicit async entrypoint if present
+        if hasattr(scraper, "search_async") and inspect.iscoroutinefunction(scraper.search_async):
+            items = await scraper.search_async(query)
+        else:
+            # Handle `search` being either sync or async
+            search_fn = getattr(scraper, "search", None)
+            if search_fn is None:
+                # Last-resort: internal async (avoid if possible, but await it if it exists)
+                internal = getattr(scraper, "_search_async", None)
+                if internal and inspect.iscoroutinefunction(internal):
+                    items = await internal(query)
+                else:
+                    raise TypeError(f"{name}: no usable search entrypoint")
+            elif inspect.iscoroutinefunction(search_fn):
+                items = await search_fn(query)
+            else:
+                # sync search() -> run in thread so we don't nest event loops
+                items = await asyncio.to_thread(search_fn, query)
+
+        # cache on success
+        try:
+            save_store_results(query, name, items)
+        except Exception:
+            pass
+
+        return items or []
+    except Exception as e:
+        print(f"[scraper] {name}: {e}")
+        return []
+
+async def search_all_async(query: str, use_cache: bool = True, force_refresh: bool = False) -> List[Product]:
+    results: List[Product] = []
+    to_fetch = []
+
+    if use_cache and not force_refresh:
+        for name, scraper in SCRAPERS.items():
+            cached = None
+            try:
+                cached = load_store_results(query, name)
+            except Exception:
+                cached = None
+            if cached:
+                results.extend(cached)
+            else:
+                to_fetch.append((name, scraper))
+    else:
+        to_fetch = list(SCRAPERS.items())
+
+    tasks = [asyncio.create_task(_run_scraper_async(scraper, name, query)) for name, scraper in to_fetch]
+    fetched_lists = await asyncio.gather(*tasks, return_exceptions=False)
+    for lst in fetched_lists:
+        results.extend(lst)
+
+    return results

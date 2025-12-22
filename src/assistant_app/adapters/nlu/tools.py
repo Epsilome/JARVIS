@@ -1,9 +1,22 @@
 import logging
 import json
+import contextlib
+import io
 from duckduckgo_search import DDGS
+
+try:
+    from dbgpu.src import DBGPU
+except ImportError:
+    DBGPU = None
+
 from assistant_app.domain.benchmarks import get_cpu_specs, get_gpu_specs, get_cached_specs, save_cached_specs
 from assistant_app.services.prices import search_all
 from assistant_app.adapters.scrapers.specs import search_specs
+from assistant_app.domain.cpu_registry import LaptopCPUBase
+from assistant_app.domain.ram_registry import RAMRegistry
+from assistant_app.domain.ssd_registry import SSDRegistry
+from assistant_app.domain.review_rag import ReviewIntelligence
+from assistant_app.services.ingestion.review_ingest import ReviewIngestor
 
 logger = logging.getLogger(__name__)
 
@@ -43,17 +56,16 @@ def lookup_detailed_specs(product_name: str) -> str:
     
     # 1. Try DBGPU (Fastest, Local, Accurate for GPUs)
     try:
-        from dbgpu.src import DBGPU
-        import contextlib
-        import io
-        
-        # Suppress "GPU not found" noise for CPU queries
-        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-            try:
-                db = DBGPU()
-                gpu_data = db.get_gpu(product_name)
-            except:
-                gpu_data = None
+        if DBGPU:
+            # Suppress "GPU not found" noise for CPU queries
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                try:
+                    db = DBGPU()
+                    gpu_data = db.get_gpu(product_name)
+                except:
+                    gpu_data = None
+        else:
+            gpu_data = None
 
         if gpu_data and hasattr(gpu_data, '__dict__'):
              clean_data = {k: v for k, v in gpu_data.__dict__.items() if not k.startswith('_') and v is not None}
@@ -65,7 +77,6 @@ def lookup_detailed_specs(product_name: str) -> str:
 
     # 2. Try CPU Registry for CPUs
     try:
-        from assistant_app.domain.cpu_registry import LaptopCPUBase
         cpu_reg = LaptopCPUBase.get_instance()
         cpu_data = cpu_reg.get_cpu(product_name)
         if cpu_data:
@@ -73,7 +84,42 @@ def lookup_detailed_specs(product_name: str) -> str:
     except Exception as e:
         logger.warning(f"CPU Registry lookup failed: {e}")
 
-    # 3. Check Local Cache (for non-GPU items or previously scraped stuff)
+    # Heuristic: Check for RAM keywords to prioritize RAM Registry
+    is_ram_query = any(k in product_name.lower() for k in ["ram", "ddr", "mhz", "memory", "cl16", "cl18", "dimm"])
+
+    if is_ram_query:
+        try:
+            from assistant_app.domain.ram_registry import RAMRegistry
+            ram_reg = RAMRegistry.get_instance()
+            clean_q = product_name.lower().replace("specs of", "").replace("specs", "").strip()
+            ram_data = ram_reg.get_ram(clean_q)
+            if ram_data:
+                 return f"Specs for {product_name} (Source: RAM Registry):\n{json.dumps(ram_data, indent=2)}"
+        except Exception: pass
+
+    # 3. Try SSD Registry
+    try:
+        ssd_reg = SSDRegistry.get_instance()
+        # Clean query for best match (e.g. remove "specs of")
+        clean_q = product_name.lower().replace("specs of", "").replace("specs", "").strip()
+        ssd_data = ssd_reg.get_ssd(clean_q)
+        if ssd_data:
+             return f"Specs for {product_name} (Source: SSD Registry):\n{json.dumps(ssd_data, indent=2)}"
+    except Exception as e:
+        logger.warning(f"SSD Registry lookup failed: {e}")
+
+    # 4. Try RAM Registry (Fallback if not caught by keyword)
+    if not is_ram_query:
+        try:
+            ram_reg = RAMRegistry.get_instance()
+            clean_q = product_name.lower().replace("specs of", "").replace("specs", "").strip()
+            ram_data = ram_reg.get_ram(clean_q)
+            if ram_data:
+                 return f"Specs for {product_name} (Source: RAM Registry):\n{json.dumps(ram_data, indent=2)}"
+        except Exception as e:
+            logger.warning(f"RAM Registry lookup failed: {e}")
+
+    # 5. Check Local Cache (for non-GPU/CPU/SSD/RAM items or previously scraped stuff)
     cached = get_cached_specs(product_name)
     if cached:
         logger.info("Found specs in cache.")
@@ -129,9 +175,39 @@ def get_live_price(product: str) -> str:
         logger.error(f"Price search error: {e}")
         return f"Error searching prices: {e}"
 
+def get_product_opinions(product_name: str) -> str:
+    """
+    Gets qualitative "Pros & Cons" by analyzing Reddit/YouTube reviews.
+    Useful for: "Is the screen bright?", "Does it overheat?", "Reviews of X".
+    """
+    logger.info(f"Tool Call: get_product_opinions('{product_name}')")
+    try:
+        rag = ReviewIntelligence.get_instance()
+        opinions = rag.get_opinions(product_name)
+        
+        if not opinions:
+            logger.info(f"Ingesting fresh reviews for {product_name}...")
+            ingestor = ReviewIngestor()
+            ingestor.ingest_product(product_name)
+            opinions = rag.get_opinions(product_name)
+            
+        if opinions:
+            # Format nicely
+            md = f"### Opinions on {product_name}\n"
+            md += f"**Verdict**: {opinions.verdict} (Confidence: {opinions.confidence})\n\n"
+            md += "**Pros**:\n" + "\n".join([f"- {p}" for p in opinions.pros]) + "\n\n"
+            md += "**Cons**:\n" + "\n".join([f"- {c}" for c in opinions.cons])
+            return md
+            
+        return "No sufficient user reviews found to form an opinion."
+    except Exception as e:
+        logger.error(f"Opinion RAG failed: {e}")
+        return f"Could not analyze opinions: {e}"
+
 AVAILABLE_TOOLS = {
     "lookup_hardware": lookup_hardware,
     "lookup_detailed_specs": lookup_detailed_specs,
     "search_web": search_web,
-    "get_live_price": get_live_price
+    "get_live_price": get_live_price,
+    "get_product_opinions": get_product_opinions
 }

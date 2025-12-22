@@ -16,7 +16,7 @@ from assistant_app.services.reminders import (
 )
 from assistant_app.adapters.nlu.time_parse import parse_when, parse_every
 
-from assistant_app.services.movies import top_horror
+from assistant_app.services.movies import top_horror, _tmdb_external_ids
 from assistant_app.services.movies_seen import mark_seen, unmark_seen, all_seen, is_seen_map
 
 from assistant_app.services.prayer import get_today_timings, schedule_today_prayers
@@ -29,8 +29,7 @@ from assistant_app.domain.benchmarks import value_score_work
 from assistant_app.domain.benchmarks_loader import refresh_cpu_cache
 from assistant_app.domain.benchmarks_loader import refresh_gpu_cache
 
-from assistant_app.services.prices import search_all
-from assistant_app.usecases.search_prices import search_all_async
+from assistant_app.services.prices import search_all, search_all_async
 
 from assistant_app.adapters.nlu.speech_recognition import listen_and_recognize
 from assistant_app.services.voice_command import process_voice_command
@@ -85,7 +84,7 @@ def start():
         signal.pause()
     except AttributeError:
         # Windows doesn't support signal.pause()
-        import time
+
         while True:
             time.sleep(1)
 
@@ -147,7 +146,7 @@ def eye_care(times: str = "12:00,16:00,20:00", reset: bool = True):
     """
     Schedule eye-care reminders (default: daily at 12:00, 16:00, 20:00).
     """
-    from assistant_app.services.reminders import add_daily, cancel_prefix
+
 
     if reset:
         removed = cancel_prefix("eye_")
@@ -243,7 +242,7 @@ def movies_mark(imdb_id: str = "", tmdb_id: str = "", title: str = "", year: str
 
     if not imdb_id and tmdb_id:
         try:
-            from assistant_app.services.movies import _tmdb_external_ids
+
             imdb_id = _tmdb_external_ids(tmdb_id).get("imdb_id") or ""
         except Exception:
             imdb_id = ""

@@ -2,7 +2,7 @@ import ollama
 import logging
 import json
 from assistant_app.config.settings import settings
-from assistant_app.adapters.tools import AVAILABLE_TOOLS
+from assistant_app.adapters.nlu.tools import AVAILABLE_TOOLS
 
 logger = logging.getLogger(__name__)
 
@@ -76,6 +76,23 @@ TOOLS_SCHEMA = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_opinions",
+            "description": "Get qualitative 'Pros & Cons' and a verdict by analyzing real user reviews (Reddit/YouTube).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_name": {
+                        "type": "string",
+                        "description": "The product name (e.g. 'Zephyrus G14').",
+                    },
+                },
+                "required": ["product_name"],
+            },
+        },
+    },
 ]
 
 def ask_ollama(text: str) -> str | None:
@@ -86,11 +103,12 @@ def ask_ollama(text: str) -> str | None:
     
     system_prompt = (
         "You are JARVIS, a helpful assistant and hardware expert. "
-        "You have access to tools for looking up hardware benchmarks (PassMark) and detailed specs (VRAM, TDP). "
+        "You have access to tools for looking up hardware benchmarks (PassMark), detailed specs (VRAM, TDP), live prices, and user opinions. "
         "IMPORTANT RULES:\n"
-        "1. For PERFORMANCE scores/ranks, use 'lookup_hardware' for EACH item.\n"
-        "2. For DETAILED SPECS (VRAM, Cores, TDP), use 'lookup_detailed_specs' for EACH item.\n"
-        "3. Do not guess specs or scores. Use the tools."
+        "1. For PERFORMANCE scores/ranks, use 'lookup_hardware'.\n"
+        "2. For DETAILED SPECS (VRAM, Cores, TDP), use 'lookup_detailed_specs'.\n"
+        "3. For OPINIONS/REVIEWS ('Is X good?', 'Pros/Cons'), use 'get_product_opinions'.\n"
+        "4. Do not guess specs or scores. Use the tools."
     )
     
     messages = [
@@ -141,6 +159,7 @@ def ask_ollama(text: str) -> str | None:
                         tool_output = f"Error executing tool {fn_name}: {e}"
                         
                     logger.info(f"Tool output: {tool_output[:100]}...")
+                    print(f"DEBUG: Tool output preview: {str(tool_output)[:200]}")
                     
                     # Add tool result to messages
                     messages.append({
@@ -155,13 +174,33 @@ def ask_ollama(text: str) -> str | None:
                     })
             
             # Second call: Get final response with tool outputs
+            # Force natural language
+            messages.append({
+                "role": "system",
+                "content": "Analyze the above tool outputs. Synthesize a natural language answer for the user. Do not output JSON."
+            })
+            print("DEBUG: Sending final prompt with tool outputs...")
             final_response = ollama.chat(model=model, messages=messages)
-            return final_response['message']['content']
+            content = final_response['message']['content']
+            print(f"DEBUG: Final content length: {len(content) if content else 0}")
+            
+            if not content and len(messages) > 2:
+                # Fallback: If LLM returns empty but we have tool outputs, use the last tool output
+                # This is common for pre-formatted tools like RAG
+                print("DEBUG: Empty LLM response. Falling back to raw tool output.")
+                last_tool_msg = next((m for m in reversed(messages) if m.get('role') == 'tool'), None)
+                if last_tool_msg:
+                    return last_tool_msg['content']
+            
+            return content
             
         else:
             # No tool call, just return content
+            if not message['content']:
+                print(f"DEBUG: Ollama returned empty content. Message keys: {message.keys()}")
             return message['content']
 
     except Exception as e:
+        print(f"DEBUG: Ollama Exception: {e}")
         logger.error(f"Ollama API error: {e}")
         return "I'm having trouble connecting to my brain. Is Ollama running?"

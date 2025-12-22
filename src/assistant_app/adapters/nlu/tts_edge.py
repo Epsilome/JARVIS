@@ -5,6 +5,10 @@ import tempfile
 import os
 import time
 import logging
+try:
+    import pyttsx3
+except ImportError:
+    pyttsx3 = None
 
 logger = logging.getLogger(__name__)
 
@@ -73,12 +77,14 @@ def speak(text: str):
 def _speak_offline(text: str):
     """Fallback using pyttsx3 (offline)."""
     try:
-        import pyttsx3
-        engine = pyttsx3.init()
-        engine.setProperty('rate', 170)
-        engine.setProperty('volume', 1.0)
-        engine.say(text)
-        engine.runAndWait()
-        engine.stop()
+        if pyttsx3:
+            engine = pyttsx3.init()
+            engine.setProperty('rate', 170)
+            engine.setProperty('volume', 1.0)
+            engine.say(text)
+            engine.runAndWait()
+            engine.stop()
+        else:
+            logger.error("pyttsx3 not installed.")
     except Exception as e:
         logger.error(f"Offline TTS error: {e}")

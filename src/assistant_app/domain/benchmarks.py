@@ -5,7 +5,20 @@ import re
 import json
 import pathlib
 import sys
+import contextlib
+import io
+import sqlite3
 from typing import Optional, Dict
+
+try:
+    from assistant_app.domain.cpu_registry import LaptopCPUBase
+except ImportError:
+    LaptopCPUBase = None
+
+try:
+    from dbgpu.src import DBGPU
+except ImportError:
+    DBGPU = None
 
 CURRENT_FILE = pathlib.Path(__file__).resolve()
 PROJECT_ROOT = CURRENT_FILE.parents[3] # Goes up to 'JARVIS'
@@ -33,23 +46,26 @@ _GPU_REGISTRY = None
 def get_cpu_registry():
     global _CPU_REGISTRY
     if _CPU_REGISTRY is None:
-        try:
-            from assistant_app.domain.cpu_registry import LaptopCPUBase
-            _CPU_REGISTRY = LaptopCPUBase.get_instance()
-        except ImportError:
-            _CPU_REGISTRY = False # Marker for failed load
+        if LaptopCPUBase:
+            try:
+                _CPU_REGISTRY = LaptopCPUBase.get_instance()
+            except ImportError:
+                _CPU_REGISTRY = False
+        else:
+            _CPU_REGISTRY = False
     return _CPU_REGISTRY if _CPU_REGISTRY else None
 
 def get_gpu_registry():
     global _GPU_REGISTRY
     if _GPU_REGISTRY is None:
-        try:
-            from dbgpu.src import DBGPU
-            import contextlib, io
-            # Suppress initialization noise
-            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-                _GPU_REGISTRY = DBGPU()
-        except ImportError:
+        if DBGPU:
+            try:
+                # Suppress initialization noise
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                    _GPU_REGISTRY = DBGPU()
+            except ImportError:
+                _GPU_REGISTRY = False
+        else:
             _GPU_REGISTRY = False
     return _GPU_REGISTRY if _GPU_REGISTRY else None
 
@@ -409,7 +425,7 @@ def parse_os_bonus(text: str) -> float:
 # ----------------------------
 # Database Queries
 # ----------------------------
-import sqlite3
+
 
 DB_PATH = PROJECT_ROOT / "assistant.db"
 
@@ -449,7 +465,6 @@ def get_cached_specs(name: str) -> Optional[dict]:
     try:
         row = conn.execute("SELECT specs_json FROM hardware_specs WHERE name = ?", (name,)).fetchone()
         if row:
-            import json
             return json.loads(row["specs_json"])
         return None
     finally:
@@ -459,7 +474,6 @@ def save_cached_specs(name: str, specs: dict):
     """Save specs to the `hardware_specs` table."""
     conn = _get_db_connection()
     try:
-        import json
         conn.execute("INSERT OR REPLACE INTO hardware_specs (name, specs_json) VALUES (?, ?)", 
                      (name, json.dumps(specs)))
         conn.commit()
@@ -561,7 +575,6 @@ def value_score(title: str, specs_text: str, price_eur: float) -> float:
         if gpu_reg:
             gpu_name = match_gpu(base_text)
             if gpu_name:
-                import contextlib, io
                 with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
                     spec = gpu_reg.get_gpu(gpu_name)
                 

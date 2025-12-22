@@ -120,7 +120,7 @@ async def safe_goto(page, url: str, wait_selector: str | None = None, name: str 
 
     await asyncio.sleep(DELAY)
     if DEBUG:
-        import time, pathlib
+
         ts = int(time.time())
         ART_DIR = pathlib.Path(".scraper_artifacts"); ART_DIR.mkdir(exist_ok=True)
         try:

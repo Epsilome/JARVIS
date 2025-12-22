@@ -1,10 +1,6 @@
 import re
 import typer
-from thefuzz import process as fuzz_process
 
-# from assistant_app.services.movies import top_horror
-# from assistant_app.services.prices import search_all
-# from assistant_app.domain.benchmarks import value_score, value_score_work
 from assistant_app.services.reminders import add_once, list_jobs, add_daily, cancel_prefix
 from assistant_app.adapters.nlu.time_parse import parse_when
 from assistant_app.services.prayer import get_today_timings
@@ -24,39 +20,35 @@ def process_voice_command(text: str):
     """
     Parses the voice command text and executes the corresponding action.
     """
-    text = text.lower()
+    text = text.lower().strip()
+    # Strip punctuation (.,!?) to ensure clean matching
+    text = re.sub(r'[^\w\s]', '', text)
+    typer.echo(f"DEBUG: Processing '{text}'")
     
-    # Define intents and their keywords/phrases
-    intents = {
-        "prayer": ["prayer times", "when is fajr", "when is isha", "prayer schedule"],
-        "watched_movies": ["watched movies", "movies i have seen", "seen movies", "what did i watch"],
-        "eye_care": ["start eye care", "enable eye care", "eye protection"],
-        "list_reminders": ["show reminders", "list reminders", "my reminders", "what do i have to do"],
-        "remind": ["remind me", "set reminder", "remember to"],
-        "stop": ["stop", "exit", "quit", "shut down", "terminate"]
-    }
-
-    # Flatten for fuzzy matching
-    all_phrases = []
-    for intent, phrases in intents.items():
-        all_phrases.extend(phrases)
-
-    # Find best match
-    best_match, score = fuzz_process.extractOne(text, all_phrases)
-    typer.echo(f"DEBUG: Best match: '{best_match}' (Score: {score})")
+    # --- Priority Dispatch ---
     
-    # Threshold for fuzzy match
-    if score < 90:
-        # Fallback to keyword matching if fuzzy score is low
-        matched_intent = None
-    else:
-        # Map phrase back to intent
-        matched_intent = next((k for k, v in intents.items() if best_match in v), None)
+    # 1. STOP/EXIT (Exact or simple match)
+    if text in ["stop", "exit", "quit", "shut down", "terminate"]:
+        respond("Goodbye.")
+        raise typer.Exit()
 
-    # --- Logic Dispatch ---
+    # 2. REMINDER SETTING (Strict Regex)
+    # Must start with "remind me" or "set reminder" or "remember to"
+    if re.match(r"^(remind me|set reminder|remember to)", text):
+        clean_text = re.sub(r"^(remind me (to )?|set reminder (to )?|remember to )", "", text).strip()
+        dt, remainder = parse_when(clean_text)
+        if dt:
+            add_once(clean_text, dt)
+            respond(f"I've set a reminder for {dt.strftime('%H:%M')}.")
+        else:
+            respond("I heard you want a reminder, but I couldn't understand the time.")
+        return
 
-    # Prayer Times
-    if matched_intent == "prayer":
+    # 3. OTHER COMMANDS (Keyword Presence)
+    # Only if specific unique phrases are found
+    
+    # Prayer
+    if any(k in text for k in ["prayer times", "when is fajr", "when is isha"]):
         city = settings.DEFAULT_CITY or "Casablanca"
         country = settings.DEFAULT_COUNTRY or "MA"
         times = get_today_timings(city, country, 2, 0)
@@ -66,7 +58,7 @@ def process_voice_command(text: str):
         return
 
     # Watched Movies
-    if matched_intent == "watched_movies":
+    if any(k in text for k in ["watched movies", "movies i have seen", "seen movies"]):
         rows = all_seen()
         if not rows:
             respond("You haven't marked any movies as watched yet.")
@@ -77,7 +69,7 @@ def process_voice_command(text: str):
         return
 
     # Eye Care
-    if matched_intent == "eye_care":
+    if "start eye care" in text or "enable eye care" in text:
         times = ["12:00", "16:00", "20:00"]
         cancel_prefix("eye_")
         for t in times:
@@ -88,7 +80,7 @@ def process_voice_command(text: str):
         return
 
     # List Reminders
-    if matched_intent == "list_reminders":
+    if "list reminders" in text or "show reminders" in text or "my reminders" in text:
         rows = list_jobs()
         if not rows:
             respond("You have no active reminders.")
@@ -98,28 +90,14 @@ def process_voice_command(text: str):
                 typer.echo(f"  • {jid} | {next_run}")
         return
 
-
-
-    # Reminders (Set new) - Keep regex/keyword for this as it has variable content
-    if "remind" in text or matched_intent == "remind":
-        clean_text = re.sub(r"^remind (me )?(to )?", "", text).strip()
-        dt, remainder = parse_when(clean_text)
-        if dt:
-            add_once(clean_text, dt)
-            respond(f"I've set a reminder for {dt.strftime('%H:%M')}.")
-        else:
-            respond("I heard you want a reminder, but I couldn't understand the time.")
-        return
-
-    # Stop/Exit
-    if matched_intent == "stop":
-        respond("Goodbye.")
-        raise typer.Exit()
-
-    # Fallback to Ollama
-    respond("Let me think about that...")
+    # 4. FALLBACK -> OLLAMA
+    # If no specific command logic matched, assume it's a general query
+    # This prevents "Tell me about..." from being caught by "remind me" regex/keywords
     answer = ask_ollama(text)
     if answer:
         respond(answer)
     else:
         respond("I'm sorry, I couldn't process that.")
+    return
+
+
