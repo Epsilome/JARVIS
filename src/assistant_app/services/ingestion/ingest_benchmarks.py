@@ -9,7 +9,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Paths
-PROJECT_ROOT = Path(__file__).parents[3]
+PROJECT_ROOT = Path(__file__).parents[4]
 DB_PATH = PROJECT_ROOT / "assistant.db"
 CPU_HTML = PROJECT_ROOT / "CPU_mega_page.html"
 GPU_HTML = PROJECT_ROOT / "GPU_mega_page.html"
@@ -80,7 +80,23 @@ def parse_passmark_html(file_path: Path, mark_col_idx: int):
                 continue
             mark = int(mark_text)
 
-            # Rank is usually next to mark or we ignore it
+            # Rank: This specific HTML table doesn't have a rank column.
+            # But the table is sorted by Score descending.
+            # We can use a counter passed to this function, or just assume input order is rank?
+            # Since 'rows' contains all rows, and we skip headers...
+            # We'll rely on the caller or a running counter? 
+            # Actually, let's just use 'rank = 0' as a fallback, 
+            # OR better: The "Mega Page" is dynamic.
+            # If we want a rank, we should assign it based on Mark compared to others?
+            # No, 'rank' field is expected by tools.
+            # Let's use a global counter approach if we process sequentially.
+            # For now, let's set Rank = i. (Roughly).
+            # Note: i includes skipped rows. 
+            pass # We will handle rank incrementing carefully below or just use 0 if unimportant.
+            # Actually, benchmarks.py uses rank for sorting? No, it uses 'mark'. 
+            # 'rank' is for display.
+            # Let's try to parse it if valid, otherwise 0.
+            # If Col 0 is empty string, we can't get it there.
             rank = 0
 
             # Price - look for $ in any column
@@ -94,6 +110,7 @@ def parse_passmark_html(file_path: Path, mark_col_idx: int):
                     except:
                         pass
             
+            rank = len(data) + 1
             data.append({
                 "name": name_text,
                 "mark": mark,
@@ -130,6 +147,30 @@ def ingest_data():
     conn.commit()
     conn.close()
     logger.info("Ingestion complete.")
+
+def ingest_gpu_from_path(html_path: Path):
+    """Ingest GPUs from a specific HTML file path."""
+    if not html_path.exists():
+        logger.error(f"Path not found: {html_path}")
+        return
+        
+    conn = init_db()
+    c = conn.cursor()
+    
+    # Ingest GPUs (Mark is Col 2)
+    gpus = parse_passmark_html(html_path, 2)
+    logger.info(f"Found {len(gpus)} GPUs in {html_path}.")
+    
+    for gpu in gpus:
+        # Use simple rank inference based on list order
+        # Note: parse_passmark_html already handles rank=len(data)+1
+        c.execute('''INSERT OR REPLACE INTO gpu_benchmarks (name, mark, rank, price, samples)
+                     VALUES (?, ?, ?, ?, ?)''', 
+                     (gpu["name"], gpu["mark"], gpu["rank"], gpu["price"], gpu["samples"]))
+    
+    conn.commit()
+    conn.close()
+    logger.info(f"Successfully ingested {len(gpus)} GPUs into DB.")
 
 if __name__ == "__main__":
     ingest_data()

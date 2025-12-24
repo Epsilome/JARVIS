@@ -190,7 +190,24 @@ def ask_ollama(text: str) -> str | None:
                 print("DEBUG: Empty LLM response. Falling back to raw tool output.")
                 last_tool_msg = next((m for m in reversed(messages) if m.get('role') == 'tool'), None)
                 if last_tool_msg:
-                    return last_tool_msg['content']
+                    raw = last_tool_msg['content']
+                    # Attempt to pretty print if it's a known structured format (e.g. from lookup_hardware)
+                    if "Mark:" in raw and "Price:" in raw:
+                        # It's likely a single hardware result, leave as is, it's already readable
+                        return raw
+                    if raw.strip().startswith("[") or raw.strip().startswith("{"):
+                         # It's JSON (e.g. list of prices). Try to tabularize.
+                         try:
+                             data = json.loads(raw)
+                             if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+                                 # List of dicts (prices gaming?)
+                                 lines = ["**Here is what I found:**"]
+                                 for item in data[:5]:
+                                     lines.append(f"- **{item.get('title', 'Unknown')}**: {item.get('price_eur', 0)}€ (Score: {item.get('score', 0):.2f})")
+                                 return "\n".join(lines)
+                         except:
+                             pass
+                    return raw
             
             return content
             

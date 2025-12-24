@@ -11,12 +11,13 @@ from assistant_app.adapters.nlu.ollama_adapter import ask_ollama
 
 
 
-def respond(text: str):
-    """Echoes text to console and speaks it."""
+def respond(text: str, speak_audio: bool = True):
+    """Echoes text to console and speaks it (if enabled)."""
     typer.echo(text)
-    speak(text)
+    if speak_audio:
+        speak(text)  # tts_kokoro handles markdown stripping
 
-def process_voice_command(text: str):
+def process_voice_command(text: str, speak_response: bool = True):
     """
     Parses the voice command text and executes the corresponding action.
     """
@@ -25,11 +26,15 @@ def process_voice_command(text: str):
     text = re.sub(r'[^\w\s]', '', text)
     typer.echo(f"DEBUG: Processing '{text}'")
     
+    # Helper to send responses with current speak setting
+    def reply(msg: str):
+        respond(msg, speak_audio=speak_response)
+
     # --- Priority Dispatch ---
     
     # 1. STOP/EXIT (Exact or simple match)
     if text in ["stop", "exit", "quit", "shut down", "terminate"]:
-        respond("Goodbye.")
+        reply("Goodbye.")
         raise typer.Exit()
 
     # 2. REMINDER SETTING (Strict Regex)
@@ -39,9 +44,9 @@ def process_voice_command(text: str):
         dt, remainder = parse_when(clean_text)
         if dt:
             add_once(clean_text, dt)
-            respond(f"I've set a reminder for {dt.strftime('%H:%M')}.")
+            reply(f"I've set a reminder for {dt.strftime('%H:%M')}.")
         else:
-            respond("I heard you want a reminder, but I couldn't understand the time.")
+            reply("I heard you want a reminder, but I couldn't understand the time.")
         return
 
     # 3. OTHER COMMANDS (Keyword Presence)
@@ -52,7 +57,7 @@ def process_voice_command(text: str):
         city = settings.DEFAULT_CITY or "Casablanca"
         country = settings.DEFAULT_COUNTRY or "MA"
         times = get_today_timings(city, country, 2, 0)
-        respond(f"Here are the prayer times for {city}.")
+        reply(f"Here are the prayer times for {city}.")
         for k in ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]:
             typer.echo(f"  {k}: {times[k]}")
         return
@@ -61,9 +66,9 @@ def process_voice_command(text: str):
     if any(k in text for k in ["watched movies", "movies i have seen", "seen movies"]):
         rows = all_seen()
         if not rows:
-            respond("You haven't marked any movies as watched yet.")
+            reply("You haven't marked any movies as watched yet.")
         else:
-            respond(f"You have watched {len(rows)} movies. Here are the last 5:")
+            reply(f"You have watched {len(rows)} movies. Here are the last 5:")
             for r in rows[:5]:
                 typer.echo(f"✓ {r.title} ({r.year})")
         return
@@ -76,16 +81,16 @@ def process_voice_command(text: str):
             hh, mm = map(int, t.split(":"))
             job_id = f"eye_{hh:02d}{mm:02d}"
             add_daily("Use eye-cleaning product", hh, mm, job_id=job_id)
-        respond(f"Eye care reminders enabled for {', '.join(times)}.")
+        reply(f"Eye care reminders enabled for {', '.join(times)}.")
         return
 
     # List Reminders
     if "list reminders" in text or "show reminders" in text or "my reminders" in text:
         rows = list_jobs()
         if not rows:
-            respond("You have no active reminders.")
+            reply("You have no active reminders.")
         else:
-            respond(f"You have {len(rows)} reminders.")
+            reply(f"You have {len(rows)} reminders.")
             for jid, trig, next_run in rows:
                 typer.echo(f"  • {jid} | {next_run}")
         return
@@ -95,9 +100,9 @@ def process_voice_command(text: str):
     # This prevents "Tell me about..." from being caught by "remind me" regex/keywords
     answer = ask_ollama(text)
     if answer:
-        respond(answer)
+        reply(answer)
     else:
-        respond("I'm sorry, I couldn't process that.")
+        reply("I'm sorry, I couldn't process that.")
     return
 
 

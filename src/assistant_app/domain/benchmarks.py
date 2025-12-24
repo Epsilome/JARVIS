@@ -20,6 +20,16 @@ try:
 except ImportError:
     DBGPU = None
 
+try:
+    from assistant_app.domain.ssd_registry import SSDRegistry
+except ImportError:
+    SSDRegistry = None
+
+try:
+    from assistant_app.domain.ram_registry import RAMRegistry
+except ImportError:
+    RAMRegistry = None
+
 CURRENT_FILE = pathlib.Path(__file__).resolve()
 PROJECT_ROOT = CURRENT_FILE.parents[3] # Goes up to 'JARVIS'
 
@@ -42,6 +52,8 @@ RAM_RE = re.compile(r"(\d{1,3})\s*(?:go|gb)\b", re.I)
 # Lazy-loaded registries
 _CPU_REGISTRY = None
 _GPU_REGISTRY = None
+_SSD_REGISTRY = None
+_RAM_REGISTRY = None
 
 def get_cpu_registry():
     global _CPU_REGISTRY
@@ -68,6 +80,30 @@ def get_gpu_registry():
         else:
             _GPU_REGISTRY = False
     return _GPU_REGISTRY if _GPU_REGISTRY else None
+
+def get_ssd_registry():
+    global _SSD_REGISTRY
+    if _SSD_REGISTRY is None:
+        if SSDRegistry:
+            try:
+                _SSD_REGISTRY = SSDRegistry.get_instance()
+            except ImportError:
+                _SSD_REGISTRY = False
+        else:
+            _SSD_REGISTRY = False
+    return _SSD_REGISTRY if _SSD_REGISTRY else None
+
+def get_ram_registry():
+    global _RAM_REGISTRY
+    if _RAM_REGISTRY is None:
+        if RAMRegistry:
+            try:
+                _RAM_REGISTRY = RAMRegistry.get_instance()
+            except ImportError:
+                _RAM_REGISTRY = False
+        else:
+            _RAM_REGISTRY = False
+    return _RAM_REGISTRY if _RAM_REGISTRY else None
 
 GPU_ALIASES = {
     # Normalize spacing/case and make sure we include “geforce”/“laptop gpu” where needed

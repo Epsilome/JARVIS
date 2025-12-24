@@ -33,3 +33,12 @@ yarn-error.log*
 CPU_mega_page.html
 GPU_mega_page.html
 Laptop & Portable CPU Performance.html
+
+# Temporary Scripts
+*.bak
+debug_*.py
+verify_*.py
+check_db_rank.py
+
+# Vector DB
+data/chroma_db/

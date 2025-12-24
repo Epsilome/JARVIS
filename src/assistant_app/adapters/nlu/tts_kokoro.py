@@ -1,62 +1,75 @@
-from RealtimeTTS import TextToAudioStream, SystemEngine, KokoroEngine
 import logging
-import os
-import warnings
-
-# Suppress annoying PyTorch/Kokoro warnings
-warnings.filterwarnings("ignore", category=UserWarning, module="torch.nn.modules.rnn")
-warnings.filterwarnings("ignore", category=FutureWarning, module="torch.nn.utils.weight_norm")
-
-# Aggressively silence phonemizer
-logging.getLogger("phonemizer").setLevel(logging.CRITICAL)
-logging.getLogger("phonemizer.backend.espeak.wrapper").setLevel(logging.CRITICAL)
+try:
+    from RealtimeTTS import TextToAudioStream, KokoroEngine
+    REALTIMETTS_AVAILABLE = True
+except ImportError:
+    REALTIMETTS_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
-# Ensure FFmpeg is in PATH (required for pydub/RealtimeTTS)
-ffmpeg_path = r"C:\Users\anase\AppData\Local\Microsoft\WinGet\Packages\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\ffmpeg-8.0.1-full_build\bin"
-if ffmpeg_path not in os.environ["PATH"]:
-    os.environ["PATH"] += os.pathsep + ffmpeg_path
-
-# Global instances to avoid reloading model
-_stream = None
-_engine = None
+_STREAM = None
+_ENGINE = None
 
 def _get_stream():
-    global _stream, _engine
-    if _stream is None:
+    """Singleton to initialize the heavy Kokoro engine once."""
+    global _STREAM, _ENGINE
+    if not REALTIMETTS_AVAILABLE:
+        return None
+        
+    if _STREAM is None:
         try:
-            logger.info("Initializing Kokoro TTS Engine (RealtimeTTS)...")
-            # voice='af_heart' is a good default for Kokoro
-            # Note: speed is likely a property or set via method, or default is 1.0
-            _engine = KokoroEngine(voice="af_heart")
-            # _engine.speed = 1.0 # Set properly if supported
-            _stream = TextToAudioStream(_engine)
+            logger.info("Initializing Kokoro TTS Engine (Local)...")
+            # default_lang_code='a' is usually American English in Kokoro default map
+            # 'af_bella' is a high quality female voice included in Kokoro
+            _ENGINE = KokoroEngine(voice="af_bella") 
+            _STREAM = TextToAudioStream(_ENGINE)
+            logger.info("Kokoro TTS Initialized.")
         except Exception as e:
             logger.error(f"Failed to init Kokoro: {e}")
-            raise e
-    return _stream
+            _STREAM = False
+            
+    return _STREAM if _STREAM else None
 
 def speak(text: str):
-    """
-    Speaks text using Kokoro (RealtimeTTS). 
-    Falls back to SystemEngine (pyttsx3) if Kokoro fails.
-    """
+    """Speaks the given text using local Kokoro engine."""
+    
+    # 1. Try Kokoro
+    stream = _get_stream()
+    if stream:
+        try:
+            # Clean Markdown implementation
+            # Remove asterisks, hashes, and list dashes that might be read aloud
+            import re
+            # Remove **bold**, *italic*, ### Headers
+            clean_text = re.sub(r'[\*#`]', '', text) 
+            # Remove leading "- " for lists to improve flow, or keep them? 
+            # Usually "- " read as "dash" is annoying. replacing with comma pause might be better.
+            clean_text = re.sub(r'\n-\s+', '\n, ', clean_text)
+            
+            clean_text = " ".join(clean_text.split())
+            if not clean_text: return
+            
+            logger.info(f"Speaking (Kokoro): {clean_text[:50]}...")
+            stream.feed(clean_text)
+            stream.play() # Blocking playback
+            return
+        except KeyboardInterrupt:
+            logger.info("Speech interrupted by user.")
+            stream.stop()
+            # Re-raise to ensure the main loop knows to stop if needed, 
+            # or swallow if we just want to stop talking but keep app running?
+            # User said "stop the assistant when he is talking", usually implies stopping that response.
+            return
+        except Exception as e:
+            logger.error(f"Kokoro Error: {e}")
+            
+    # 2. Fallback to offline pyttsx3 if Kokoro fails
+    logger.warning("Falling back to standard offline TTS...")
     try:
-        stream = _get_stream()
-        logger.info(f"Speaking (Kokoro): {text}")
-        stream.feed(text)
-        stream.play()
+        import pyttsx3
+        engine = pyttsx3.init()
+        engine.setProperty('rate', 170)
+        engine.say(text)
+        engine.runAndWait()
     except Exception as e:
-        logger.error(f"Kokoro TTS failed: {e}. Switching to System Fallback.")
-        _speak_system_fallback(text)
-
-def _speak_system_fallback(text: str):
-    try:
-        # Create a fresh system engine for fallback
-        engine = SystemEngine()
-        stream = TextToAudioStream(engine)
-        stream.feed(text)
-        stream.play()
-    except Exception as e:
-        logger.error(f"System Fallback TTS failed: {e}")
+        logger.error(f"Fallback TTS failed: {e}")

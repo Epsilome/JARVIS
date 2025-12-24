@@ -38,12 +38,14 @@ def lookup_hardware(query: str) -> str:
     # Try CPU first
     cpu = get_cpu_specs(query)
     if cpu:
-        return f"Found CPU: {cpu['name']}\nMark: {cpu['mark']}\nRank: {cpu['rank']}\nPrice: ${cpu['price']}"
+        price_str = f"Price: ${cpu['price']}" if cpu['price'] > 0 else ""
+        return f"Found CPU: {cpu['name']}\nMark: {cpu['mark']}\nRank: {cpu['rank']}\n{price_str}".strip()
     
     # Try GPU
     gpu = get_gpu_specs(query)
     if gpu:
-        return f"Found GPU: {gpu['name']}\nMark: {gpu['mark']}\nRank: {gpu['rank']}\nPrice: ${gpu['price']}"
+        price_str = f"Price: ${gpu['price']}" if gpu['price'] > 0 else ""
+        return f"Found GPU: {gpu['name']}\nMark: {gpu['mark']}\nRank: {gpu['rank']}\n{price_str}".strip()
     
     return f"No hardware found matching '{query}' in the database."
 

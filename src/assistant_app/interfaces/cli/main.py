@@ -94,17 +94,36 @@ def listen(loop: bool = True):
     Start listening for voice commands.
     """
     typer.echo("Listening for commands... (say 'stop' to exit)")
+    typer.echo("Listening for commands... (say 'stop' to exit)")
     while True:
-        text = listen_and_recognize()
-        if text:
-            try:
+        try:
+            text = listen_and_recognize()
+            if text:
                 process_voice_command(text)
                 # Short pause to prevent mic from hearing the end of the TTS response
-                time.sleep(0.5) 
-            except typer.Exit:
-                break
+                # Increased to 1.5s to be safe against echo
+                time.sleep(1.5) 
+        except (KeyboardInterrupt, typer.Exit):
+            typer.echo("\nStopping listener.")
+            break
+        except Exception as e:
+            logger.error(f"Listener Loop Error: {e}")
+            time.sleep(1) # Prevent tight loop on error
+            
         if not loop:
             break
+
+@app.command()
+def ask(
+    query: str,
+    speak: bool = typer.Option(False, "--speak", "-s", help="Speak the response aloud."),
+):
+    """
+    Send a text query to the assistant (CLI mode). 
+    Useful for debugging or silent interaction.
+    """
+    process_voice_command(query, speak_response=speak)
+
 
 @app.command()
 def pref(key: str, value: str):
@@ -597,9 +616,17 @@ def refresh_gpu_bench(
 ):
     """
     Parse a locally saved PassMark GPU mega page and cache laptop/mobile GPU ranks (0..100).
+    Also updates the SQL database for 'lookup_hardware' tool.
     """
+    # 1. Update JSON Cache (0-100 normalization for scoring)
     path = refresh_gpu_cache(gpu_html_path=from_html)
     typer.echo(f"GPU benchmark cache written to: {path}")
+
+    # 2. Update SQLite DB (Raw marks for lookup)
+    if from_html:
+        from assistant_app.services.ingestion.ingest_benchmarks import ingest_gpu_from_path
+        ingest_gpu_from_path(Path(from_html))
+        typer.echo("GPU SQLite database updated.")
 
 if __name__ == "__main__":
     app()
