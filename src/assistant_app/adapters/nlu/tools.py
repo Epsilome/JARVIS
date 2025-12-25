@@ -10,15 +10,35 @@ except ImportError:
     DBGPU = None
 
 from assistant_app.domain.benchmarks import get_cpu_specs, get_gpu_specs, get_cached_specs, save_cached_specs
-from assistant_app.services.prices import search_all
+from assistant_app.services.prices import search_products
 from assistant_app.adapters.scrapers.specs import search_specs
 from assistant_app.domain.cpu_registry import LaptopCPUBase
 from assistant_app.domain.ram_registry import RAMRegistry
 from assistant_app.domain.ssd_registry import SSDRegistry
 from assistant_app.domain.review_rag import ReviewIntelligence
 from assistant_app.services.ingestion.review_ingest import ReviewIngestor
+from assistant_app.services.reminders import add_once
+from assistant_app.adapters.nlu.time_parse import parse_when
 
 logger = logging.getLogger(__name__)
+
+def set_reminder(task: str, when: str = "1 minute") -> str:
+    """
+    Sets a reminder for a specific task at a given time or time delta.
+    Input 'when' can be 'in 5 minutes', 'tomorrow at 10am', '17:00', etc.
+    """
+    logger.info(f"Tool Call: set_reminder('{task}', '{when}')")
+    try:
+        dt, _ = parse_when(when)
+        
+        if not dt:
+             return f"Could not parse the time '{when}'. Please try a different format (e.g. 'in 10 minutes', 'at 5pm')."
+             
+        add_once(task, dt)
+        return f"Reminder set: I will remind you to '{task}' at {dt.strftime('%H:%M')}."
+    except Exception as e:
+        logger.error(f"Reminder error: {e}")
+        return f"Failed to set reminder: {e}"
 
 def lookup_hardware(query: str) -> str:
     """
@@ -155,21 +175,31 @@ def search_web(query: str) -> str:
         logger.error(f"Web search error: {e}")
         return f"Error searching web: {e}"
 
-def get_live_price(product: str) -> str:
+def get_live_price(product: str, category: str = "general") -> str:
     """
     Searches for live prices of a product from online retailers.
     Useful for "How much is X?" or "Price of Y".
+    Category can be 'gaming' (adds RTX query logic), 'work', or 'general'.
     """
-    logger.info(f"Tool Call: get_live_price('{product}')")
+    logger.info(f"Tool Call: get_live_price('{product}', category='{category}')")
+    
+    # Fallback for empty product (LLM extraction failure)
+    search_term = product
+    if not search_term or not search_term.strip():
+        if category == "gaming": search_term = "pc portable gamer"
+        elif category == "work": search_term = "pc portable professionnel"
+        else: search_term = "pc portable"
+        logger.info(f"Product was empty. Defaulting to '{search_term}'.")
+
     try:
-        results = search_all(product, country_hint="FR") # Default to FR as per user context
+        results = search_products(search_term, category=category, country_hint="FR") # Default to FR
         if not results:
             return "No live prices found."
         
         # Sort by price
         results.sort(key=lambda x: x.price or float('inf'))
         
-        summary = f"Found {len(results)} deals for '{product}':\n"
+        summary = f"Found {len(results)} deals for '{product}' ({category}):\n"
         for p in results[:5]:
             summary += f"- {p.title}: {p.price} € ({p.store})\n"
         return summary
@@ -211,5 +241,6 @@ AVAILABLE_TOOLS = {
     "lookup_detailed_specs": lookup_detailed_specs,
     "search_web": search_web,
     "get_live_price": get_live_price,
-    "get_product_opinions": get_product_opinions
+    "get_product_opinions": get_product_opinions,
+    "set_reminder": set_reminder
 }

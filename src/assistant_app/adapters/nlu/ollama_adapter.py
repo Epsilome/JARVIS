@@ -3,6 +3,8 @@ import logging
 import json
 from assistant_app.config.settings import settings
 from assistant_app.adapters.nlu.tools import AVAILABLE_TOOLS
+from assistant_app.services.memory import get_profile_db, update_profile_db
+from assistant_app.services.prices import search_products
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +71,12 @@ TOOLS_SCHEMA = [
                 "properties": {
                     "product": {
                         "type": "string",
-                        "description": "The product name to search for.",
+                        "description": "The search query (e.g. 'laptop', 'monitor'). Must not be empty.",
+                    },
+                    "category": {
+                        "type": "string",
+                        "description": "Category: 'gaming', 'work', 'general'. Use 'gaming' for gaming laptops/GPUs.",
+                        "enum": ["gaming", "work", "general"]
                     },
                 },
                 "required": ["product"],
@@ -93,6 +100,37 @@ TOOLS_SCHEMA = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "set_reminder",
+            "description": "Set a reminder for a specific task at a given time relative to now.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "task": {"type": "string"},
+                    "when": {"type": "string"},
+                },
+                "required": ["task", "when"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "update_user_profile",
+            "description": "Save user preferences/constraints (budget, region, primary usage) to memory.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "budget": {"type": "string", "description": "budget limit e.g. '1200 EUR'"},
+                    "region": {"type": "string", "description": "ISO country code e.g. 'FR'"},
+                    "usage": {"type": "string", "description": "e.g. 'Gaming', 'Work'"},
+                    "preferred_brand": {"type": "string", "description": "e.g. 'ASUS', 'Lenovo'"},
+                },
+            },
+        },
+    },
 ]
 
 def ask_ollama(text: str) -> str | None:
@@ -101,14 +139,23 @@ def ask_ollama(text: str) -> str | None:
     """
     model = settings.OLLAMA_MODEL
     
+    # Context Injection
+    profile = get_profile_db()
+    profile_str = ", ".join([f"{k.upper()}={v}" for k, v in profile.items() if v])
+    
     system_prompt = (
         "You are JARVIS, a helpful assistant and hardware expert. "
         "You have access to tools for looking up hardware benchmarks (PassMark), detailed specs (VRAM, TDP), live prices, and user opinions. "
+        f"{'active USER CONTEXT: [' + profile_str + ']' if profile_str else ''}\n"
         "IMPORTANT RULES:\n"
-        "1. For PERFORMANCE scores/ranks, use 'lookup_hardware'.\n"
-        "2. For DETAILED SPECS (VRAM, Cores, TDP), use 'lookup_detailed_specs'.\n"
-        "3. For OPINIONS/REVIEWS ('Is X good?', 'Pros/Cons'), use 'get_product_opinions'.\n"
-        "4. Do not guess specs or scores. Use the tools."
+        "1. For BUYING/PRICES/SHOPPING ('What can I afford?', 'Find cheap laptop'), use 'get_live_price'. Set category='gaming' for gaming PCs.\n"
+        "2. For PERFORMANCE/BENCHMARKS ('Is 4090 fast?', 'Score for Ryzen 9'), use 'lookup_hardware'.\n"
+        "3. For DETAILED SPECS (VRAM, Cores, TDP), use 'lookup_detailed_specs'.\n"
+        "4. For OPINIONS/REVIEWS ('Is X good?', 'Pros/Cons'), use 'get_product_opinions'.\n"
+        "5. For REMINDERS ('Remind me to X in Y'), use 'set_reminder'.\n"
+        "6. For PREFERENCES ('My budget is X'), use 'update_user_profile'.\n"
+        "7. For general chat/greetings ('Hello', 'Hi', 'Who are you?'), do NOT use any tools. Just reply text.\n"
+        "8. Do not guess. Use the tools ONLY when necessary."
     )
     
     messages = [
@@ -166,6 +213,15 @@ def ask_ollama(text: str) -> str | None:
                         'role': 'tool',
                         'content': str(tool_output),
                     })
+                    
+                # Direct handling for memory tool
+                elif fn_name == "update_user_profile":
+                     logger.info(f"Updating profile with: {args}")
+                     update_profile_db(args)
+                     messages.append({
+                        'role': 'tool',
+                        'content': "User profile updated successfully.",
+                     })
                 else:
                     logger.warning(f"Unknown tool requested: {fn_name}")
                     messages.append({

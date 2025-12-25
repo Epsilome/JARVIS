@@ -4,13 +4,15 @@ import asyncio, json, logging, signal, sys, time
 from pathlib import Path
 from datetime import datetime, timedelta
 import typer
+from loguru import logger
+from assistant_app.adapters.console_manager import console, print_table, print_panel, create_table, print_success, print_error, print_warning
 from collections import defaultdict
 
 
 # ── updated import paths to match your new layout ───────────────────────────────
 from assistant_app.interfaces.scheduler.scheduler import scheduler
 
-from assistant_app.services.memory import init_memory, set_pref, get_pref
+from assistant_app.services.memory import init_memory, set_pref, get_pref, get_profile_db
 from assistant_app.services.reminders import (
     add_once, add_interval, add_cron, list_jobs, cancel,
 )
@@ -18,6 +20,10 @@ from assistant_app.adapters.nlu.time_parse import parse_when, parse_every
 
 from assistant_app.services.movies import top_horror, _tmdb_external_ids
 from assistant_app.services.movies_seen import mark_seen, unmark_seen, all_seen, is_seen_map
+
+from assistant_app.adapters.system_control import (
+    set_volume, lock_screen, minimize_all, open_app as sys_open_app
+)
 
 from assistant_app.services.prayer import get_today_timings, schedule_today_prayers
 from assistant_app.config.settings import settings
@@ -50,6 +56,9 @@ logging.getLogger("phonemizer.backend.espeak.wrapper").setLevel(logging.CRITICAL
 app = typer.Typer(help="Local Desktop Assistant")
 movies_app = typer.Typer(help="Movie suggestions & watched list")
 app.add_typer(movies_app, name="movies")
+
+system_app = typer.Typer(help="System controls (volume, lock, open apps)")
+app.add_typer(system_app, name="system")
 
 @app.callback()
 def _start():
@@ -86,7 +95,11 @@ def start():
         # Windows doesn't support signal.pause()
 
         while True:
-            time.sleep(1)
+            # Force scheduler to wake up and check DB for new jobs every 15s
+            # (BackgroundScheduler doesn't autorefresh ext changes easily)
+            if scheduler.running:
+                scheduler.wakeup()
+            time.sleep(15)
 
 @app.command()
 def listen(loop: bool = True):
@@ -114,6 +127,25 @@ def listen(loop: bool = True):
             break
 
 @app.command()
+def pref():
+    """
+    Show stored user profile context (contextual memory).
+    """
+    profile = get_profile_db()
+    
+    if not profile:
+        print_warning("No user profile found in memory.")
+        return
+
+    # Filter out empty keys for cleaner display
+    clean_profile = {k: v for k, v in profile.items() if v}
+    if not clean_profile:
+         print_warning("User profile exists but is empty.")
+         return
+
+    print_panel(json.dumps(clean_profile, indent=2), title="Active User Context")
+
+@app.command()
 def ask(
     query: str,
     speak: bool = typer.Option(False, "--speak", "-s", help="Speak the response aloud."),
@@ -125,76 +157,88 @@ def ask(
     process_voice_command(query, speak_response=speak)
 
 
-@app.command()
-def pref(key: str, value: str):
-    """Set a preference. Example: assistant pref country MA"""
-    set_pref(key, value)
-    typer.echo(f"Set {key}={value}")
 
 @app.command()
-def remind(text: str, when: str = "", every: str = "", cron: str = ""):
+def remind(text: str = "", when: str = "", every: str = "", cron: str = "", preset: str = ""):
     """
+    Set a reminder.
     Examples:
-      assistant remind "Drink water" --every "2h"
-      assistant remind "Call mom" "tomorrow 13:00"
+      assistant remind "Drink water" "in 10m"
       assistant remind "Standup" --cron "0 9 * * MON-FRI"
+      assistant remind --preset eye-care
     """
+    if preset:
+        if preset.lower() == "eye-care":
+            # Reusing eye_care logic (calling the function directly or duplicating for now)
+            eye_care(reset=True)
+            return
+        else:
+            print_error(f"Unknown preset: {preset}")
+            return
+
+    if not text:
+        print_error("Missing argument 'TEXT'.")
+        raise typer.Exit(1)
+
     if every:
         kwargs = parse_every(every)
         if not kwargs:
-            typer.echo("Invalid --every. Try 30m, 2h, 1d, 1w.")
+            print_error("Invalid --every. Try 30m, 2h, 1d, 1w.")
             raise typer.Exit(1)
         res = add_interval(text, **kwargs)
-        typer.echo(f"Interval: {res}")
+        print_success(f"Interval set: {res}")
         return
 
     if cron:
         res = add_cron(text, cron)
-        typer.echo(f"CRON: {res}")
+        print_success(f"CRON set: {res}")
         return
 
     dt, _ = parse_when(when)
     if not dt:
-        typer.echo("Couldn’t parse 'when'.")
+        print_error("Couldn’t parse 'when'.")
         raise typer.Exit(1)
     res = add_once(text, dt)
-    typer.echo(f"Once: {res}")
+    print_success(f"Reminder set for {dt.strftime('%H:%M')}: {text}")
 
 @app.command("eye-care")
 def eye_care(times: str = "12:00,16:00,20:00", reset: bool = True):
     """
-    Schedule eye-care reminders (default: daily at 12:00, 16:00, 20:00).
+    Schedule eye-care reminders.
     """
-
-
     if reset:
         removed = cancel_prefix("eye_")
-        typer.echo(f"Removed {removed} existing eye-care jobs.")
+        # print_success(f"Removed {removed} existing eye-care jobs.") # Optional verbosity
 
     scheduled = []
     for t in [x.strip() for x in times.split(",") if x.strip()]:
         try:
             hh, mm = map(int, t.split(":"))
         except ValueError:
-            typer.echo(f"Invalid time format: {t}. Use HH:MM (24h).")
+            print_error(f"Invalid time format: {t}. Use HH:MM (24h).")
             raise typer.Exit(1)
         job_id = f"eye_{hh:02d}{mm:02d}"
         res = add_daily("Use eye-cleaning product", hh, mm, job_id=job_id)
         scheduled.append((job_id, f"{hh:02d}:{mm:02d}"))
 
-    typer.echo("Eye-care schedule:")
+    table = create_table("Eye Care Schedule", ["Job ID", "Time"])
     for jid, at in scheduled:
-        typer.echo(f"  {jid} -> daily at {at}")
+        table.add_row(jid, at)
+    print_table(table)
+    print_success("Eye care reminders scheduled.")
 
 @app.command("reminders")
 def reminders_list():
     """List scheduled reminders/jobs."""
     rows = list_jobs()
     if not rows:
-        typer.echo("No jobs.")
+        print_warning("No active reminders.")
         return
+    
+    table = create_table("Active Reminders", ["ID", "Trigger", "Next Run"])
     for jid, trig, next_run in rows:
-        typer.echo(f"{jid} | {trig} | next: {next_run}")
+        table.add_row(jid, str(trig), str(next_run))
+    print_table(table)
 
 @app.command()
 def cancel_job(job_id: str):
@@ -209,30 +253,55 @@ def movies(limit: int = 7, min_vote: float = 6.5, year_from: int = 2010):
         typer.echo(f"{m['title']} ({m['year']}) ★ {m['rating']}\n  {m['overview']}\n")
 
 @app.command()
-def prices(query: str, country: str = ""):
-    """Search laptop prices via your scraper plugins. Example: assistant prices "16GB i5" --country FR"""
-    results = search_all(query, country_hint=country or None)
+def prices(query: str, country: str = "", mode: str = ""):
+    """
+    Search prices. Modes: gaming, work.
+    Example: assistant prices "rtx 4060" --mode gaming
+    """
+    # Simple query expansion based on mode
+    if mode.lower() == "gaming":
+        pass # query += " rtx" # Maybe too aggressive?
+    elif mode.lower() == "work":
+        pass 
+        
+    with console.status(f"[bold green]Searching for '{query}'..."):
+        results = search_all(query, country_hint=country or None)
+
     if not results:
-        typer.echo("No results (yet). Add scrapers in src/assistant_app/adapters/scrapers/")
-        raise typer.Exit(0)
+        print_warning("No results found.")
+        return
+
+    table = create_table(f"Results for '{query}'", ["Store", "Product", "Price", "Specs"])
     for p in results:
-        typer.echo(f"[{p.store} {p.country}] {p.title} — {p.price} {p.currency}\n  {p.url}\n  specs: {p.specs}\n")
+        specs_str = str(p.specs or "")[:50] # Truncate
+        if len(str(p.specs or "")) > 50: specs_str += "..."
+        
+        table.add_row(
+            f"[{p.country}] {p.store}",
+            f"[link={p.url}]{p.title[:60]}...[/link]" if len(p.title) > 60 else f"[link={p.url}]{p.title}[/link]",
+            f"[bold green]{p.price} {p.currency}[/bold green]",
+            specs_str
+        )
+    print_table(table)
 
 @app.command("pray")
 def pray(city: str = "", country: str = "", method: int = 2, school: int = 0, schedule: bool = False):
-    """Show today's prayer times and optionally schedule the remaining ones."""
+    """Show prayer times."""
     city = city or settings.DEFAULT_CITY or "Casablanca"
     country = country or settings.DEFAULT_COUNTRY or "MA"
-    times = get_today_timings(city, country, method, school)
-    typer.echo(f"Prayer times for {city}, {country} (method {method}):")
+    
+    with console.status("Fetching prayer times..."):
+        times = get_today_timings(city, country, method, school)
+
+    table = create_table(f"Prayer Times: {city}, {country}", ["Prayer", "Time"])
     for k in ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"]:
-        typer.echo(f"  {k}: {times[k]}")
+        table.add_row(k, times[k])
+    print_table(table)
+
     if schedule:
         scheduled = schedule_today_prayers(city, country, method, school)
         if scheduled:
-            typer.echo("Scheduled:")
-            for name, at in scheduled:
-                typer.echo(f"  {name} at {at}")
+            print_success(f"Scheduled {len(scheduled)} prayers.")
 
 @movies_app.command("list")
 def movies_list(limit: int = 15, year_from: int = 2000, min_votes: int = 200, show_overview: bool = False):
@@ -627,6 +696,32 @@ def refresh_gpu_bench(
         from assistant_app.services.ingestion.ingest_benchmarks import ingest_gpu_from_path
         ingest_gpu_from_path(Path(from_html))
         typer.echo("GPU SQLite database updated.")
+
+@system_app.command()
+def lock():
+    """Lock the workstation instantly."""
+    lock_screen()
+    print_success("System locked.")
+
+@system_app.command()
+def volume(level: int):
+    """Set system volume (0-100)."""
+    if set_volume(level):
+        print_success(f"Volume set to {level}%.")
+    else:
+        print_error("Failed to set volume.")
+
+@system_app.command()
+def open(app_name: str):
+    """Open an application via search."""
+    sys_open_app(app_name)
+    print_success(f"Opening '{app_name}'...")
+
+@system_app.command()
+def minimize():
+    """Minimize all windows (Show Desktop)."""
+    minimize_all()
+    print_success("Windows minimized.")
 
 if __name__ == "__main__":
     app()

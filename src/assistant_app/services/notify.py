@@ -1,25 +1,27 @@
 try:
-    from winrt.windows.ui.notifications import ToastNotificationManager, ToastNotification
-    from winrt.windows.data.xml.dom import XmlDocument
-    WINRT_AVAILABLE = True
-except ImportError:
-    WINRT_AVAILABLE = False
+    from plyer import notification
+    PLYER_AVAILABLE = True
+except ImportError as e:
+    print(f"[NOTIFY] Failed to import plyer: {e}")
+    PLYER_AVAILABLE = False
+
+from loguru import logger
 
 def toast(title: str, msg: str):
-    """Windows toast; falls back to stdout on non-Windows."""
-    if WINRT_AVAILABLE:
+    """
+    Displays a desktop notification using Plyer.
+    """
+    # Always print to console/logs as well
+    logger.info(f"[NOTIFY] {title}: {msg}")
+    
+    if PLYER_AVAILABLE:
         try:
-            xml = XmlDocument()
-            xml.load_xml(
-                f"<toast><visual><binding template='ToastGeneric'>"
-                f"<text>{title}</text><text>{msg}</text>"
-                f"</binding></visual></toast>"
+            notification.notify(
+                title=title,
+                message=msg,
+                app_name="JARVIS",
+                timeout=10
             )
-            notifier = ToastNotificationManager.create_toast_notifier("Assistant")
-            notifier.show(ToastNotification(xml))
         except Exception as e:
-            print(f"[NOTIFY] Error: {e}")
-    else:
-        # Fallback
-        print(f"[NOTIFY] {title}: {msg}")
+            logger.error(f"[NOTIFY] Error showing toast: {e}")
 

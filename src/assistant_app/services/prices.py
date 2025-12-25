@@ -1,42 +1,59 @@
 from __future__ import annotations
 import importlib, math, asyncio, inspect
 from typing import Iterable, List
-from assistant_app.adapters.scrapers import ALL as SCRAPERS  # dict[str, scraper]
+from loguru import logger
+from assistant_app.adapters.scrapers import SCRAPERS  # dict[str, scraper]
 from assistant_app.domain.benchmarks import value_score
 from assistant_app.domain.models import Product
 from assistant_app.services.cache import load_store_results, save_store_results
 
 
-
-
-SCRAPER_MODULES = [
-    "assistant_app.scrapers.cdiscount_fr",
-    # "assistant_app.scrapers.fnac_fr",
-    # "assistant_app.scrapers.darty_fr",
-]
-
-def _value_score(p):
-    # Pass title + specs (joined) + price
-    specs_text = ""
+def search_products(query: str, category: str = "general", country_hint: str = "FR") -> List[Product]:
+    """
+    Search for products with smart category logic (like the CLI).
+    Category: 'gaming', 'work', 'general'.
+    """
+    final_query = query
+    if category == "gaming":
+        # Ensure gaming keywords if not present
+        if "rtx" not in query.lower() and "gtx" not in query.lower() and "gaming" not in query.lower():
+            final_query += " rtx"
+    elif category == "work":
+        # French retail context: 'professionnel' helps filter out toys/accessories
+        terms = ["professionnel", "pro", "business", "thinkpad", "latitude", "macbook"]
+        if not any(t in query.lower() for t in terms):
+            final_query += " professionnel"
+    
+    # Use Async Search for parallel scraping (Performance Boost)
+    # We wrap it in asyncio.run() because this function is called synchronously by tools/CLI
     try:
-        if isinstance(p.specs, dict):
-            specs_text = " ".join(f"{k}:{v}" for k, v in p.specs.items() if v)
-        else:
-            specs_text = str(p.specs or "")
-    except Exception:
-        specs_text = str(p.specs or "")
-    return value_score(p.title, specs_text, getattr(p, "price", 0.0) or 0.0)
+        # Check if we are already in an event loop (unlikely for sync CLI/Tools, but possible)
+        try:
+            loop = asyncio.get_running_loop()
+            if loop.is_running():
+                # We are in an async context, but this function is sync.
+                # Ideally we should strictly separate sync/async paths.
+                # For now, falling back to sync search_all to avoid "This event loop is already running"
+                results = search_all(final_query, country_hint=country_hint)
+            else:
+                results = asyncio.run(search_all_async(final_query))
+        except RuntimeError:
+             results = asyncio.run(search_all_async(final_query))
+    except Exception as e:
+        logger.warning(f"Async search failed, falling back to sync: {e}")
+        results = search_all(final_query, country_hint=country_hint)
+    
+    # Heuristic: Filter noise (Air fryers, accessories) based on price
+    clean_results = []
+    for p in results:
+        price = getattr(p, "price", 0.0) or 0.0
+        if category == "gaming" and price < 400:
+            continue # Gaming PCs/Laptops are definitely > 400
+        if category == "work" and price < 200:
+            continue # Work laptops are rarely < 200
+        clean_results.append(p)
 
-def _normalize(products):
-    return sorted(products, key=_value_score, reverse=True)
-
-def _iter_scrapers():
-    if isinstance(SCRAPERS, dict):
-        yield from SCRAPERS.items()
-    else:
-        for i, s in enumerate(SCRAPERS):
-            name = getattr(s, "NAME", None) or getattr(s, "__name__", None) or f"s{i}"
-            yield name, s
+    return clean_results
 
 def _run_scraper(scraper, query: str):
     if hasattr(scraper, "search") and callable(scraper.search):
@@ -50,11 +67,11 @@ def _run_scraper(scraper, query: str):
 def search_all(query: str, country_hint: str | None = None):
     target_country = country_hint or None
     products = []
-    for name, scraper in _iter_scrapers():
+    for name, scraper in SCRAPERS.items():
         try:
             items = list(_run_scraper(scraper, query))
         except Exception as e:
-            print(f"[scraper] {name}: {e}")
+            logger.error(f"[scraper] {name}: {e}")
             continue
         if target_country:
             items = [p for p in items if getattr(p, "country", None) == target_country]
@@ -98,7 +115,7 @@ async def _run_scraper_async(scraper, name: str, query: str) -> List[Product]:
 
         return items or []
     except Exception as e:
-        print(f"[scraper] {name}: {e}")
+        logger.error(f"[scraper] {name}: {e}")
         return []
 
 async def search_all_async(query: str, use_cache: bool = True, force_refresh: bool = False) -> List[Product]:

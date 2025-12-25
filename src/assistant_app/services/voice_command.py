@@ -37,19 +37,7 @@ def process_voice_command(text: str, speak_response: bool = True):
         reply("Goodbye.")
         raise typer.Exit()
 
-    # 2. REMINDER SETTING (Strict Regex)
-    # Must start with "remind me" or "set reminder" or "remember to"
-    if re.match(r"^(remind me|set reminder|remember to)", text):
-        clean_text = re.sub(r"^(remind me (to )?|set reminder (to )?|remember to )", "", text).strip()
-        dt, remainder = parse_when(clean_text)
-        if dt:
-            add_once(clean_text, dt)
-            reply(f"I've set a reminder for {dt.strftime('%H:%M')}.")
-        else:
-            reply("I heard you want a reminder, but I couldn't understand the time.")
-        return
-
-    # 3. OTHER COMMANDS (Keyword Presence)
+    # 2. OTHER COMMANDS (Keyword Presence)
     # Only if specific unique phrases are found
     
     # Prayer

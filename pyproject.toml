@@ -10,6 +10,10 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
   "playwright",
+  "pandas",
+  "instructor",
+  "chromadb",
+  "youtube-transcript-api",
   "beautifulsoup4",
   "lxml",
   "pydantic",
@@ -23,13 +27,18 @@ dependencies = [
   "pyaudio",
   "pyttsx3",
   "thefuzz",
-  "google-generativeai",
   "ollama",
   "edge-tts",
   "pygame",
   "duckduckgo-search",
   "beautifulsoup4",
   "faster-whisper",
+  "plyer",
+  "rich",
+  "loguru",
+  "pyautogui",
+  "pycaw",
+  "comtypes",
 ]
 
 [project.scripts]
