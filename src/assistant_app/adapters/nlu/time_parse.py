@@ -1,11 +1,15 @@
 import dateparser
 import re
+from datetime import datetime
 
 def parse_when(text: str):
-    # Returns a naive datetime or None. For recurring, use simple keywords for now.
-    dt = dateparser.parse(text)
+    # Fix "after X minutes" -> "in X minutes"
+    text = re.sub(r'\bafter\s+(\d+)\s+', r'in \1 ', text, flags=re.IGNORECASE)
+    
+    # Force future preference
+    dt = dateparser.parse(text, settings={'PREFER_DATES_FROM': 'future', 'RELATIVE_BASE': datetime.now()})
+    
     recurrence = None
-    # crude recurring hints; replace with better rules later
     lower = text.lower()
     if "every" in lower or "each" in lower:
         recurrence = lower

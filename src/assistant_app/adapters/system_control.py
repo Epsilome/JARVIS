@@ -31,15 +31,20 @@ def set_volume(level: int):
         return False
 
     try:
+        # COM Initialization for Thread Safety
+        try:
+             import comtypes
+             comtypes.CoInitialize()
+        except: pass
+
         # PyCaw setup (Simplified for v2+)
         devices = AudioUtilities.GetSpeakers()
         volume = devices.EndpointVolume
         
         # Scale 0-100 to scalar 0.0-1.0
-        
-        # Scale 0-100 to scalar 0.0-1.0
         # Note: SetMasterVolumeLevelScalar is linear perception
-        scalar = max(0.0, min(1.0, level / 100.0))
+        val = float(level)
+        scalar = max(0.0, min(1.0, val / 100.0))
         volume.SetMasterVolumeLevelScalar(scalar, None)
         logger.info(f"Volume set to {level}%")
         return True
@@ -55,11 +60,35 @@ def lock_screen():
 
     logger.info("Locking screen...")
     if platform.system() == "Windows":
-        pyautogui.hotkey('win', 'l')
+        try:
+            import ctypes
+            ctypes.windll.user32.LockWorkStation()
+        except Exception as e:
+            logger.error(f"Failed to lock via ctypes: {e}")
+            pyautogui.hotkey('win', 'l') # Fallback
     elif platform.system() == "Darwin":
         pyautogui.hotkey('ctrl', 'cmd', 'q')
     else:
         logger.warning("Lock screen not implemented for this OS.")
+
+def focus_window(title_query: str):
+    """Brings a window matching the title to the foreground."""
+    try:
+        import pygetwindow as gw
+        windows = gw.getWindowsWithTitle(title_query)
+        if windows:
+            win = windows[0]
+            if win.isMinimized:
+                win.restore()
+            win.activate()
+            logger.info(f"Focused window: {win.title}")
+            return True
+        else:
+            logger.warning(f"No window found matching '{title_query}'")
+            return False
+    except Exception as e:
+        logger.error(f"Failed to focus window: {e}")
+        return False
 
 def minimize_all():
     """Minimize all windows (Show Desktop)."""

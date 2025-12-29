@@ -118,6 +118,32 @@ TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
+            "name": "delete_reminder",
+            "description": "Cancel or delete a reminder that matches the provided text.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "partial_text": {"type": "string", "description": "The text to match (e.g. 'water', 'meeting')"},
+                },
+                "required": ["partial_text"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_active_reminders",
+            "description": "List all currently scheduled reminders.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "update_user_profile",
             "description": "Save user preferences/constraints (budget, region, primary usage) to memory.",
             "parameters": {
@@ -128,6 +154,84 @@ TOOLS_SCHEMA = [
                     "usage": {"type": "string", "description": "e.g. 'Gaming', 'Work'"},
                     "preferred_brand": {"type": "string", "description": "e.g. 'ASUS', 'Lenovo'"},
                 },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_system_health",
+            "description": "Check current PC system health (CPU load, RAM usage, Battery, Disk).",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "open_application",
+            "description": "Opens a Windows application (e.g. 'Spotify', 'Notepad', 'Chrome').",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "app_name": {"type": "string", "description": "Name of the app to launch."}
+                },
+                "required": ["app_name"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "set_system_volume",
+            "description": "Set the system audio volume to a specific percentage (0-100).",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "level": {"type": "integer", "description": "Volume level (0 to 100)."}
+                },
+                "required": ["level"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "minimize_windows",
+            "description": "Minimize all open windows to show the desktop.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "system_lock",
+            "description": "Lock the Windows workstation immediately.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "bring_window_to_front",
+            "description": "Finds a window by title and brings it to the foreground/focuses it.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string", "description": "Partial title of the window (e.g. 'Chrome', 'Spotify', 'Antigravity')."}
+                },
+                "required": ["title"],
             },
         },
     },
@@ -149,13 +253,15 @@ def ask_ollama(text: str) -> str | None:
         f"{'active USER CONTEXT: [' + profile_str + ']' if profile_str else ''}\n"
         "IMPORTANT RULES:\n"
         "1. For BUYING/PRICES/SHOPPING ('What can I afford?', 'Find cheap laptop'), use 'get_live_price'. Set category='gaming' for gaming PCs.\n"
-        "2. For PERFORMANCE/BENCHMARKS ('Is 4090 fast?', 'Score for Ryzen 9'), use 'lookup_hardware'.\n"
+        "2. For PERFORMANCE/BENCHMARKS ('Is 4090 fast?', 'Score for Ryzen 9'), use 'lookup_hardware'. NOTE: RTX 50-series (5090, 5080, 5070, 5060)GPUs  exist. Do not auto-correct them to 40-series.\n"
         "3. For DETAILED SPECS (VRAM, Cores, TDP), use 'lookup_detailed_specs'.\n"
         "4. For OPINIONS/REVIEWS ('Is X good?', 'Pros/Cons'), use 'get_product_opinions'.\n"
-        "5. For REMINDERS ('Remind me to X in Y'), use 'set_reminder'.\n"
+        "5. For REMINDERS ('Remind me to X', 'Delete reminder about water', 'Show my reminders'), use 'set_reminder', 'delete_reminder', or 'get_active_reminders'.\n"
         "6. For PREFERENCES ('My budget is X'), use 'update_user_profile'.\n"
-        "7. For general chat/greetings ('Hello', 'Hi', 'Who are you?'), do NOT use any tools. Just reply text.\n"
-        "8. Do not guess. Use the tools ONLY when necessary."
+        "7. For SYSTEM HEALTH ('How is my PC?', 'Check ram'), use 'get_system_health'.\n"
+        "8. For SYSTEM CONTROL ('Open Spotify', 'Volume 50', 'Lock PC', 'Focus Chrome'), use 'open_application', 'set_system_volume', 'system_lock', 'minimize_windows', 'bring_window_to_front'.\n"
+        "9. For general chat/greetings ('Hello', 'Hi', 'Who are you?'), do NOT use any tools. Just reply text.\n"
+        "10. Do not guess. Use the tools ONLY when necessary. Reply ONLY to the user's specific request. If performing a system action, confirm completion briefly and DO NOT digress into hardware topics unless asked."
     )
     
     messages = [
@@ -232,8 +338,13 @@ def ask_ollama(text: str) -> str | None:
             # Second call: Get final response with tool outputs
             # Force natural language
             messages.append({
-                "role": "system",
-                "content": "Analyze the above tool outputs. Synthesize a natural language answer for the user. Do not output JSON."
+                "role": "user",
+                "content": (
+                    "Using the tool outputs above, answer the user's question naturally. "
+                    "Do NOT output tables or raw data. Summarize the findings like a human expert. "
+                    "If comparing hardware, mention the % difference in marks. "
+                    "If the answer is simple, be concise."
+                )
             })
             print("DEBUG: Sending final prompt with tool outputs...")
             final_response = ollama.chat(model=model, messages=messages)

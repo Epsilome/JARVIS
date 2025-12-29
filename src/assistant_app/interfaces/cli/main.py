@@ -1,5 +1,12 @@
 # trunk-ignore-all(isort)
 # src/assistant_app/interfaces/cli/main.py
+import os
+# Force Load ctranslate2 (faster-whisper) DLLs BEFORE anything else (like torch in chromadb)
+try:
+    import ctranslate2
+except ImportError:
+    pass
+
 import asyncio, json, logging, signal, sys, time
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -104,27 +111,57 @@ def start():
 @app.command()
 def listen(loop: bool = True):
     """
-    Start listening for voice commands.
+    Start detailed voice interaction loop.
+    Uses Porcupine 'Wake Word' if configured, otherwise loops continuously.
     """
-    typer.echo("Listening for commands... (say 'stop' to exit)")
-    typer.echo("Listening for commands... (say 'stop' to exit)")
+    from assistant_app.adapters.nlu.wake_word import WakeWordListener
+
+    typer.echo("Initializing Ears...")
+    ww = WakeWordListener()
+    
+    if ww.porcupine:
+        typer.echo("🟢 Wake Word ENABLED: Say 'Jarvis' to activate.")
+        typer.echo("ℹ️  To exit: Wake me up ('Jarvis!') then say 'Stop' or 'Goodbye'.")
+    else:
+        typer.echo("🟡 Wake Word DISABLED (No Key). Falling back to continuous listen.")
+
     while True:
         try:
+            # 1. Wait for Wake Word (if enabled)
+            if ww.porcupine:
+                # This blocks until "Jarvis" is heard
+                if not ww.listen():
+                    # If ww.listen() returns False (interrupt), break
+                    break
+                
+                # Wake word detected!
+                typer.echo("🤖 JARVIS listening...")
+                # Optional: Add a simple beep here using winsound
+                try: 
+                    import winsound
+                    winsound.Beep(1000, 200) 
+                except: pass
+
+            # 2. Listen for Command
             text = listen_and_recognize()
+            
+            # 3. Process
             if text:
                 process_voice_command(text)
-                # Short pause to prevent mic from hearing the end of the TTS response
-                # Increased to 1.5s to be safe against echo
-                time.sleep(1.5) 
+                time.sleep(1.2)
+            
         except (KeyboardInterrupt, typer.Exit):
             typer.echo("\nStopping listener.")
             break
         except Exception as e:
             logger.error(f"Listener Loop Error: {e}")
-            time.sleep(1) # Prevent tight loop on error
-            
+            time.sleep(1) 
+        
         if not loop:
             break
+            
+    if ww.porcupine:
+        ww.close()
 
 @app.command()
 def pref():

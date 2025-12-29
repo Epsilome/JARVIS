@@ -17,8 +17,12 @@ from assistant_app.domain.ram_registry import RAMRegistry
 from assistant_app.domain.ssd_registry import SSDRegistry
 from assistant_app.domain.review_rag import ReviewIntelligence
 from assistant_app.services.ingestion.review_ingest import ReviewIngestor
+from assistant_app.adapters.system_control import (
+    set_volume, lock_screen, minimize_all, open_app as sys_open_app, focus_window
+)
 from assistant_app.services.reminders import add_once
 from assistant_app.adapters.nlu.time_parse import parse_when
+from assistant_app.adapters.system_health import get_system_health
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +43,60 @@ def set_reminder(task: str, when: str = "1 minute") -> str:
     except Exception as e:
         logger.error(f"Reminder error: {e}")
         return f"Failed to set reminder: {e}"
+
+def delete_reminder(partial_text: str) -> str:
+    """
+    Deletes a reminder if the text matches.
+    """
+    logger.info(f"Tool Call: delete_reminder('{partial_text}')")
+    # Fuzzy match logic
+    from assistant_app.interfaces.scheduler.scheduler import scheduler
+    
+    found = []
+    # Search for job with matching text kwarg
+    for job in scheduler.get_jobs():
+        txt = job.kwargs.get('text', '').lower()
+        if partial_text.lower() in txt:
+             found.append(job)
+             
+    if not found:
+        return f"No active reminders found matching '{partial_text}'."
+        
+    deleted_count = 0
+    for job in found:
+        try:
+            job.remove()
+            deleted_count += 1
+        except: pass
+        
+    return f"Removed {deleted_count} reminder(s) containing '{partial_text}'."
+
+def get_active_reminders() -> str:
+    """
+    Returns a list of all currently scheduled reminders.
+    """
+    logger.info("Tool Call: get_active_reminders()")
+    from assistant_app.interfaces.scheduler.scheduler import scheduler
+    
+    jobs = scheduler.get_jobs()
+    if not jobs:
+        return "You have no active reminders."
+        
+    summary = f"Found {len(jobs)} active reminders:\n"
+    for job in jobs:
+        # job.id is usually 'rem_ID' or 'eye_HHMM'
+        # job.kwargs['text'] holds the message for Cron/Interval
+        # job.args[0] holds the message for Date/Once
+        txt = job.kwargs.get('text')
+        if not txt and job.args:
+            txt = job.args[0]
+        if not txt:
+            txt = 'Unknown Task'
+            
+        next_run = job.next_run_time.strftime("%H:%M") if job.next_run_time else "Unknown Time"
+        summary += f"- '{txt}' at {next_run} (ID: {job.id})\n"
+        
+    return summary
 
 def lookup_hardware(query: str) -> str:
     """
@@ -236,11 +294,51 @@ def get_product_opinions(product_name: str) -> str:
         logger.error(f"Opinion RAG failed: {e}")
         return f"Could not analyze opinions: {e}"
 
+def open_application(app_name: str) -> str:
+    """Opens a Windows application by name."""
+    logger.info(f"Tool Call: open_application('{app_name}')")
+    sys_open_app(app_name)
+    return f"Opening {app_name}..."
+
+def set_system_volume(level: int) -> str:
+    """Sets system volume (0-100)."""
+    logger.info(f"Tool Call: set_system_volume({level})")
+    if set_volume(level):
+        return f"Volume set to {level}%."
+    return "Failed to set volume. Check logs."
+
+def bring_window_to_front(title: str) -> str:
+    """Focuses a specific window."""
+    logger.info(f"Tool Call: bring_window_to_front('{title}')")
+    if focus_window(title):
+        return f"Focused window matching '{title}'."
+    return f"Could not find or focus window '{title}'."
+
+def system_lock() -> str:
+    """Locks the workstation."""
+    logger.info("Tool Call: system_lock()")
+    lock_screen()
+    return "Locking screen."
+
+def minimize_windows() -> str:
+    """Minimizes all windows."""
+    logger.info("Tool Call: minimize_windows()")
+    minimize_all()
+    return "All windows minimized."
+
 AVAILABLE_TOOLS = {
     "lookup_hardware": lookup_hardware,
     "lookup_detailed_specs": lookup_detailed_specs,
     "search_web": search_web,
     "get_live_price": get_live_price,
     "get_product_opinions": get_product_opinions,
-    "set_reminder": set_reminder
+    "set_reminder": set_reminder,
+    "delete_reminder": delete_reminder,
+    "get_active_reminders": get_active_reminders,
+    "get_system_health": get_system_health,
+    "open_application": open_application,
+    "set_system_volume": set_system_volume,
+    "system_lock": system_lock,
+    "minimize_windows": minimize_windows,
+    "bring_window_to_front": bring_window_to_front
 }
