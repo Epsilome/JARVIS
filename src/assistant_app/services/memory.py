@@ -63,3 +63,42 @@ def get_profile_db() -> dict:
             "usage": profile.usage,
             "preferred_brand": profile.preferred_brand
         }
+
+from sqlalchemy import DateTime
+import datetime
+
+class Note(Base):
+    __tablename__ = "notes"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    content: Mapped[str] = mapped_column(Text)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime, default=datetime.datetime.now)
+
+def add_note_db(content: str) -> str:
+    with SessionLocal() as db:
+        note = Note(content=content)
+        db.add(note)
+        db.commit()
+        return f"Note saved with ID {note.id}."
+
+def get_notes_db() -> list[dict]:
+    with SessionLocal() as db:
+        notes = db.query(Note).order_by(Note.created_at.desc()).all()
+        return [{"id": n.id, "content": n.content, "created_at": n.created_at.strftime("%Y-%m-%d %H:%M")} for n in notes]
+
+def delete_note_db(note_id: int) -> bool:
+    with SessionLocal() as db:
+        note = db.query(Note).filter(Note.id == note_id).one_or_none()
+        if note:
+            db.delete(note)
+            db.commit()
+            return True
+        return False
+
+def update_note_db(note_id: int, new_content: str) -> bool:
+    with SessionLocal() as db:
+        note = db.query(Note).filter(Note.id == note_id).one_or_none()
+        if note:
+            note.content = new_content
+            db.commit()
+            return True
+        return False

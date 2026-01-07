@@ -40,6 +40,8 @@ dependencies = [
   "psutil",
   "pvporcupine",
   "flet",
+  "pyperclip",
+  "keyboard",
 ]
 
 [project.scripts]

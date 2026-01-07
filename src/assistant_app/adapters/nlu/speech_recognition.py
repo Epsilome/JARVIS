@@ -2,7 +2,6 @@ import speech_recognition as sr
 import logging
 import os
 import tempfile
-from faster_whisper import WhisperModel
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +15,8 @@ def get_model():
     global _model
     if _model is None:
         logger.info(f"Loading Faster Whisper model ({MODEL_SIZE})...")
+        from faster_whisper import WhisperModel
+        
         # Default to CPU to avoid 'cudnn_ops64_9.dll' errors on Windows
         # GPU requires specific cuDNN v9 installation which is often missing.
         logger.info("Using CPU (INT8) for stability.")

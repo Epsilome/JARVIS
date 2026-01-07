@@ -1,15 +1,38 @@
 # trunk-ignore-all(isort)
 # src/assistant_app/interfaces/cli/main.py
 import os
+import sys
+import warnings
+
+# Suppress all noisy warnings immediately, BEFORE other imports
+warnings.filterwarnings("ignore", category=UserWarning, module="torch")
+warnings.filterwarnings("ignore", category=FutureWarning, module="torch") # For weight_norm
+warnings.filterwarnings("ignore", category=DeprecationWarning, module="misaki")
+warnings.filterwarnings("ignore", category=RuntimeWarning, module="duckduckgo_search")
+warnings.filterwarnings("ignore", category=ResourceWarning) # Silence socket warnings (Ollama)
+warnings.filterwarnings("ignore", message="Word count mismatch", module="phonemizer")
+
+import logging
+# Configure loggers - Silence 3rd party noise
+logging.getLogger("phonemizer").setLevel(logging.CRITICAL)
+logging.getLogger("phonemizer.backend").setLevel(logging.CRITICAL)
+logging.getLogger("espeakng").setLevel(logging.CRITICAL)
+logging.getLogger("misaki").setLevel(logging.ERROR)
+logging.getLogger("parso").setLevel(logging.ERROR)
+
+import asyncio
+import json
+import signal
+import time
+from pathlib import Path
+
 # Force Load ctranslate2 (faster-whisper) DLLs BEFORE anything else (like torch in chromadb)
 try:
     import ctranslate2
 except ImportError:
     pass
 
-import asyncio, json, logging, signal, sys, time
-from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 import typer
 from loguru import logger
 from assistant_app.adapters.console_manager import console, print_table, print_panel, create_table, print_success, print_error, print_warning

@@ -8,12 +8,19 @@ from assistant_app.services.movies_seen import all_seen
 from assistant_app.config.settings import settings
 from assistant_app.adapters.nlu.tts_kokoro import speak
 from assistant_app.adapters.nlu.ollama_adapter import ask_ollama
-
-
+# Optional UI hook
+try:
+    from assistant_app.interfaces.gui.state import state
+except ImportError:
+    state = None
 
 def respond(text: str, speak_audio: bool = True):
     """Echoes text to console and speaks it (if enabled)."""
     typer.echo(text)
+    if state:
+        state.add_message("assistant", text)
+        state.add_log(f"Response: {text[:30]}...")
+        
     if speak_audio:
         speak(text)  # tts_kokoro handles markdown stripping
 
