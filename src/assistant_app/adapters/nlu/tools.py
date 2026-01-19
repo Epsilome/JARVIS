@@ -305,13 +305,22 @@ def open_search_result(index: int) -> str:
         logger.error(f"Error opening search result: {e}")
         return f"Error opening result: {e}"
 
-def get_live_price(product: str, category: str = "general") -> str:
+def get_live_price(product: str, category: str = "general", price_max: float = None) -> str:
     """
-    Searches for live prices of a product from online retailers.
-    Useful for "How much is X?" or "Price of Y".
-    Category can be 'gaming' (adds RTX query logic), 'work', or 'general'.
+    Searches for LIVE PRICES and DEALS of products from real online retailers like Cdiscount, Amazon, LDLC.
+    USE THIS for:
+    - "search for a laptop", "find me a gaming PC", "laptop gamer"
+    - "price of X", "how much is X", "deals on X"
+    - "buy a laptop for 1000 euros", "laptop under 1500"
+    - ANY product shopping or price-related query
+    
+    Category: 'gaming' (adds RTX logic), 'work', or 'general'.
+    price_max: Maximum price in EUR (e.g. 1500 for "laptop under 1500 euros")
+    Returns actual prices in EUR from French retailers.
+    
+    DO NOT use search_web for product searches - use this tool instead!
     """
-    logger.info(f"Tool Call: get_live_price('{product}', category='{category}')")
+    logger.info(f"Tool Call: get_live_price('{product}', category='{category}', price_max={price_max})")
     
     # Fallback for empty product (LLM extraction failure)
     search_term = product
@@ -326,16 +335,68 @@ def get_live_price(product: str, category: str = "general") -> str:
         if not results:
             return "No live prices found."
         
-        # Sort by price
-        results.sort(key=lambda x: x.price or float('inf'))
+        # Scoring System with detailed breakdown
+        from assistant_app.domain.benchmarks import value_breakdown, match_cpu, match_gpu
         
-        summary = f"Found {len(results)} deals for '{product}' ({category}):\n"
-        for p in results[:5]:
-            summary += f"- {p.title}: {p.price} € ({p.store})\n"
+        # Filter by price_max if provided
+        if price_max:
+            results = [p for p in results if (p.price or 0) <= price_max]
+            if not results:
+                return f"No laptops found under {price_max} €. Try a higher budget."
+        
+        # Calculate scores for all items
+        scored_results = []
+        for p in results:
+            # Use description if available, else just title
+            specs = getattr(p, "description", "") or ""
+            breakdown = value_breakdown(p.title, specs, p.price or 9999.0)
+            scored_results.append((p, breakdown))
+            
+        # Sort by Score (Best first)
+        scored_results.sort(key=lambda x: x[1]["score"], reverse=True)
+        
+        # Build detailed output
+        summary = f"**Top {min(10, len(results))} Laptops for '{product}' ({category})**\n"
+        summary += "Ranked by Value Score (Performance ÷ Price):\n\n"
+        
+        for i, (p, b) in enumerate(scored_results[:10], 1):
+            # Extract detected components
+            cpu = match_cpu(p.title) or "Unknown CPU"
+            gpu = match_gpu(p.title) or "Unknown GPU"
+            
+            # Format RAM tier
+            ram_labels = {0: "8GB", 1: "16GB", 2: "32GB", 3: "64GB+"}
+            ram = ram_labels.get(b["ram_tier"], "?GB")
+            
+            # Format display
+            display = f"{b['hz']}Hz {b['panel'].upper()}" if b['panel'] else f"{b['hz']}Hz"
+            if b['hz'] == 0:
+                display = "Standard"
+            
+            # Format storage
+            storage = f"{b['storage_gb']}GB SSD" if b['storage_gb'] > 0 else "SSD"
+            
+            summary += f"**{i}. {p.title[:60]}{'...' if len(p.title) > 60 else ''}**\n"
+            summary += f"   • Price: **{p.price} €** | Score: **{b['score']:.2f}**\n"
+            summary += f"   • CPU: {cpu} (pts: {b['cpu_raw']:.0f})\n"
+            summary += f"   • GPU: {gpu} (pts: {b['gpu_raw']:.0f})\n"
+            summary += f"   • RAM: {ram} | Display: {display} | Storage: {storage}\n"
+            summary += f"   • Store: {p.store}\n\n"
+        
         return summary
+
     except Exception as e:
         logger.error(f"Price search error: {e}")
         return f"Error searching prices: {e}"
+
+def get_weather(city: str, country: str = "") -> str:
+    """Get weather for a city."""
+    from assistant_app.services.weather_service import get_weather_sync
+    try:
+        w = get_weather_sync(city, country or None)
+        return f"Weather in {w['city']}, {w['country']}: {w['temp']}°C, {w['description']}. Humidity: {w['humidity']}%."
+    except Exception as e:
+        return f"Could not get weather for {city}: {e}"
 
 def get_product_opinions(product_name: str) -> str:
     """
@@ -450,19 +511,29 @@ def open_multiple_search_results(indices: list[int]) -> str:
 def close_multiple_tabs(indices: list[int] | str) -> str:
     """
     Closes multiple tabs by their indices.
+    Pass "all" to close all tabs.
     """
     logger.info(f"Tool Call: close_multiple_tabs({indices})")
     
-    # Robust parsing if passed as string
+    # Handle "all" or "any" keywords
     if isinstance(indices, str):
+        lower_indices = indices.lower().strip()
+        if lower_indices in ["all", "any", "every", "everything"]:
+            control_browser("close_all_tabs")
+            return "Closed all tabs."
+        
+        # Robust parsing - handle comma, space, or mixed separators
         try:
-            # Handle list-like string "[1, 2]" or simple comma "1, 2"
-            clean = indices.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-            indices_list = [int(x.strip()) for x in clean.split(",") if x.strip().isdigit()]
+            # Handle "[1, 2]", "1, 2", "1 2 5", "1,2,5"
+            import re
+            clean = re.sub(r'[\[\]\'\"]', '', indices)  # Remove brackets/quotes
+            # Split on comma, space, or "and"
+            parts = re.split(r'[,\s]+|and', clean)
+            indices_list = [int(x.strip()) for x in parts if x.strip().isdigit()]
         except Exception as e:
             return f"Error parsing indices: {e}"
     elif isinstance(indices, list):
-        indices_list = indices
+        indices_list = [int(x) for x in indices if str(x).isdigit()]
     else:
         return "Invalid format for indices."
 
@@ -564,6 +635,77 @@ def update_note(index: int, new_content: str) -> str:
     except Exception as e:
          return f"Error updating note: {e}"
 
+
+# --- MOVIES WATCHED IMPLEMENTATION ---
+from assistant_app.services.movies_seen import all_seen, mark_seen, unmark_seen, is_seen_map
+
+def get_movies_watched() -> str:
+    """
+    Returns all movies the user has marked as watched.
+    Use this when user asks 'what movies have I watched', 'movies I've seen', 'my watched list'.
+    """
+    logger.info("Tool Call: get_movies_watched()")
+    try:
+        movies = all_seen()
+        if not movies:
+            return "You haven't marked any movies as watched yet."
+        
+        summary = f"You have watched {len(movies)} movies:\n"
+        for m in movies[:10]:  # Show last 10
+            summary += f"- {m.title} ({m.year})\n"
+        
+        if len(movies) > 10:
+            summary += f"...and {len(movies) - 10} more."
+        
+        return summary
+    except Exception as e:
+        logger.error(f"Movies watched error: {e}")
+        return f"Error getting watched movies: {e}"
+
+def add_movie_watched(title: str, year: str = "", tmdb_id: str = "", imdb_id: str = "") -> str:
+    """
+    Marks a movie as watched. 
+    Use this when user says 'I watched X', 'mark X as seen', 'add X to watched'.
+    """
+    logger.info(f"Tool Call: add_movie_watched('{title}', '{year}')")
+    try:
+        # Generate IDs if not provided
+        if not tmdb_id:
+            tmdb_id = f"manual_{hash(title) % 100000}"
+        if not imdb_id:
+            imdb_id = f"tt{hash(title) % 10000000:07d}"
+        
+        if mark_seen(tmdb_id, imdb_id, title, year):
+            return f"Marked '{title}' ({year}) as watched."
+        else:
+            return f"'{title}' was already in your watched list."
+    except Exception as e:
+        logger.error(f"Mark movie error: {e}")
+        return f"Error marking movie as watched: {e}"
+
+def remove_movie_watched(title: str) -> str:
+    """
+    Removes a movie from the watched list.
+    Use when user says 'remove X from watched', 'unmark X'.
+    """
+    logger.info(f"Tool Call: remove_movie_watched('{title}')")
+    try:
+        movies = all_seen()
+        # Find by partial title match
+        found = None
+        for m in movies:
+            if title.lower() in m.title.lower():
+                found = m
+                break
+        
+        if found and unmark_seen(found.imdb_id):
+            return f"Removed '{found.title}' from your watched list."
+        return f"Could not find '{title}' in your watched list."
+    except Exception as e:
+        logger.error(f"Remove movie error: {e}")
+        return f"Error removing movie: {e}"
+
+
 AVAILABLE_TOOLS = {
     "lookup_hardware": lookup_hardware,
     "lookup_detailed_specs": lookup_detailed_specs,
@@ -590,4 +732,10 @@ AVAILABLE_TOOLS = {
     "delete_note": delete_note,
     "update_note": update_note,
     "close_multiple_tabs": close_multiple_tabs,
+    # Movies watched tools
+    "get_movies_watched": get_movies_watched,
+    "add_movie_watched": add_movie_watched,
+    "remove_movie_watched": remove_movie_watched,
+    "get_weather": get_weather,
 }
+

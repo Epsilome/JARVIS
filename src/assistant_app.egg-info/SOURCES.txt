@@ -1,5 +1,6 @@
 README.md
 pyproject.toml
+src/assistant_app/test_search.py
 src/assistant_app.egg-info/PKG-INFO
 src/assistant_app.egg-info/SOURCES.txt
 src/assistant_app.egg-info/dependency_links.txt

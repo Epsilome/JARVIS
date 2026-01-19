@@ -1,10 +1,9 @@
-
 import flet as ft
 from assistant_app.interfaces.gui.theme import (
     IronTheme, IRON_CYAN, PANEL_BG, PANEL_BORDER, CYAN_GLOW
 )
 
-class GlassCard(ft.Container):
+class GlassCard(ft.Stack):
     def __init__(
         self,
         title: str,
@@ -19,33 +18,54 @@ class GlassCard(ft.Container):
         self.width = width
         self.height = height
         self.expand = expand
-        self.border_radius = 12
-        self.bgcolor = PANEL_BG
-        self.border = ft.border.all(1, PANEL_BORDER)
-        self.padding = 15
-        self.blur = ft.Blur(10, 10, ft.BlurTileMode.MIRROR)
-        self.shadow = CYAN_GLOW
         
-        header = ft.Row(
-            [
-                ft.Icon(icon, color=IRON_CYAN, size=14),
-                IronTheme.header_text(title, size=11),
-                ft.Container(expand=True),
-                ft.Container(
-                    content=ft.Icon("open_in_full", color=ft.Colors.with_opacity(0.5, IRON_CYAN), size=12),
-                    on_click=lambda e: print(f"Expand {title}"),  # Placeholder
-                )
-            ],
-            alignment=ft.MainAxisAlignment.START,
-            vertical_alignment=ft.CrossAxisAlignment.CENTER,
-            spacing=8,
+        # Layer 1: The Background Image (Dark Glass)
+        # This replaces Container.bgcolor/image_src to avoid theme overrides.
+        self.bg_image = ft.Image(
+            src=r"d:/JARVIS/src/assistant_app/assets/glass_bg.png",
+            fit="cover",
+            opacity=0.9,
+            width=width,
+            height=height,
         )
         
-        self.content = ft.Column(
-            [
-                header,
-                ft.Divider(color=PANEL_BORDER, height=1, thickness=1),
-                content,
-            ],
-            spacing=10,
+        # Layer 2: The Content Container (Border, Layout)
+        self.main_container = ft.Container(
+            border=ft.border.all(1, PANEL_BORDER),
+            border_radius=12,
+            padding=0,
+            bgcolor=ft.Colors.TRANSPARENT, # FORCE TRANSPARENCY to reveal Image
+            content=ft.Stack(
+                controls=[
+                    # Header
+                    ft.Icon(icon, color=IRON_CYAN, size=14, top=8, left=5),
+                    ft.Container(
+                        content=IronTheme.header_text(title, size=11),
+                        top=8, left=25, height=20,
+                        bgcolor=ft.Colors.TRANSPARENT, # Safety transparency
+                    ),
+                    ft.Icon("open_in_full", color=ft.Colors.with_opacity(0.5, IRON_CYAN), size=12, top=8, right=5),
+                    
+                    # Divider
+                    ft.Container(height=1, bgcolor=PANEL_BORDER, opacity=0.5, top=35, left=0, right=0),
+                    
+                    # Content
+                    content,
+                ],
+                expand=True
+            ),
         )
+        
+        # Position Content
+        content.top = 45
+        content.left = 10
+        content.right = 10
+        content.bottom = 10
+        content.expand = True
+
+        # Assemble the Stack
+        self.controls = [
+            self.bg_image,      # Bottom Layer
+            self.main_container # Top Layer
+        ]
+

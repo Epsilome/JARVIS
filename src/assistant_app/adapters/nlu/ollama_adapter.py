@@ -48,7 +48,7 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "search_web",
-            "description": "Search the web for recent information, news, movies, or general knowledge.",
+            "description": "Search the web for real-time news, specific facts, or external data. Do NOT use for general knowledge (definitions, jokes, etc).",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -65,13 +65,13 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "get_live_price",
-            "description": "Get current live prices for a product from online retailers.",
+            "description": "Search for LIVE PRICES and DEALS from retailers (Cdiscount, Amazon, LDLC). USE THIS for: shopping queries, 'search for a laptop', 'find me a gaming PC', 'laptop for 1000 euros', 'buy a monitor', 'price of X'. Preferred over search_web for product/shopping queries.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "product": {
                         "type": "string",
-                        "description": "The search query (e.g. 'laptop', 'monitor'). Must not be empty.",
+                        "description": "The search query (e.g. 'laptop', 'gaming laptop', 'monitor').",
                     },
                     "category": {
                         "type": "string",
@@ -97,6 +97,47 @@ TOOLS_SCHEMA = [
                     },
                 },
                 "required": ["product_name"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_movies_watched",
+            "description": "Get the list of movies the user has watched. Use for: 'movies I watched', 'what movies have I seen', 'my watched list', 'show my watched films'.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "add_movie_watched",
+            "description": "Mark a movie as watched. Use for: 'I watched Inception', 'mark The Shining as seen', 'add Alien to watched'.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string", "description": "Movie title"},
+                    "year": {"type": "string", "description": "Release year (optional)"}
+                },
+                "required": ["title"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "remove_movie_watched",
+            "description": "Remove a movie from the watched list.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string", "description": "Movie title to remove"}
+                },
+                "required": ["title"],
             },
         },
     },
@@ -332,7 +373,7 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "open_multiple_search_results",
-            "description": "Opens multiple search results at once by their indices.",
+            "description": "Opens MULTIPLE links/results from the LAST search. Use when user says 'open link 1, 2, 5' or 'open the first second and fifth link' or 'open results 1 3 5'. DO NOT use search_web for this.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -350,14 +391,13 @@ TOOLS_SCHEMA = [
         "type": "function",
         "function": {
             "name": "close_multiple_tabs",
-            "description": "Closes multiple tabs at once by their indices.",
+            "description": "Closes multiple browser tabs at once. Use when user says 'close tabs 1, 2' or 'close all tabs' or 'close first and second tab'. Pass 'all' to close all tabs.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "indices": {
-                        "type": "array",
-                        "items": {"type": "integer"},
-                        "description": "List of tab indices to close (e.g. [1, 3])."
+                        "type": "string",
+                        "description": "Either 'all' to close all tabs, or a comma-separated list like '1, 2, 3' or '1 2 5'."
                     }
                 },
                 "required": ["indices"],
@@ -419,6 +459,21 @@ TOOLS_SCHEMA = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get current weather for a specific city.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city": {"type": "string", "description": "City name (e.g. Paris, Casablanca)."},
+                    "country": {"type": "string", "description": "Country code (optional)."}
+                },
+                "required": ["city"],
+            },
+        },
+    },
 ]
 
 
@@ -475,10 +530,10 @@ def ask_ollama(text: str) -> str | None:
         "</TOOL_POLICIES>\n\n"
 
         "<CORE_CONSTRAINTS>\n"
-        "- If the user says 'Hello', 'Top', 'You' or engages in small talk/ambiguous phrases, ASK FOR CLARIFICATION. DO NOT SEARCH.\n"
-        "- Do not hallucinate specs. If a tool returns no data, inform the user you cannot find that specific detail.\n"
+        "- SEARCH POLICY: Do NOT search the web for general knowledge, definitions, jokes, or small talk. Use your internal knowledge. Only search if the user explicitly asks for real-time news, specific product prices, or external data.\n"
+        "- SEARCH OUTPUT: When providing search results, output a Markdown list of the Top 3-5 results in this format: '- [Title](URL)'. Do NOT read snippets. Do NOT summarize the content unless explicitly asked. JUST THE LIST.\n"
         "- Always consider the USER_CONTEXT (Budget, Region) when making hardware recommendations.\n"
-        "- Reply ONLY to the user's specific request. Be concise.\n"
+        "- Reply ONLY to the user's specific request.\n"
         "</CORE_CONSTRAINTS>"
     )
     
@@ -551,6 +606,33 @@ def ask_ollama(text: str) -> str | None:
                      # Remap arguments (keep only indices)
                      args = {"indices": args['indices']}
 
+                # INTERCEPTOR 3: Hallucination 'switch_tab_N' or integer args for open
+                if res_action and ('switch' in res_action or 'open' in res_action):
+                     # If users says "Open the second one", model might try 'switch_tab_2' or 'reopen_tab' with arg=2
+                     # We should assume this refers to SEARCH RESULTS if a search just happened? 
+                     # Or just redirect to open_multiple_search_results if arg is int.
+                     logger.warning(f"Intercepting browser action '{res_action}' with args {args}")
+                     
+                     # Check for numeric argument hallucinated in action name (e.g. switch_tab_2)
+                     import re
+                     match = re.search(r'\d+', res_action)
+                     idx = None
+                     if match:
+                         idx = int(match.group())
+                     elif isinstance(args.get('arg'), int):
+                         idx = args.get('arg')
+                     elif isinstance(args.get('query'), int): # Sometimes query=2
+                         idx = args.get('query')
+                     elif str(args.get('query')).isdigit():
+                         idx = int(args.get('query'))
+                     
+                     if idx is not None:
+                         # Redirect to OPEN SEARCH RESULT (safest bet for voice assistant usually)
+                         logger.warning(f"Redirecting hallucinated tab action to open_search_result(index={idx})")
+                         fn_name = "open_multiple_search_results"
+                         function_to_call = AVAILABLE_TOOLS["open_multiple_search_results"]
+                         args = {"indices": [idx]}
+
             if fn_name in AVAILABLE_TOOLS:
                 function_to_call = AVAILABLE_TOOLS[fn_name]
                 logger.info(f"Executing tool {fn_name} with args: {args}")
@@ -603,11 +685,12 @@ def ask_ollama(text: str) -> str | None:
         prompt_content = ""
         if last_tool == "search_web":
              prompt_content = (
-                "Using the tool outputs above, answer the user's question naturally.\n"
-                "- If search results were found, READ OUT ALL available titles (up to 7-10) with numbering. Do NOT arbitrarily limit to 3. The user needs the full list.\n"
-                "- Do NOT output raw JSON or tables.\n"
-                "- You can offer to open multiple links using 'open_multiple_search_results'.\n"
-                "BE CONCISE but COMPLETE."
+                "Using the tool outputs above, provide the results.\n"
+                "- OUTPUT THE MARKDOWN LIST IMMEDIATELY.\n"
+                "- Format: '- [Title](URL)'\n"
+                "- Do NOT add intro text like 'Here are the results'.\n"
+                "- Do NOT summarize. Just the list.\n"
+                "BE COMPLETE."
             )
         elif last_tool == "open_search_result" or last_tool == "open_multiple_search_results":
              prompt_content = (

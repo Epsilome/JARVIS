@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Theme CSS Variables */
+:root {
+  --accent-color: #00F0FF;
+  --accent-color-rgb: 0, 240, 255;
+}
+
+:root[data-theme="cyan"] {
+  --accent-color: #00F0FF;
+  --accent-color-rgb: 0, 240, 255;
+}
+
+:root[data-theme="green"] {
+  --accent-color: #00FF88;
+  --accent-color-rgb: 0, 255, 136;
+}
+
+:root[data-theme="purple"] {
+  --accent-color: #A855F7;
+  --accent-color-rgb: 168, 85, 247;
+}
+
+:root[data-theme="amber"] {
+  --accent-color: #FFB800;
+  --accent-color-rgb: 255, 184, 0;
+}
+
+:root[data-theme="red"] {
+  --accent-color: #FF6B6B;
+  --accent-color-rgb: 255, 107, 107;
+}
+
+/* GLOBAL RESET */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Custom Scrollbar for Chat */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #050505;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--accent-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--accent-color) 70%, black);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  /* Prevent body scroll in electron app */
+}
+
+body {
+  background: transparent;
+}
+
+/* Utility classes for themed shadows */
+.glow-accent {
+  box-shadow: 0 0 15px rgba(var(--accent-color-rgb), 0.3);
+}
+
+.glow-accent-sm {
+  box-shadow: 0 0 10px rgba(var(--accent-color-rgb), 0.5);
+}
+
+.glow-accent-lg {
+  box-shadow: 0 0 20px rgba(var(--accent-color-rgb), 0.3);
+}
+
+/* Themed borders */
+.border-accent {
+  border-color: var(--accent-color);
+}
+
+.border-accent-dim {
+  border-color: rgba(var(--accent-color-rgb), 0.3);
+}
+
+/* Text color */
+.text-accent {
+  color: var(--accent-color);
+}
+
+/* Background */
+.bg-accent-dim {
+  background-color: rgba(var(--accent-color-rgb), 0.1);
+}

@@ -146,18 +146,22 @@ def listen(loop: bool = True):
         typer.echo("🟢 Wake Word ENABLED: Say 'Jarvis' to activate.")
         typer.echo("ℹ️  To exit: Wake me up ('Jarvis!') then say 'Stop' or 'Goodbye'.")
     else:
-        typer.echo("🟡 Wake Word DISABLED (No Key). Falling back to continuous listen.")
+        typer.echo("🔴 Wake Word DISABLED (No Key). Cannot run voice loop safely without it.")
+        print("[GUI:ERROR:Wake Word Missing]", flush=True)
+        return
 
     while True:
         try:
             # 1. Wait for Wake Word (if enabled)
             if ww.porcupine:
+                print("[GUI:STATE:IDLE]", flush=True)
                 # This blocks until "Jarvis" is heard
                 if not ww.listen():
                     # If ww.listen() returns False (interrupt), break
                     break
                 
                 # Wake word detected!
+                print("[GUI:STATE:LISTENING]", flush=True)
                 typer.echo("🤖 JARVIS listening...")
                 # Optional: Add a simple beep here using winsound
                 try: 
@@ -170,8 +174,13 @@ def listen(loop: bool = True):
             
             # 3. Process
             if text:
+                print(f"[GUI:USER:{text}]", flush=True)
+                print("[GUI:STATE:THINKING]", flush=True)
                 process_voice_command(text)
-                time.sleep(1.2)
+                print("[GUI:STATE:IDLE]", flush=True)
+                
+                # Wait for TTS audio to clear + silence to avoid self-listening loop
+                time.sleep(2.5)
             
         except (KeyboardInterrupt, typer.Exit):
             typer.echo("\nStopping listener.")

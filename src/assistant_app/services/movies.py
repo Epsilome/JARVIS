@@ -46,6 +46,7 @@ class Movie:
     tmdb_vote: float | None
     imdb_rating: float | None
     overview: str
+    poster_path: str | None = None
 
 def _tmdb_get(path: str, params: dict, *, cache_ttl: int | None = None):
     """
@@ -151,8 +152,56 @@ def top_horror(limit: int = 20, year_from: int = 2000, min_votes: int = 200) -> 
             year=year,
             tmdb_vote=tmdb_vote,
             imdb_rating=imdb,
-            overview=m.get("overview") or ""
+            overview=m.get("overview") or "",
+            poster_path=m.get("poster_path")
         ))
     # Sort by IMDb when present, else TMDb
     out.sort(key=lambda x: (x.imdb_rating if x.imdb_rating is not None else x.tmdb_vote or 0), reverse=True)
+    return out
+
+
+def search_movies(query: str, limit: int = 20) -> list[Movie]:
+    """Search for movies on TMDb."""
+    data = _tmdb_get("/search/movie", {
+        "query": query,
+        "include_adult": "false",
+        "language": "en-US",
+        "page": 1,
+    },
+    cache_ttl=3600, # 1 hour cache for search results
+    )["results"]
+
+    picks = data[:limit]
+    out: list[Movie] = []
+    for m in picks:
+        tmdb_id = str(m["id"])
+        title = m["title"]
+        year = (m.get("release_date") or "")[:4]
+        tmdb_vote = float(m.get("vote_average") or 0)
+        
+        # Skip movies without poster or overview to keep UI clean
+        if not m.get("poster_path"):
+            continue
+
+        imdb_id = None
+        imdb = None
+        try:
+            ext = _tmdb_external_ids(tmdb_id)
+            imdb_id = ext.get("imdb_id")
+            if imdb_id:
+                imdb = _omdb_rating(imdb_id)
+        except Exception:
+            pass
+
+        out.append(Movie(
+            tmdb_id=tmdb_id,
+            imdb_id=imdb_id,
+            title=title,
+            year=year,
+            tmdb_vote=tmdb_vote,
+            imdb_rating=imdb,
+            overview=m.get("overview") or "",
+            poster_path=m.get("poster_path")
+        ))
+    
     return out
