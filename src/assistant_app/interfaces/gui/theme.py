@@ -1,81 +1,76 @@
 
 import flet as ft
 
-# === Iron Man Color Palette ===
-IRON_CYAN = "#00D4FF"
-IRON_CYAN_DIM = "#006080"
-IRON_RED = "#FF3030"
-IRON_RED_DIM = "#8B0000"
-IRON_GOLD = "#FFD700"
+# === Iron Man / Techno Palette ===
+# Primary Colors
+IRON_CYAN = "#00E5FF"       # Main accent (Lines, Text, Glows)
+IRON_CYAN_DIM = "#006080"   # Secondary accent
+IRON_BG = "#050505"         # Deep Background
+IRON_GLASS = "#0A0A0A"      # Panel Background (semi-transparent ideally, but using solid for contrast if needed)
 
-DARK_BG = "#0A0A0A"
-PANEL_BG = ft.Colors.with_opacity(0.08, IRON_CYAN)
-PANEL_BORDER = ft.Colors.with_opacity(0.4, IRON_CYAN)
+# Secondary/Functional Colors
+IRON_WARNING = "#FFC107"    # Amber/Gold for Processing/Warning
+IRON_ERROR = "#FF3030"      # Red for Error/Critical
+IRON_SUCCESS = "#00FF00"    # Green for Online/Success
+IRON_WHITE = "#FFFFFF"
 
-# === Glow Effects ===
-CYAN_GLOW = ft.BoxShadow(
-    spread_radius=2,
-    blur_radius=15,
-    color=ft.Colors.with_opacity(0.5, IRON_CYAN),
+# Opacity Variants (ARGB) - Fixing "Grey" issue by using explicit Hex
+IRON_CYAN_10 = "#1A00E5FF"
+IRON_CYAN_05 = "#0D00E5FF"
+IRON_BG_90 = "#E6050505"
+IRON_BG_TRANSPARENT = "#00000000"
+IRON_BLACK_20 = "#33000000"
+
+# Gradients (LinearGradient objects)
+
+BG_GRADIENT = ft.LinearGradient(
+    begin=ft.Alignment(-1, -1),
+    end=ft.Alignment(1, 1),
+    colors=[
+        "#000000",
+        "#0A0A0A",
+        "#050C10", # Slight Cyan tint at bottom right
+    ],
 )
 
-TEXT_GLOW = ft.BoxShadow(
-    spread_radius=1,
-    blur_radius=8,
-    color=ft.Colors.with_opacity(0.7, IRON_CYAN),
+# Hard override for stubborn backgrounds
+BLACK_GRADIENT = ft.LinearGradient(
+    colors=["#050505", "#050505"],
+    begin=ft.Alignment(-1, -1),
+    end=ft.Alignment(1, 1),
 )
 
-# === Glassmorphism Container Factory ===
-def glass_container(
-    content: ft.Control,
-    width: int = None,
-    height: int = None,
-    padding: int = 15,
-    blur_amount: int = 10,
-    expand: bool = False,
-) -> ft.Container:
-    return ft.Container(
-        content=content,
-        width=width,
-        height=height,
-        padding=padding,
-        expand=expand,
-        bgcolor=PANEL_BG,
-        border=ft.border.all(1, PANEL_BORDER),
-        border_radius=12,
-        blur=ft.Blur(blur_amount, blur_amount, ft.BlurTileMode.MIRROR),
-        shadow=CYAN_GLOW,
-    )
+# 1x1 Black Pixel Base64 (Forcing Texture Rendering)
+BLACK_PIXEL_B64 = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
 
-# === Text Styles with Glow ===
+
+# === Text Styles ===
 class IronTheme:
-    font_family = "Consolas"
+    font_family = "Consolas" # Monospace for terminal feel
     
     @staticmethod
-    def header_text(text: str, size: int = 14) -> ft.Text:
+    def header_text(text: str, size: int = 14, color: str = IRON_CYAN) -> ft.Text:
         return ft.Text(
             text.upper(),
             size=size,
             weight=ft.FontWeight.BOLD,
-            color=IRON_CYAN,
+            color=color,
             font_family=IronTheme.font_family,
-            # Note: Text shadow is applied via Container wrapper if needed
+            spans=[ft.TextSpan(text, style=ft.TextStyle(shadow=ft.BoxShadow(blur_radius=10, color=color)))] if color == IRON_CYAN else []
         )
     
     @staticmethod
-    def body_text(text: str, size: int = 12, color=ft.Colors.WHITE) -> ft.Text:
+    def body_text(text: str, size: int = 12, color: str = IRON_WHITE) -> ft.Text:
         return ft.Text(
             text,
             size=size,
             color=color,
             font_family=IronTheme.font_family,
         )
-    
-    @staticmethod    
-    def dim_text(text: str, size: int = 11) -> ft.Text:
-        return ft.Text(
-            text,
-            size=size,
-            color=ft.Colors.GREY_500,
-            font_family=IronTheme.font_family,
-        )
+
+# === Effects ===
+GLOW_CYAN = ft.BoxShadow(
+    spread_radius=1,
+    blur_radius=15,
+    color="#6600E5FF", # ARGB for 40% Opacity Cyan
+)

@@ -63,6 +63,42 @@ class WakeWordListener:
             logger.error(f"Wake word loop error: {e}")
             return False
 
+    def release_mic(self):
+        """Fully release the microphone (close stream and PyAudio) for other apps."""
+        if hasattr(self, 'audio_stream') and self.audio_stream:
+            try:
+                self.audio_stream.close()
+                self.audio_stream = None
+            except Exception as e:
+                logger.error(f"Error closing stream: {e}")
+        
+        if hasattr(self, 'pa') and self.pa:
+            try:
+                self.pa.terminate()
+                self.pa = None
+            except Exception as e:
+                logger.error(f"Error terminating PyAudio: {e}")
+        
+        logger.info("Microphone released (PyAudio terminated)")
+
+    def acquire_mic(self):
+        """Re-initialize PyAudio and open stream."""
+        if not self.porcupine:
+            return
+            
+        try:
+            self.pa = pyaudio.PyAudio()
+            self.audio_stream = self.pa.open(
+                rate=self.porcupine.sample_rate,
+                channels=1,
+                format=pyaudio.paInt16,
+                input=True,
+                frames_per_buffer=self.porcupine.frame_length
+            )
+            logger.info("Microphone acquired (PyAudio initialized)")
+        except Exception as e:
+            logger.error(f"Error acquiring mic: {e}")
+
     def close(self):
         if self.porcupine:
             self.porcupine.delete()

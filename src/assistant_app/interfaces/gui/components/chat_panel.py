@@ -29,7 +29,12 @@ class ChatPanel(ft.Container):
             text_color = ft.Colors.WHITE if is_user else IRON_CYAN
             
             bubble = ft.Container(
-                content=ft.Text(text, color=text_color, font_family=IronTheme.font_family, size=12),
+                content=ft.Markdown(
+                    text,
+                    extension_set=ft.MarkdownExtensionSet.GITHUB_WEB,
+                    on_tap_link=lambda e: self.page.launch_url(e.data),
+                    selectable=True,
+                ),
                 bgcolor=bg_color,
                 border_radius=10,
                 padding=10,

@@ -15,10 +15,7 @@ requests
 SpeechRecognition
 pyaudio
 pyttsx3
-thefuzz
 ollama
-edge-tts
-pygame
 duckduckgo-search
 beautifulsoup4
 faster-whisper
@@ -28,3 +25,10 @@ loguru
 pyautogui
 pycaw
 comtypes
+win11toast
+psutil
+pvporcupine
+flet
+pyperclip
+keyboard
+tavily

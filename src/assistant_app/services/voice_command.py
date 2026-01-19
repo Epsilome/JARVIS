@@ -14,15 +14,32 @@ try:
 except ImportError:
     state = None
 
-def respond(text: str, speak_audio: bool = True):
-    """Echoes text to console and speaks it (if enabled)."""
-    typer.echo(text)
+def respond(text: str, is_command=False, is_error=False):
+    """
+    Standard function to print to CLI and speak tts.
+    Wraps it in [GUI:ASSISTANT:...] for the GUI to parse.
+    """
+    # 1. Print visual message
+    # IMPORTANT: We encode newlines as literal \n so the GUI regex catches it as one line
+    safe_text = text.replace('\n', '\\n')
+    print(f"[GUI:ASSISTANT:{safe_text}]", flush=True)
+
+    # 2. Stats update
+    if is_command:
+        print("[GUI:STATS:CMD:+1]", flush=True)
+    if is_error:
+        print("[GUI:STATS:ERR:+1]", flush=True)
+
+    # 3. Print pretty to CLI
+    typer.echo(f"🤖 {text}")
+    
+    # 4. Update GUI state (if available)
     if state:
         state.add_message("assistant", text)
         state.add_log(f"Response: {text[:30]}...")
         
-    if speak_audio:
-        speak(text)  # tts_kokoro handles markdown stripping
+    # 5. Speak
+    speak(text)  # tts_kokoro handles markdown stripping
 
 def process_voice_command(text: str, speak_response: bool = True):
     """
@@ -34,19 +51,54 @@ def process_voice_command(text: str, speak_response: bool = True):
     typer.echo(f"DEBUG: Processing '{text}'")
     
     # Helper to send responses with current speak setting
-    def reply(msg: str):
-        respond(msg, speak_audio=speak_response)
+    def reply(msg: str, is_command: bool = False, is_error: bool = False):
+        respond(msg, is_command=is_command, is_error=is_error)
 
     # --- Priority Dispatch ---
     
     # 1. STOP/EXIT (Exact or simple match)
-    if text in ["stop", "exit", "quit", "shut down", "terminate"]:
+    if text in ["stop", "exit", "quit", "shut down", "terminate", "goodbye", "bye"]:
         reply("Goodbye.")
         raise typer.Exit()
 
     # 2. OTHER COMMANDS (Keyword Presence)
     # Only if specific unique phrases are found
     
+    # Weather
+    if "weather" in text or "temperature" in text or "how hot" in text:
+        from assistant_app.services.weather_service import get_weather_sync
+        city = settings.DEFAULT_CITY or "Casablanca"
+        country = settings.DEFAULT_COUNTRY or "MA"
+        
+        # Check if user specified a city (simple heuristic)
+        # e.g., "weather in london"
+        words = text.split()
+        if "in" in words:
+            try:
+                idx = words.index("in")
+                if idx < len(words) - 1:
+                    city = words[idx+1].capitalize()
+            except: pass
+            
+        w = get_weather_sync(city, country)
+        reply(f"Currently in {w['city']}, it is {w['temp']} degrees Celsius with {w['description']}. Humidity is {w['humidity']}%.")
+        return
+
+    # Jokes
+    if "joke" in text or "funny" in text:
+        import random
+        jokes = [
+            "Why did the AI cross the road? To optimize the pathfinding algorithm!",
+            "I would tell you a UDP joke, but you might not get it.",
+            "Why do programmers prefer dark mode? Because light attracts bugs.",
+            "How many programmers does it take to change a light bulb? None, that's a hardware problem.",
+            "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?'",
+            "Why was the computer cold? It left its Windows open.",
+            "I asked my specialized AI for a joke about the future... it said 'I'm still processing it'.",
+        ]
+        reply(random.choice(jokes))
+        return
+
     # Prayer
     if any(k in text for k in ["prayer times", "when is fajr", "when is isha"]):
         city = settings.DEFAULT_CITY or "Casablanca"
@@ -95,9 +147,9 @@ def process_voice_command(text: str, speak_response: bool = True):
     # This prevents "Tell me about..." from being caught by "remind me" regex/keywords
     answer = ask_ollama(text)
     if answer:
-        reply(answer)
+        reply(answer, is_command=True)
     else:
-        reply("I'm sorry, I couldn't process that.")
+        reply("I'm sorry, I couldn't process that.", is_error=True)
     return
 
 

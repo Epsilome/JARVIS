@@ -3,12 +3,16 @@ import logging
 import os
 import tempfile
 
+
+# Disable HuggingFace Symlinks to avoid WinError 1314 on non-admin Windows
+os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
+
 logger = logging.getLogger(__name__)
 
 # Initialize Whisper Model (Lazy loading or global)
 # "base.en" is fast and decent. "small.en" is better. "medium.en" is very accurate.
 # Let's start with "small.en" for a balance of speed and accuracy on GPU.
-MODEL_SIZE = "small.en"
+MODEL_SIZE = "distil-small.en"
 _model = None
 
 def get_model():
@@ -47,12 +51,14 @@ class VoiceListener:
         try:
             with self.microphone as source:
                 logger.info("Listening...")
+                print("[GUI:LOG:Listening for audio...]", flush=True) # Tag for GUI Logs
                 try:
                     audio = self.recognizer.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
                 except sr.WaitTimeoutError:
                     return None
             
             # Save audio to temp file for Whisper
+            print("[GUI:LOG:Processing audio...]", flush=True)
             return self._transcribe(audio)
         except Exception as e:
             logger.error(f"Listening error: {e}")

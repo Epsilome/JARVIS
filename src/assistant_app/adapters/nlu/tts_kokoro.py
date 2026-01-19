@@ -18,10 +18,14 @@ def _get_stream():
         
     if _STREAM is None:
         try:
-            logger.info("Initializing Kokoro TTS Engine (Local)...")
-            # default_lang_code='a' is usually American English in Kokoro default map
-            # 'af_bella' is a high quality female voice included in Kokoro
-            _ENGINE = KokoroEngine(voice="af_bella") 
+            import os
+            voice = os.getenv("TTS_VOICE", "af_bella")
+            logger.info(f"Initializing Kokoro TTS Engine (Local) - CPU Forced (Eco Mode) - Voice: {voice}...")
+            # Force CPU usage by hiding CUDA from Torch (Kokoro uses torch internally)
+            import torch
+            torch.cuda.is_available = lambda: False
+            
+            _ENGINE = KokoroEngine(voice=voice) 
             _STREAM = TextToAudioStream(_ENGINE)
             logger.info("Kokoro TTS Initialized.")
         except Exception as e:
@@ -30,6 +34,41 @@ def _get_stream():
             
     return _STREAM if _STREAM else None
 
+def reload_voice(new_voice: str = None):
+    """Reload TTS engine with a new voice. Allows hot-swapping voice without restart."""
+    global _STREAM, _ENGINE
+    
+    if not REALTIMETTS_AVAILABLE:
+        return False
+    
+    try:
+        import os
+        voice = new_voice or os.getenv("TTS_VOICE", "af_bella")
+        logger.info(f"Reloading Kokoro TTS Engine with voice: {voice}...")
+        
+        # Clean up existing engine
+        if _STREAM:
+            try:
+                _STREAM.stop()
+            except:
+                pass
+        _STREAM = None
+        _ENGINE = None
+        
+        # Force CPU usage
+        import torch
+        torch.cuda.is_available = lambda: False
+        
+        # Reinitialize with new voice
+        _ENGINE = KokoroEngine(voice=voice)
+        _STREAM = TextToAudioStream(_ENGINE)
+        logger.info(f"Kokoro TTS reloaded with voice: {voice}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to reload Kokoro: {e}")
+        _STREAM = False
+        return False
+
 def speak(text: str):
     """Speaks the given text using local Kokoro engine."""
     
@@ -37,15 +76,26 @@ def speak(text: str):
     stream = _get_stream()
     if stream:
         try:
-            # Clean Markdown implementation
-            # Remove asterisks, hashes, and list dashes that might be read aloud
+            # Clean Markdown and URLs for natural speech
             import re
-            # Remove **bold**, *italic*, ### Headers
-            clean_text = re.sub(r'[\*#`]', '', text) 
-            # Remove leading "- " for lists to improve flow, or keep them? 
-            # Usually "- " read as "dash" is annoying. replacing with comma pause might be better.
+            
+            # Remove URLs (http://, https://, www.)
+            clean_text = re.sub(r'https?://[^\s\]]+', '', text)
+            clean_text = re.sub(r'www\.[^\s\]]+', '', clean_text)
+            
+            # Remove markdown links [text](url) - keep just the text
+            clean_text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', clean_text)
+            
+            # Remove **bold**, *italic*, ### Headers, backticks
+            clean_text = re.sub(r'[\*#`]', '', clean_text)
+            
+            # Remove leading "- " for lists (reads as "dash")
             clean_text = re.sub(r'\n-\s+', '\n, ', clean_text)
             
+            # Remove bullet points (•)
+            clean_text = clean_text.replace('•', ',')
+            
+            # Collapse whitespace
             clean_text = " ".join(clean_text.split())
             if not clean_text: return
             
