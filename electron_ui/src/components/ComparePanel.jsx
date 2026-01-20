@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Cpu, Monitor, HardDrive, MemoryStick, X, Plus, Scale, Trash2, Database, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { Search, Cpu, Monitor, HardDrive, MemoryStick, X, Plus, Scale, Trash2, Database } from 'lucide-react';
 import { getHardwareDatabase } from '../api';
 
 const TYPE_ICONS = {
@@ -18,6 +19,42 @@ const TYPE_COLORS = {
     unknown: '#888'
 };
 
+// 3D Tilt Card Component
+const TiltCard = ({ children, className = '' }) => {
+    const x = useMotionValue(0);
+    const y = useMotionValue(0);
+
+    const mouseX = useSpring(x, { stiffness: 500, damping: 100 });
+    const mouseY = useSpring(y, { stiffness: 500, damping: 100 });
+
+    const rotateX = useTransform(mouseY, [-0.5, 0.5], ["8deg", "-8deg"]);
+    const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-8deg", "8deg"]);
+
+    const handleMouseMove = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+        const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+        x.set(xPct);
+        y.set(yPct);
+    };
+
+    const handleMouseLeave = () => {
+        x.set(0);
+        y.set(0);
+    };
+
+    return (
+        <motion.div
+            style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            className={`perspective-1000 ${className}`}
+        >
+            {children}
+        </motion.div>
+    );
+};
+
 const ComparePanel = () => {
     const [compareSlots, setCompareSlots] = useState([]);
     const [selectedSlotIndex, setSelectedSlotIndex] = useState(null);
@@ -26,10 +63,8 @@ const ComparePanel = () => {
     const [typeFilter, setTypeFilter] = useState('all');
     const [database, setDatabase] = useState({ cpus: [], gpus: [], ssds: [], ram: [], total: 0 });
     const [dbLoading, setDbLoading] = useState(true);
-    const [expandedSection, setExpandedSection] = useState('gpu');
     const searchRef = useRef(null);
 
-    // Load hardware database on mount
     useEffect(() => {
         loadDatabase();
     }, []);
@@ -45,14 +80,12 @@ const ComparePanel = () => {
         setDbLoading(false);
     };
 
-    // Search hardware - filter local database instead of calling API
     useEffect(() => {
         if (!searchQuery.trim() || searchQuery.length < 2) {
             setSearchResults([]);
             return;
         }
 
-        // Filter local database
         const query = searchQuery.toLowerCase().trim();
         const allItems = [
             ...database.cpus,
@@ -61,63 +94,51 @@ const ComparePanel = () => {
             ...database.ram
         ];
 
-        // Filter by type if not 'all'
         let itemsToSearch = allItems;
         if (typeFilter !== 'all') {
             itemsToSearch = allItems.filter(item => item.type === typeFilter);
         }
 
-        // Filter by search query
         const filtered = itemsToSearch.filter(item =>
             item.name?.toLowerCase().includes(query)
         );
 
-        // Sort by score descending
         filtered.sort((a, b) => (b.score || 0) - (a.score || 0));
-
         setSearchResults(filtered.slice(0, 50));
     }, [searchQuery, typeFilter, database]);
 
-    // Add item to comparison - fill selected empty slot or append
     const addToComparison = (item) => {
-        // If a slot is selected and it's empty, fill it
         if (selectedSlotIndex !== null && compareSlots[selectedSlotIndex] === null) {
             const newSlots = [...compareSlots];
             newSlots[selectedSlotIndex] = item;
             setCompareSlots(newSlots);
             setSelectedSlotIndex(null);
         } else {
-            // Find first empty slot
             const emptyIndex = compareSlots.findIndex(s => s === null);
             if (emptyIndex !== -1) {
                 const newSlots = [...compareSlots];
                 newSlots[emptyIndex] = item;
                 setCompareSlots(newSlots);
             } else if (compareSlots.length < 8) {
-                // No empty slots, add new one
                 setCompareSlots([...compareSlots, item]);
             }
         }
     };
 
-    // Select an empty slot to fill
     const selectSlot = (index) => {
         if (compareSlots[index] === null) {
             setSelectedSlotIndex(selectedSlotIndex === index ? null : index);
         }
     };
 
-    // Remove item from slot
     const removeSlot = (index) => {
         setCompareSlots(compareSlots.filter((_, i) => i !== index));
     };
 
-    // Clear all slots
     const clearAll = () => {
         setCompareSlots([]);
     };
 
-    // Get max score for bar scaling (filter out null slots)
     const filledSlots = compareSlots.filter(Boolean);
     const maxScore = Math.max(...filledSlots.map(s => s.score || 0), 1);
 
@@ -136,7 +157,6 @@ const ComparePanel = () => {
         }
     };
 
-    // Get count based on current filter
     const getFilteredCount = () => {
         switch (typeFilter) {
             case 'cpu': return database.cpus.length;
@@ -147,108 +167,166 @@ const ComparePanel = () => {
         }
     };
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.1 } }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 15 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
-        <div className="flex flex-col h-full animate-in slide-in-from-bottom duration-500">
+        <motion.div
+            className="flex flex-col h-full"
+            initial="hidden"
+            animate="visible"
+            variants={containerVariants}
+        >
             {/* Header */}
-            <div className="flex justify-between items-end mb-4 border-b border-jarvis-cyan/20 pb-2">
-                <h2 className="text-lg font-orbitron text-jarvis-cyan tracking-wider flex items-center gap-2">
+            <motion.div
+                variants={itemVariants}
+                className="flex justify-between items-end mb-4 border-b border-jarvis-cyan/20 pb-2"
+            >
+                <h2 className="text-lg font-orbitron text-jarvis-cyan tracking-wider flex items-center gap-2 drop-shadow-[0_0_10px_rgba(0,240,255,0.3)]">
                     <Scale size={20} />
                     HARDWARE COMPARE
                 </h2>
                 <div className="flex gap-2">
                     {['all', 'cpu', 'gpu', 'ssd', 'ram'].map(type => (
-                        <button
+                        <motion.button
                             key={type}
                             onClick={() => setTypeFilter(type)}
-                            className={`px-3 py-1 text-xs rounded border transition-colors ${typeFilter === type
-                                ? 'border-jarvis-cyan bg-jarvis-cyan/20 text-jarvis-cyan'
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`px-3 py-1 text-xs rounded border transition-all duration-300 ${typeFilter === type
+                                ? 'border-jarvis-cyan bg-jarvis-cyan/20 text-jarvis-cyan shadow-[0_0_10px_rgba(0,240,255,0.2)]'
                                 : 'border-gray-600 text-gray-400 hover:border-gray-500'
                                 }`}
                         >
                             {type.toUpperCase()}
-                        </button>
+                        </motion.button>
                     ))}
                 </div>
-            </div>
+            </motion.div>
 
-            {/* SECTION 1: Comparison Slots */}
-            <div className="flex flex-wrap gap-3 mb-4">
-                {compareSlots.map((slot, index) => (
-                    <div key={index} className="w-[calc(25%-0.75rem)] min-w-[140px]">
-                        <CompareSlot
-                            item={slot}
-                            index={index}
-                            onRemove={() => removeSlot(index)}
-                            onSelect={() => selectSlot(index)}
-                            isSelected={selectedSlotIndex === index}
-                            maxScore={maxScore}
-                        />
-                    </div>
-                ))}
+            {/* Comparison Slots */}
+            <motion.div variants={itemVariants} className="flex flex-wrap gap-3 mb-4">
+                <AnimatePresence mode="popLayout">
+                    {compareSlots.map((slot, index) => (
+                        <motion.div
+                            key={index}
+                            className="w-[calc(25%-0.75rem)] min-w-[140px]"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8, x: -20 }}
+                            layout
+                        >
+                            <CompareSlot
+                                item={slot}
+                                index={index}
+                                onRemove={() => removeSlot(index)}
+                                onSelect={() => selectSlot(index)}
+                                isSelected={selectedSlotIndex === index}
+                                maxScore={maxScore}
+                            />
+                        </motion.div>
+                    ))}
+                </AnimatePresence>
                 {compareSlots.length < 8 && (
-                    <button
+                    <motion.button
                         onClick={() => setCompareSlots([...compareSlots, null])}
-                        className="w-[calc(25%-0.75rem)] min-w-[140px] h-[120px] border-2 border-dashed border-gray-600 hover:border-jarvis-cyan/50 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-jarvis-cyan transition-colors"
+                        whileHover={{ borderColor: 'rgba(0, 240, 255, 0.5)' }}
+                        className="w-[calc(25%-0.75rem)] min-w-[140px] h-[120px] border-2 border-dashed border-gray-600 rounded-lg flex flex-col items-center justify-center gap-2 text-gray-500 hover:text-jarvis-cyan transition-colors"
                     >
                         <Plus size={24} />
                         <span className="text-xs font-orbitron">ADD SLOT</span>
-                    </button>
+                    </motion.button>
                 )}
-            </div>
+            </motion.div>
 
             {/* Clear button */}
-            {filledSlots.length > 0 && (
-                <div className="flex justify-end mb-3">
-                    <button
-                        onClick={clearAll}
-                        className="text-xs text-gray-500 hover:text-red-400 flex items-center gap-1 transition-colors"
+            <AnimatePresence>
+                {filledSlots.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="flex justify-end mb-3"
                     >
-                        <Trash2 size={12} />
-                        Clear All
-                    </button>
-                </div>
-            )}
+                        <motion.button
+                            onClick={clearAll}
+                            whileHover={{ color: '#f87171' }}
+                            className="text-xs text-gray-500 flex items-center gap-1 transition-colors"
+                        >
+                            <Trash2 size={12} />
+                            Clear All
+                        </motion.button>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            {/* SECTION 2: Performance Comparison */}
-            {filledSlots.length > 0 && (
-                <div className="bg-black/30 border border-jarvis-cyan/20 rounded-lg p-4 mb-4">
-                    <h3 className="text-sm font-orbitron text-gray-400 mb-3">PERFORMANCE COMPARISON</h3>
-                    <div className="space-y-2">
-                        {filledSlots.map((item, i) => {
-                            const percentage = ((item.score || 0) / maxScore) * 100;
-                            return (
-                                <div key={i} className="flex items-center gap-3">
-                                    <span className="w-28 text-xs text-gray-300 truncate">{item.name}</span>
-                                    <div className="flex-1 h-5 bg-black/50 rounded overflow-hidden">
-                                        <div
-                                            className="h-full transition-all duration-500 flex items-center justify-end pr-2"
-                                            style={{
-                                                width: `${percentage}%`,
-                                                background: `linear-gradient(90deg, ${TYPE_COLORS[item.type]}44, ${TYPE_COLORS[item.type]})`
-                                            }}
-                                        >
-                                            <span className="text-[10px] text-white font-mono">{(item.score || 0).toLocaleString()}</span>
+            {/* Performance Comparison */}
+            <AnimatePresence>
+                {filledSlots.length > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-5 mb-4 shadow-lg"
+                    >
+                        <h3 className="text-sm font-orbitron text-gray-400 mb-4 flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-jarvis-cyan animate-pulse" />
+                            PERFORMANCE COMPARISON
+                        </h3>
+                        <div className="space-y-3">
+                            {filledSlots.map((item, i) => {
+                                const percentage = ((item.score || 0) / maxScore) * 100;
+                                return (
+                                    <div key={i} className="flex items-center gap-3">
+                                        <span className="w-32 text-xs text-gray-300 truncate">{item.name}</span>
+                                        <div className="flex-1 h-6 bg-black/50 rounded-lg overflow-hidden border border-white/5">
+                                            <motion.div
+                                                className="h-full flex items-center justify-end pr-3"
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${percentage}%` }}
+                                                transition={{ duration: 1, ease: "easeOut", delay: i * 0.1 }}
+                                                style={{
+                                                    background: `linear-gradient(90deg, ${TYPE_COLORS[item.type]}22, ${TYPE_COLORS[item.type]})`,
+                                                    boxShadow: `0 0 15px ${TYPE_COLORS[item.type]}40`
+                                                }}
+                                            >
+                                                <span className="text-[10px] text-white font-mono font-bold">
+                                                    {(item.score || 0).toLocaleString()}
+                                                </span>
+                                            </motion.div>
                                         </div>
+                                        <motion.span
+                                            className="text-[10px] px-2 py-1 rounded-lg font-bold"
+                                            style={{ backgroundColor: `${TYPE_COLORS[item.type]}20`, color: TYPE_COLORS[item.type] }}
+                                            animate={{ opacity: [0.7, 1, 0.7] }}
+                                            transition={{ duration: 2, repeat: Infinity }}
+                                        >
+                                            {item.type.toUpperCase()}
+                                        </motion.span>
                                     </div>
-                                    <span
-                                        className="text-[10px] px-1.5 py-0.5 rounded font-bold"
-                                        style={{ backgroundColor: `${TYPE_COLORS[item.type]}20`, color: TYPE_COLORS[item.type] }}
-                                    >
-                                        {item.type.toUpperCase()}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
+                                );
+                            })}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
-            {/* SECTION 3: Hardware Database Browser */}
-            <div className="flex-1 bg-black/30 border border-jarvis-cyan/20 rounded-lg overflow-hidden flex flex-col min-h-0">
+            {/* Hardware Database Browser */}
+            <motion.div
+                variants={itemVariants}
+                className="flex-1 bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden flex flex-col min-h-0 shadow-lg"
+            >
                 {/* Search Header */}
-                <div className="p-3 border-b border-jarvis-cyan/10 flex items-center gap-3">
+                <div className="p-4 border-b border-white/5 flex items-center gap-3">
                     <Database size={16} className="text-jarvis-cyan/60" />
-                    <div className="flex-1 flex items-center gap-2 bg-black/40 rounded px-3 py-1.5">
+                    <div className="flex-1 flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
                         <Search size={14} className="text-gray-500" />
                         <input
                             ref={searchRef}
@@ -259,65 +337,80 @@ const ComparePanel = () => {
                             className="flex-1 bg-transparent border-none text-sm text-white placeholder:text-gray-500 focus:outline-none"
                         />
                         {searchQuery && (
-                            <button
+                            <motion.button
                                 onClick={() => setSearchQuery('')}
+                                whileHover={{ scale: 1.1 }}
                                 className="text-gray-500 hover:text-jarvis-cyan"
                             >
                                 <X size={14} />
-                            </button>
+                            </motion.button>
                         )}
                     </div>
-                    <span className="text-xs text-gray-500">{getFilteredCount()} items</span>
+                    <span className="text-xs text-gray-500 font-mono">{getFilteredCount()} items</span>
                 </div>
 
                 {/* Database List */}
-                <div className="flex-1 overflow-y-auto p-2 space-y-1 min-h-0">
+                <motion.div
+                    className="flex-1 overflow-y-auto p-3 space-y-1 min-h-0 custom-scrollbar"
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                >
                     {dbLoading ? (
-                        <div className="text-center py-8 text-jarvis-cyan animate-pulse text-sm">Loading hardware database...</div>
+                        <motion.div
+                            className="text-center py-8 text-jarvis-cyan text-sm font-orbitron"
+                            animate={{ opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                            Loading hardware database...
+                        </motion.div>
                     ) : searchQuery.length >= 2 ? (
-                        // Show search results (locally filtered, instant)
                         searchResults.length > 0 ? (
                             searchResults.map((item, i) => (
-                                <DatabaseItem key={i} item={item} onAdd={addToComparison} />
+                                <motion.div key={i} variants={itemVariants}>
+                                    <DatabaseItem item={item} onAdd={addToComparison} />
+                                </motion.div>
                             ))
                         ) : (
                             <div className="text-center py-4 text-gray-500 text-sm">No results found</div>
                         )
                     ) : (
-                        // Show database browser
                         getDatabaseItems().map((item, i) => (
-                            <DatabaseItem key={i} item={item} onAdd={addToComparison} />
+                            <motion.div key={i} variants={itemVariants}>
+                                <DatabaseItem item={item} onAdd={addToComparison} />
+                            </motion.div>
                         ))
                     )}
-                </div>
-            </div>
-        </div>
+                </motion.div>
+            </motion.div>
+        </motion.div>
     );
 };
 
-// Comparison Slot Component
+// Comparison Slot Component with 3D Tilt
 const CompareSlot = ({ item, index, onRemove, onSelect, isSelected, maxScore }) => {
     if (!item) {
         return (
-            <div
+            <motion.div
                 onClick={onSelect}
-                className={`border-2 border-dashed rounded-lg h-32 flex flex-col items-center justify-center bg-black/20 cursor-pointer transition-all relative group ${isSelected
+                whileHover={{ borderColor: 'rgba(0, 240, 255, 0.4)' }}
+                className={`border-2 border-dashed rounded-xl h-32 flex flex-col items-center justify-center bg-black/30 backdrop-blur cursor-pointer transition-all relative group ${isSelected
                     ? 'border-jarvis-cyan bg-jarvis-cyan/10'
-                    : 'border-gray-700 hover:border-gray-500'
+                    : 'border-gray-700'
                     }`}
             >
-                {/* Remove button for empty slot */}
-                <button
+                <motion.button
                     onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                    className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400"
+                    whileHover={{ scale: 1.2, color: '#f87171' }}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500"
                 >
                     <X size={12} />
-                </button>
+                </motion.button>
                 <Plus size={20} className={isSelected ? 'text-jarvis-cyan' : 'text-gray-600'} />
-                <span className={`text-[10px] mt-1 ${isSelected ? 'text-jarvis-cyan' : 'text-gray-600'}`}>
+                <span className={`text-[10px] mt-1 font-orbitron ${isSelected ? 'text-jarvis-cyan' : 'text-gray-600'}`}>
                     {isSelected ? 'SELECTED' : `SLOT ${index + 1}`}
                 </span>
-            </div>
+            </motion.div>
         );
     }
 
@@ -325,67 +418,75 @@ const CompareSlot = ({ item, index, onRemove, onSelect, isSelected, maxScore }) 
     const percentage = ((item.score || 0) / maxScore) * 100;
 
     return (
-        <div
-            className="border rounded-lg h-32 p-3 bg-black/40 flex flex-col relative group"
-            style={{ borderColor: `${TYPE_COLORS[item.type]}40` }}
-        >
-            {/* Remove button */}
-            <button
-                onClick={onRemove}
-                className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 hover:text-red-400"
-            >
-                <X size={12} />
-            </button>
-
-            {/* Type badge */}
+        <TiltCard>
             <div
-                className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold"
-                style={{ backgroundColor: `${TYPE_COLORS[item.type]}20`, color: TYPE_COLORS[item.type] }}
+                className="border rounded-xl h-32 p-3 bg-black/50 backdrop-blur-xl flex flex-col relative group overflow-hidden shadow-lg"
+                style={{ borderColor: `${TYPE_COLORS[item.type]}40` }}
             >
-                {item.type.toUpperCase()}
-            </div>
+                {/* Hover glow */}
+                <div
+                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{ background: `radial-gradient(circle at center, ${TYPE_COLORS[item.type]}10, transparent)` }}
+                />
 
-            {/* Icon and name */}
-            <div className="flex-1 flex flex-col items-center justify-center mt-3">
-                <Icon size={20} style={{ color: TYPE_COLORS[item.type] }} />
-                <h3 className="text-[11px] text-white text-center mt-1 line-clamp-2 leading-tight">{item.name}</h3>
-            </div>
+                <motion.button
+                    onClick={onRemove}
+                    whileHover={{ scale: 1.2, color: '#f87171' }}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity text-gray-500 z-10"
+                >
+                    <X size={12} />
+                </motion.button>
 
-            {/* Score */}
-            <div className="text-center">
-                <div className="text-lg font-orbitron" style={{ color: TYPE_COLORS[item.type] }}>
-                    {(item.score || 0).toLocaleString()}
+                <motion.div
+                    className="absolute top-2 left-2 px-2 py-0.5 rounded-lg text-[8px] font-bold"
+                    style={{ backgroundColor: `${TYPE_COLORS[item.type]}20`, color: TYPE_COLORS[item.type] }}
+                    animate={{ opacity: [0.8, 1, 0.8] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                >
+                    {item.type.toUpperCase()}
+                </motion.div>
+
+                <div className="flex-1 flex flex-col items-center justify-center mt-3 relative z-10">
+                    <Icon size={20} style={{ color: TYPE_COLORS[item.type] }} />
+                    <h3 className="text-[11px] text-white text-center mt-1 line-clamp-2 leading-tight">{item.name}</h3>
+                </div>
+
+                <div className="text-center relative z-10">
+                    <div className="text-lg font-orbitron font-bold" style={{ color: TYPE_COLORS[item.type] }}>
+                        {(item.score || 0).toLocaleString()}
+                    </div>
+                </div>
+
+                <div className="h-1.5 bg-black/60 rounded-full mt-1 overflow-hidden">
+                    <motion.div
+                        className="h-full rounded-full"
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percentage}%` }}
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        style={{
+                            backgroundColor: TYPE_COLORS[item.type],
+                            boxShadow: `0 0 8px ${TYPE_COLORS[item.type]}`
+                        }}
+                    />
                 </div>
             </div>
-
-            {/* Mini bar */}
-            <div className="h-1 bg-gray-800 rounded mt-1 overflow-hidden">
-                <div
-                    className="h-full"
-                    style={{
-                        width: `${percentage}%`,
-                        backgroundColor: TYPE_COLORS[item.type]
-                    }}
-                />
-            </div>
-        </div>
+        </TiltCard>
     );
 };
 
 // Database Item Component
 const DatabaseItem = ({ item, onAdd }) => {
     const Icon = TYPE_ICONS[item.type] || Cpu;
-    const isAdded = false; // Could track if already in comparison
 
     return (
-        <button
+        <motion.button
             onClick={() => onAdd(item)}
-            className="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-jarvis-cyan/10 text-left transition-colors group"
+            whileHover={{ backgroundColor: 'rgba(0, 240, 255, 0.08)' }}
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all group"
         >
             <Icon size={16} style={{ color: TYPE_COLORS[item.type] }} />
             <span className="flex-1 text-sm text-white truncate">{item.name}</span>
 
-            {/* Specs preview */}
             {item.specs && (
                 <span className="text-[10px] text-gray-500 hidden md:block truncate max-w-32">
                     {item.type === 'cpu' && item.specs.cores && `${item.specs.cores}C`}
@@ -397,16 +498,18 @@ const DatabaseItem = ({ item, onAdd }) => {
 
             <span className="text-xs text-gray-400 font-mono w-16 text-right">{(item.score || 0).toLocaleString()}</span>
             <span
-                className="text-[9px] px-1.5 py-0.5 rounded font-semibold"
+                className="text-[9px] px-2 py-1 rounded-lg font-semibold"
                 style={{ backgroundColor: `${TYPE_COLORS[item.type]}15`, color: TYPE_COLORS[item.type] }}
             >
                 {item.type.toUpperCase()}
             </span>
-            <Plus
-                size={14}
+            <motion.div
+                whileHover={{ scale: 1.2 }}
                 className="text-gray-600 group-hover:text-jarvis-cyan transition-colors"
-            />
-        </button>
+            >
+                <Plus size={14} />
+            </motion.div>
+        </motion.button>
     );
 };
 

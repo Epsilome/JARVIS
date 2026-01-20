@@ -65,13 +65,48 @@ def fetch_reddit_reviews(product_name: str, limit: int = 10) -> List[str]:
     return reviews
 
 
+def fetch_youtube_transcripts(product_name: str, limit: int = 2) -> List[str]:
+    """Scrape YouTube search for video IDs and get transcripts."""
+    from youtube_transcript_api import YouTubeTranscriptApi
+    import re
+    
+    reviews = []
+    try:
+        # Simple scrape to get video IDs
+        query_encoded = product_name.replace(" ", "+") + "+review"
+        search_url = f"https://www.youtube.com/results?search_query={query_encoded}"
+        
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        resp = requests.get(search_url, headers=headers, timeout=10)
+        
+        # Regex to find video IDs
+        video_ids = re.findall(r"watch\?v=(\S{11})", resp.text)
+        unique_ids = list(set(video_ids))[:limit]
+        
+        for vid in unique_ids:
+            try:
+                transcript = YouTubeTranscriptApi.get_transcript(vid)
+                full_text = " ".join([t['text'] for t in transcript])
+                reviews.append(f"YouTube Video {vid}: {full_text}")
+            except Exception:
+                continue 
+                
+    except Exception as e:
+        logger.error(f"YouTube fetch failed: {e}")
+        
+    return reviews
+
+
 def ingest_reviews(product_name: str) -> bool:
     """Fetch and store reviews for a product."""
     logger.info(f"Ingesting reviews for {product_name}...")
     
-    reviews = fetch_reddit_reviews(product_name)
+    reddit_reviews = fetch_reddit_reviews(product_name)
+    youtube_reviews = fetch_youtube_transcripts(product_name)
     
-    if not reviews:
+    all_reviews = reddit_reviews + youtube_reviews
+    
+    if not all_reviews:
         logger.info(f"No reviews found for {product_name}.")
         return False
     
@@ -79,14 +114,14 @@ def ingest_reviews(product_name: str) -> bool:
     file_path = _get_reviews_file(product_name)
     data = {
         "product": product_name,
-        "reviews": reviews,
-        "count": len(reviews)
+        "reviews": all_reviews,
+        "count": len(all_reviews)
     }
     
     try:
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        logger.info(f"Stored {len(reviews)} reviews for {product_name} in {file_path}")
+        logger.info(f"Stored {len(all_reviews)} reviews for {product_name} in {file_path}")
         return True
     except Exception as e:
         logger.error(f"Failed to save reviews: {e}")

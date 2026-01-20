@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, Home, Settings, Activity, Bell, FileText, Film, Send, Laptop, Scale } from 'lucide-react';
 import VoiceVisualizer from './components/VoiceVisualizer';
 import ChatWindow from './components/ChatWindow';
@@ -575,7 +576,15 @@ const App = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 pb-10">
+                                <motion.div
+                                    className="grid grid-cols-2 lg:grid-cols-4 gap-6 pb-10"
+                                    initial="hidden"
+                                    animate="visible"
+                                    variants={{
+                                        hidden: { opacity: 0 },
+                                        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+                                    }}
+                                >
                                     {movies.map((m, i) => (
                                         <MovieCard
                                             key={i}
@@ -590,7 +599,7 @@ const App = () => {
                                             onMarkWatched={handleMarkWatched}
                                         />
                                     ))}
-                                </div>
+                                </motion.div>
                             )}
                         </div>
                     )}
