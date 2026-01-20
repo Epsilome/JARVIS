@@ -151,6 +151,12 @@ const LaptopCard = ({ laptop, rank }) => {
     const store = laptop.store || 'Unknown Store';
     const score = laptop.score || 0;
 
+    // Get specs from API response
+    const cpu = laptop.cpu || '';
+    const gpu = laptop.gpu || '';
+    const ram = laptop.ram || '';
+    const ssd = laptop.storage || '';
+
     return (
         <div className="group border border-jarvis-cyan/20 rounded-lg p-4 bg-black/30 hover:border-jarvis-cyan/50 hover:bg-black/50 transition-all duration-300">
             <div className="flex items-start gap-4">
@@ -175,6 +181,32 @@ const LaptopCard = ({ laptop, rank }) => {
                             </div>
                         )}
                     </div>
+
+                    {/* Spec Badges */}
+                    {(cpu || gpu || ram || ssd) && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                            {cpu && (
+                                <span className="px-2 py-0.5 bg-blue-500/20 text-blue-300 rounded text-xs font-mono">
+                                    CPU: {cpu}
+                                </span>
+                            )}
+                            {gpu && (
+                                <span className="px-2 py-0.5 bg-green-500/20 text-green-300 rounded text-xs font-mono">
+                                    GPU: {gpu}
+                                </span>
+                            )}
+                            {ram && (
+                                <span className="px-2 py-0.5 bg-purple-500/20 text-purple-300 rounded text-xs font-mono">
+                                    RAM: {ram}
+                                </span>
+                            )}
+                            {ssd && (
+                                <span className="px-2 py-0.5 bg-orange-500/20 text-orange-300 rounded text-xs font-mono">
+                                    SSD: {ssd}
+                                </span>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Open Button */}

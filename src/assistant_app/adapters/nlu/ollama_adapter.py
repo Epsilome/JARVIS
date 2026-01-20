@@ -530,7 +530,7 @@ def ask_ollama(text: str) -> str | None:
         "</TOOL_POLICIES>\n\n"
 
         "<CORE_CONSTRAINTS>\n"
-        "- SEARCH POLICY: Do NOT search the web for general knowledge, definitions, jokes, or small talk. Use your internal knowledge. Only search if the user explicitly asks for real-time news, specific product prices, or external data.\n"
+        "- SEARCH POLICY: Do NOT search the web for definitions or small talk. Use your internal knowledge. Only search if the user explicitly asks for real-time news, specific product prices, or external data.\n"
         "- SEARCH OUTPUT: When providing search results, output a Markdown list of the Top 3-5 results in this format: '- [Title](URL)'. Do NOT read snippets. Do NOT summarize the content unless explicitly asked. JUST THE LIST.\n"
         "- Always consider the USER_CONTEXT (Budget, Region) when making hardware recommendations.\n"
         "- Reply ONLY to the user's specific request.\n"

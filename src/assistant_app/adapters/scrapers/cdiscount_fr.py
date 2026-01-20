@@ -7,6 +7,8 @@ from assistant_app.domain.specs import parse_price_eur
 from assistant_app.domain.benchmarks import match_cpu, match_gpu, parse_tgp_w
 
 SEARCH_URL = "https://www.cdiscount.com/search/10/{query}.html#_his_"
+SEARCH_URL_PAGED = "https://www.cdiscount.com/search/10/{query}.html?page={page}#_his_"
+MAX_PAGES = 3  # Scrape first 3 pages for better coverage
 
 
 def _clean_url(raw: str) -> str:
@@ -35,13 +37,21 @@ def _build_specs(title: str) -> dict:
         "tgp_w": _safe(parse_tgp_w, title),   # ← likely source of “no such group”
     }
 
-async def _search_async(query: str) -> list[Product]:
+async def _search_async(query: str, page_num: int = 1) -> list[Product]:
     out: list[Product] = []
     async with browser(headless=False) as ctx:
         page = await ctx.new_page()
 
-        # Land and accept consent if present; don't over-constrain the wait selector
-        await safe_goto(page, SEARCH_URL.format(query=query.replace(" ", "+")), wait_selector="body", name="cdiscount")
+        # Build URL based on page number
+        if page_num == 1:
+            url = SEARCH_URL.format(query=query.replace(" ", "+"))
+        else:
+            url = SEARCH_URL_PAGED.format(query=query.replace(" ", "+"), page=page_num)
+        
+        print(f"[scraper] Cdiscount: Fetching page {page_num} - {url}")
+        
+        # Land and accept consent if present
+        await safe_goto(page, url, wait_selector="body", name="cdiscount")
 
         # Try to see if any likely product nodes exist (repeat a few times)
         ok = False
@@ -194,5 +204,28 @@ async def _search_async(query: str) -> list[Product]:
         print(f"[scraper] Cdiscount kept {len(out)} items; dropped {drops} with no parseable price/title/url")
     return out
 
+async def _search_all_pages_async(query: str) -> list[Product]:
+    """Scrape all pages in parallel using asyncio.gather."""
+    tasks = [_search_async(query, page_num) for page_num in range(1, MAX_PAGES + 1)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+    
+    all_products: list[Product] = []
+    seen_urls: set[str] = set()
+    
+    for page_num, result in enumerate(results, 1):
+        if isinstance(result, Exception):
+            print(f"[scraper] Cdiscount page {page_num} failed: {result}")
+            continue
+        for p in result:
+            key = (p.url or "").split("?", 1)[0]
+            if key not in seen_urls:
+                seen_urls.add(key)
+                all_products.append(p)
+        print(f"[scraper] Cdiscount page {page_num}: {len(result)} items")
+    
+    print(f"[scraper] Cdiscount total: {len(all_products)} unique items from {MAX_PAGES} pages (parallel)")
+    return all_products
+
 def search(query: str) -> list[Product]:
-    return asyncio.run(_search_async(query))
+    """Search with parallel pagination - scrapes all pages simultaneously."""
+    return asyncio.run(_search_all_pages_async(query))

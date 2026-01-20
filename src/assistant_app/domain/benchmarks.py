@@ -266,6 +266,29 @@ def match_cpu(text: str) -> Optional[str]:
     if m:
         return f"{m.group(1)}-{m.group(2)}{m.group(3)}".lower()
 
+    # ---- Legacy Intel i3/i5/i7/i9 U/G/M suffix (laptops) --------------------
+    # e.g., "i5-6200U", "i5 4300U", "i7-1065G7", "i5-8250U"
+    m = re.search(r"(i[3579])[-\s]?(\d{4,5})(u|g\d?|m)\b", n, re.I)
+    if m:
+        return f"{m.group(1)}-{m.group(2)}{m.group(3)}".lower()
+
+    # ---- Intel Celeron (work laptops/budget) --------------------------------
+    # e.g., "Celeron N4000", "Celeron N5100", "Celeron J4125", "Celeron 1.10 GHz"
+    m = re.search(r"celeron\s*([njg]?\d{4,5})\b", n, re.I)
+    if m:
+        return f"intel celeron {m.group(1)}".lower()
+    # Fallback for just "Celeron" without model
+    if "celeron" in n:
+        return "intel celeron"
+
+    # ---- Intel Pentium (budget laptops) -------------------------------------
+    # e.g., "Pentium N5000", "Pentium Gold 7505"
+    m = re.search(r"pentium\s*(?:gold|silver|n)?\s*(\d{4,5})\b", n, re.I)
+    if m:
+        return f"intel pentium {m.group(1)}".lower()
+    if "pentium" in n:
+        return "intel pentium"
+
 # ---- AMD Ryzen AI family (FIXED) --------------------
     # Matches: "Ryzen AI 9 HX 370", "Ryzen AI 7 360", "Ryzen 7 AI 350" (some retailers flip it)
     # We made 'hx/h/u' optional, and 'max/pro' optional.

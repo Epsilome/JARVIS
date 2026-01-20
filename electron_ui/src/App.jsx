@@ -10,17 +10,23 @@ import SystemPanel from './components/SystemPanel';
 import PricesPanel from './components/PricesPanel';
 import ComparePanel from './components/ComparePanel';
 import ConfigPanel from './components/ConfigPanel';
-import { getMovies, sendChat, getStatus, markMovieWatched, unmarkMovieWatched, getWatchedMovies, startWakeWord, stopWakeWord, WAKE_WORD_WS_URL } from './api';
+import { getMovies, sendChat, getStatus, markMovieWatched, unmarkMovieWatched, getWatchedMovies, startWakeWord, stopWakeWord, WAKE_WORD_WS_URL, getConfig } from './api';
 
 // Draggable Title Bar
 const TitleBar = ({ apiStatus }) => (
-    <div className="h-8 flex items-center px-4 space-x-4 border-b border-jarvis-cyan/30 bg-jarvis-black/80 select-none z-50 relative" style={{ WebkitAppRegion: 'drag' }}>
-        <div className={`w-1 h-4 ${apiStatus === 'online' ? 'bg-jarvis-cyan' : 'bg-red-500'} animate-pulse glow-accent-sm`}></div>
-        <div className="text-jarvis-cyan text-[10px] font-orbitron tracking-widest flex-1 opacity-80">
+    <div
+        className="h-8 flex items-center px-4 space-x-4 bg-jarvis-black/80 select-none z-50 relative"
+        style={{ WebkitAppRegion: 'drag', borderBottom: '1px solid rgba(var(--accent-color-rgb), 0.3)' }}
+    >
+        <div
+            className={`w-1 h-4 animate-pulse`}
+            style={{ backgroundColor: apiStatus === 'online' ? 'var(--accent-color)' : '#ef4444', boxShadow: '0 0 8px rgba(var(--accent-color-rgb), 0.5)' }}
+        ></div>
+        <div className="text-[10px] font-orbitron tracking-widest flex-1 opacity-80" style={{ color: 'var(--accent-color)' }}>
             SYSTEM STATUS: {apiStatus === 'online' ? 'NOMINAL' : 'OFFLINE'} // PROTOCOL 7: ACTIVE // {apiStatus === 'online' ? 'CONNECTED' : 'DISCONNECTED'}
         </div>
         <div className="flex space-x-2" style={{ WebkitAppRegion: 'no-drag' }}>
-            <div className="w-2 h-2 rounded-full bg-jarvis-cyan/50 hover:bg-jarvis-cyan cursor-pointer transition-colors glow-accent-sm"></div>
+            <div className="w-2 h-2 rounded-full cursor-pointer transition-colors" style={{ backgroundColor: 'rgba(var(--accent-color-rgb), 0.5)', boxShadow: '0 0 5px rgba(var(--accent-color-rgb), 0.5)' }}></div>
             <div className="w-2 h-2 rounded-full bg-red-500/50 hover:bg-red-500 cursor-pointer transition-colors shadow-[0_0_5px_#ff0000]"></div>
         </div>
     </div>
@@ -40,8 +46,11 @@ const NavRail = ({ active, setActive }) => {
     ];
 
     return (
-        <div className="w-20 bg-black/60 border-r border-jarvis-cyan/20 flex flex-col items-center py-4 space-y-6 backdrop-blur-md relative z-40 overflow-y-auto min-h-0">
-            <div className="absolute right-0 top-0 bottom-0 w-[1px] bg-gradient-to-b from-transparent via-jarvis-cyan/50 to-transparent"></div>
+        <div
+            className="w-20 bg-black/60 flex flex-col items-center py-4 space-y-6 backdrop-blur-md relative z-40 overflow-y-auto min-h-0"
+            style={{ borderRight: '1px solid rgba(var(--accent-color-rgb), 0.2)' }}
+        >
+            <div className="absolute right-0 top-0 bottom-0 w-[1px]" style={{ background: 'linear-gradient(to bottom, transparent, rgba(var(--accent-color-rgb), 0.5), transparent)' }}></div>
             {items.map((item) => {
                 const Icon = item.icon;
                 const isActive = active === item.id;
@@ -51,11 +60,21 @@ const NavRail = ({ active, setActive }) => {
                         className={`group flex flex-col items-center cursor-pointer transition-all duration-300 ${isActive ? '' : 'opacity-40 hover:opacity-80'}`}
                         onClick={() => setActive(item.id)}
                     >
-                        <div className={`p-3 rounded-lg mb-2 relative transition-all duration-300 ${isActive ? 'bg-jarvis-cyan/10 glow-accent border border-jarvis-cyan/30' : 'border border-transparent'}`}>
-                            <Icon size={22} className={isActive ? 'text-jarvis-cyan' : 'text-cyan-100'} />
-                            {isActive && <div className="absolute inset-0 bg-jarvis-cyan/10 blur-sm rounded-lg"></div>}
+                        <div
+                            className={`p-3 rounded-lg mb-2 relative transition-all duration-300`}
+                            style={isActive ? {
+                                backgroundColor: 'rgba(var(--accent-color-rgb), 0.1)',
+                                border: '1px solid rgba(var(--accent-color-rgb), 0.3)',
+                                boxShadow: '0 0 15px rgba(var(--accent-color-rgb), 0.3)'
+                            } : { border: '1px solid transparent' }}
+                        >
+                            <Icon size={22} style={isActive ? { color: 'var(--accent-color)' } : { color: '#e0f2fe' }} />
+                            {isActive && <div className="absolute inset-0 blur-sm rounded-lg" style={{ backgroundColor: 'rgba(var(--accent-color-rgb), 0.1)' }}></div>}
                         </div>
-                        <span className={`text-[9px] font-orbitron tracking-widest transition-colors ${isActive ? 'text-jarvis-cyan' : 'text-gray-400'}`}>
+                        <span
+                            className={`text-[9px] font-orbitron tracking-widest transition-colors`}
+                            style={isActive ? { color: 'var(--accent-color)' } : { color: '#9ca3af' }}
+                        >
                             {item.label}
                         </span>
                     </div>
@@ -167,8 +186,7 @@ const App = () => {
         }
     };
 
-    // Check API status on mount
-    // Check API status on mount
+    // Check API status and load theme on mount
     useEffect(() => {
         const checkApi = async () => {
             try {
@@ -179,6 +197,19 @@ const App = () => {
             }
         };
         checkApi();
+
+        // Load and apply saved theme
+        const applyTheme = async () => {
+            try {
+                const config = await getConfig();
+                if (config?.theme_accent) {
+                    document.documentElement.setAttribute('data-theme', config.theme_accent);
+                }
+            } catch (e) {
+                console.error('Failed to load theme:', e);
+            }
+        };
+        applyTheme();
 
         // Initial fetch
         fetchMovies();
@@ -423,13 +454,13 @@ const App = () => {
     };
 
     return (
-        <div className="bg-[#050505] w-screen h-screen text-white overflow-hidden font-mono selection:bg-jarvis-cyan/30 selection:text-white flex flex-col">
+        <div className="bg-[#050505] w-screen h-screen text-white overflow-hidden font-mono flex flex-col">
             {/* Ambient Background Glow */}
-            <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-blue-900/10 blur-[80px] pointer-events-none rounded-full"></div>
-            <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-jarvis-cyan/5 blur-[80px] pointer-events-none rounded-full"></div>
+            <div className="absolute top-0 left-0 w-1/2 h-1/2 blur-[80px] pointer-events-none rounded-full" style={{ backgroundColor: 'rgba(var(--accent-color-rgb), 0.05)' }}></div>
+            <div className="absolute bottom-0 right-0 w-1/2 h-1/2 blur-[80px] pointer-events-none rounded-full" style={{ backgroundColor: 'rgba(var(--accent-color-rgb), 0.03)' }}></div>
 
             {/* Border Frame */}
-            <div className="absolute inset-0 border border-jarvis-cyan/50 rounded-lg pointer-events-none z-[60]"></div>
+            <div className="absolute inset-0 rounded-lg pointer-events-none z-[60]" style={{ border: '1px solid rgba(var(--accent-color-rgb), 0.5)' }}></div>
 
             <TitleBar apiStatus={apiStatus} />
 
@@ -450,7 +481,10 @@ const App = () => {
                             </div>
 
                             {/* Chat Input */}
-                            <div className="h-12 shrink-0 flex items-center gap-3 border border-jarvis-cyan/30 bg-black/40 rounded-lg px-4 backdrop-blur-md">
+                            <div
+                                className="h-12 shrink-0 flex items-center gap-3 bg-black/40 rounded-lg px-4 backdrop-blur-md"
+                                style={{ border: '1px solid rgba(var(--accent-color-rgb), 0.3)' }}
+                            >
                                 <input
                                     type="text"
                                     value={inputText}
@@ -461,15 +495,18 @@ const App = () => {
                                 />
                                 <button
                                     onClick={handleSendMessage}
-                                    className="p-2 hover:bg-jarvis-cyan/10 rounded-lg transition-colors"
+                                    className="p-2 rounded-lg transition-colors hover:bg-white/5"
                                 >
-                                    <Send size={18} className="text-jarvis-cyan" />
+                                    <Send size={18} style={{ color: 'var(--accent-color)' }} />
                                 </button>
                             </div>
 
                             {/* Visualizer */}
-                            <div className="h-32 shrink-0 relative flex flex-col items-center justify-center border border-jarvis-cyan/30 bg-black/40 rounded-xl overflow-hidden backdrop-blur-md">
-                                <div className="absolute top-3 left-5 text-[10px] text-jarvis-cyan/80 font-bold tracking-widest font-orbitron flex items-center">
+                            <div
+                                className="h-32 shrink-0 relative flex flex-col items-center justify-center bg-black/40 rounded-xl overflow-hidden backdrop-blur-md"
+                                style={{ border: '1px solid rgba(var(--accent-color-rgb), 0.3)' }}
+                            >
+                                <div className="absolute top-3 left-5 text-[10px] font-bold tracking-widest font-orbitron flex items-center" style={{ color: 'rgba(var(--accent-color-rgb), 0.8)' }}>
                                     <span className={`w-2 h-2 rounded-full mr-2 ${isListening ? 'bg-red-500 animate-pulse' : 'bg-gray-600'}`}></span>
                                     AUDIO: {isListening ? 'ACTIVE' : 'STANDBY'}
                                 </div>
@@ -480,14 +517,34 @@ const App = () => {
                                 {/* Voice Mode Toggle */}
                                 <div
                                     onClick={toggleVoiceMode}
-                                    className={`absolute bottom-3 left-5 px-3 py-1.5 rounded-full border text-[9px] font-orbitron tracking-wider cursor-pointer transition-all duration-300 ${voiceModeEnabled ? 'border-green-500 bg-green-500/20 text-green-400' : 'border-gray-600 bg-black/40 text-gray-500 hover:border-jarvis-cyan/50'}`}
+                                    className="absolute bottom-3 left-5 px-3 py-1.5 rounded-full text-[9px] font-orbitron tracking-wider cursor-pointer transition-all duration-300"
+                                    style={voiceModeEnabled ? {
+                                        border: '1px solid #22c55e',
+                                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                                        color: '#4ade80'
+                                    } : {
+                                        border: '1px solid #4b5563',
+                                        backgroundColor: 'rgba(0,0,0,0.4)',
+                                        color: '#6b7280'
+                                    }}
                                 >
                                     {voiceModeEnabled ? '🎤 VOICE ACTIVE' : '🔇 WAKE WORD OFF'}
                                 </div>
 
                                 {/* Mic Button */}
-                                <div onClick={toggleMic} className={`absolute bottom-3 w-12 h-12 rounded-full border-2 flex items-center justify-center cursor-pointer transition-all duration-300 z-50 ${isListening ? 'border-jarvis-alert bg-jarvis-alert/10 scale-110' : 'border-jarvis-cyan bg-jarvis-cyan/5 hover:scale-105'}`}>
-                                    <Mic size={20} className={isListening ? 'text-jarvis-alert' : 'text-jarvis-cyan'} />
+                                <div
+                                    onClick={toggleMic}
+                                    className="absolute bottom-3 w-12 h-12 rounded-full flex items-center justify-center cursor-pointer transition-all duration-300 z-50"
+                                    style={isListening ? {
+                                        border: '2px solid #ff6b6b',
+                                        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                                        transform: 'scale(1.1)'
+                                    } : {
+                                        border: '2px solid var(--accent-color)',
+                                        backgroundColor: 'rgba(var(--accent-color-rgb), 0.05)'
+                                    }}
+                                >
+                                    <Mic size={20} style={{ color: isListening ? '#ff6b6b' : 'var(--accent-color)' }} />
                                 </div>
                             </div>
                         </>
@@ -571,7 +628,7 @@ const App = () => {
                     backgroundSize: '100% 4px'
                 }}
             ></div>
-        </div>
+        </div >
     );
 };
 

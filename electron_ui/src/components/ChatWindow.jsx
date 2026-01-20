@@ -9,7 +9,10 @@ const ChatWindow = ({ messages }) => {
     }, [messages]);
 
     return (
-        <div className="flex-1 border border-jarvis-cyan/20 rounded-lg bg-black/40 backdrop-blur-md p-4 relative overflow-hidden flex flex-col min-h-0">
+        <div
+            className="flex-1 rounded-lg bg-black/40 backdrop-blur-md p-4 relative overflow-hidden flex flex-col min-h-0"
+            style={{ border: '1px solid rgba(var(--accent-color-rgb), 0.2)' }}
+        >
             {/* Background Grid */}
             <div className="absolute inset-0 grid-bg opacity-10 pointer-events-none"></div>
 
@@ -25,9 +28,12 @@ const ChatWindow = ({ messages }) => {
             </div>
 
             {/* Input Placeholder (Visual Only for now) */}
-            <div className="mt-4 pt-4 border-t border-jarvis-cyan/20 flex items-center opacity-50">
-                <div className="w-2 h-2 bg-jarvis-cyan animate-pulse mr-2"></div>
-                <span className="text-xs font-mono text-jarvis-cyan/50">LISTENING FOR AUDIO INPUT...</span>
+            <div
+                className="mt-4 pt-4 flex items-center opacity-50"
+                style={{ borderTop: '1px solid rgba(var(--accent-color-rgb), 0.2)' }}
+            >
+                <div className="w-2 h-2 animate-pulse mr-2" style={{ backgroundColor: 'var(--accent-color)' }}></div>
+                <span className="text-xs font-mono" style={{ color: 'rgba(var(--accent-color-rgb), 0.5)' }}>LISTENING FOR AUDIO INPUT...</span>
             </div>
         </div>
     );

@@ -7,8 +7,18 @@ import sys
 import os
 import asyncio
 
+# Load .env file for environment variables
+from dotenv import load_dotenv
+load_dotenv()
+
 # Add src to path so we can import assistant_app
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+# Import scheduled jobs (auto-registers daily cache refresh)
+try:
+    import assistant_app.services.cache_refresh
+except ImportError:
+    pass  # Should not happen, but safe to ignore if file missing
 
 from fastapi import FastAPI, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware

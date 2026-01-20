@@ -15,10 +15,26 @@ logger = logging.getLogger(__name__)
 CHROMA_PATH = r"d:\JARVIS\data\chroma_db"
 STEADY_BASE_URL = "https://api.steadyapi.com/v1"
 
+# Manual embedding helper to avoid library crashes
+def get_embedding(text: str) -> list[float]:
+    try:
+        url = "http://127.0.0.1:11434/api/embeddings"
+        # qwen2.5:3b is the user's model
+        resp = requests.post(url, json={"model": "qwen2.5:3b", "prompt": text}, timeout=10)
+        if resp.status_code == 200:
+            return resp.json().get("embedding", [])
+    except Exception as e:
+        logger.error(f"Embedding failed: {e}")
+    return []
+
 class ReviewIngestor:
     def __init__(self):
         self.client = chromadb.PersistentClient(path=CHROMA_PATH)
-        self.collection = self.client.get_or_create_collection(name="product_reviews")
+        # Use None to disable auto-embedding (we provide them manually)
+        self.collection = self.client.get_or_create_collection(
+            name="product_reviews",
+            embedding_function=None
+        )
         self.api_key = os.getenv("STEADY_API_KEY")
         if not self.api_key:
             logger.warning("STEADY_API_KEY not found in env.")
@@ -115,14 +131,48 @@ class ReviewIngestor:
         ids = [f"{product_name}_{i}" for i in range(len(all_texts))]
         metadatas = [{"product": product_name, "source": "reddit" if i < len(reddit_texts) else "youtube"} for i in range(len(all_texts))]
         
-        # Simple usage: add documents directly (Chroma uses default embedding model by default)
+        # Manual Embedding Generation - skip failures, validate dimensions
+        embeddings = []
+        expected_dim = None
+        
+        for i, text in enumerate(all_texts):
+            emb = get_embedding(text[:1000])  # Truncate to avoid oversized prompts
+            
+            if not emb or not isinstance(emb, list) or len(emb) == 0:
+                logger.warning(f"Skipping text {i}: Failed to get embedding")
+                continue
+            
+            # Set expected dimension from first successful embedding
+            if expected_dim is None:
+                expected_dim = len(emb)
+                logger.info(f"Embedding dimension detected: {expected_dim}")
+            
+            # Validate dimension consistency
+            if len(emb) != expected_dim:
+                logger.warning(f"Skipping text {i}: Dimension mismatch ({len(emb)} vs {expected_dim})")
+                continue
+            
+            embeddings.append({
+                "text": all_texts[i],
+                "id": ids[i],
+                "meta": metadatas[i],
+                "emb": emb
+            })
+        
+        if not embeddings:
+            logger.error("No valid embeddings generated.")
+            return
+        
+        logger.info(f"Generated {len(embeddings)} valid embeddings out of {len(all_texts)} texts.")
+
         try:
-             self.collection.add(
-                documents=all_texts,
-                metadatas=metadatas,
-                ids=ids
+            self.collection.add(
+                documents=[e["text"] for e in embeddings],
+                metadatas=[e["meta"] for e in embeddings],
+                ids=[e["id"] for e in embeddings],
+                embeddings=[e["emb"] for e in embeddings]
             )
-             logger.info(f"Stored {len(all_texts)} review chunks.")
+            logger.info(f"Stored {len(embeddings)} review chunks.")
         except Exception as e:
             logger.error(f"Chroma add failed: {e}")
 

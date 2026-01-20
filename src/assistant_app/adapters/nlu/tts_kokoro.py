@@ -34,6 +34,15 @@ def _get_stream():
             
     return _STREAM if _STREAM else None
 
+def preload_model():
+    """Warm up the TTS engine to avoid latency on first speech."""
+    try:
+        if REALTIMETTS_AVAILABLE:
+            _get_stream()
+            logger.info("Kokoro TTS preloaded successfully.")
+    except Exception as e:
+        logger.error(f"Failed to preload Kokoro: {e}")
+
 def reload_voice(new_voice: str = None):
     """Reload TTS engine with a new voice. Allows hot-swapping voice without restart."""
     global _STREAM, _ENGINE

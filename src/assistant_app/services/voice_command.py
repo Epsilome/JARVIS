@@ -86,17 +86,31 @@ def process_voice_command(text: str, speak_response: bool = True):
 
     # Jokes
     if "joke" in text or "funny" in text:
-        import random
-        jokes = [
-            "Why did the AI cross the road? To optimize the pathfinding algorithm!",
-            "I would tell you a UDP joke, but you might not get it.",
-            "Why do programmers prefer dark mode? Because light attracts bugs.",
-            "How many programmers does it take to change a light bulb? None, that's a hardware problem.",
-            "A SQL query walks into a bar, walks up to two tables and asks: 'Can I join you?'",
-            "Why was the computer cold? It left its Windows open.",
-            "I asked my specialized AI for a joke about the future... it said 'I'm still processing it'.",
-        ]
-        reply(random.choice(jokes))
+        try:
+            import requests
+            
+            # Dynamic filter: check if user explicitly wants dark/nsfw content
+            unfiltered_keywords = ["dark", "nsfw", "dirty", "adult", "offensive", "edgy"]
+            wants_unfiltered = any(kw in text for kw in unfiltered_keywords)
+            
+            if wants_unfiltered:
+                # Remove safety filters for explicit requests
+                url = "https://v2.jokeapi.dev/joke/Dark?type=single"
+            else:
+                # Default: Safe mode with full blacklist
+                url = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single"
+            
+            resp = requests.get(url, timeout=5)
+            if resp.status_code == 200:
+                data = resp.json()
+                joke = data.get("joke", "I can't think of a joke right now.")
+                reply(joke)
+            else:
+                reply("I tried to fetch a joke, but the internet didn't laugh back.")
+        except Exception as e:
+            typer.echo(f"Joke API failed: {e}")
+            # Fallback
+            reply("Why did the AI cross the road? To get to the other side... of the firewall.")
         return
 
     # Prayer

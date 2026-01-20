@@ -18,6 +18,34 @@ def run_voice_loop(stop_event: threading.Event):
     """
     logger.info("Initializing Voice Loop...")
     state.add_log("Initializing Auditory Systems...")
+
+    # Preload TTS to avoid first-time latency
+    try:
+        from assistant_app.adapters.nlu.tts_kokoro import preload_model
+        state.add_log("Warming up Vocal Cords...")
+        preload_model()
+    except Exception as e:
+        logger.error(f"TTS Preload failed: {e}")
+    
+    # Preload Ollama LLM to avoid cold-start latency
+    try:
+        import threading
+        def _warmup_ollama():
+            try:
+                import ollama
+                from assistant_app.config.settings import settings
+                logger.info("Warming up Ollama brain...")
+                # Send a minimal prompt to load the model into memory
+                ollama.chat(model=settings.OLLAMA_MODEL, messages=[{"role": "user", "content": "ping"}])
+                logger.info("Ollama brain preloaded.")
+            except Exception as e:
+                logger.warning(f"Ollama warmup failed (non-critical): {e}")
+        
+        state.add_log("Warming up Neural Pathways...")
+        # Run in background thread so it doesn't block Wake Word init
+        threading.Thread(target=_warmup_ollama, daemon=True).start()
+    except Exception as e:
+        logger.error(f"Ollama Preload failed: {e}")
     
     try:
         ww = WakeWordListener()

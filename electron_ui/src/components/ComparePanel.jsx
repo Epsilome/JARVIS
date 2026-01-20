@@ -136,6 +136,17 @@ const ComparePanel = () => {
         }
     };
 
+    // Get count based on current filter
+    const getFilteredCount = () => {
+        switch (typeFilter) {
+            case 'cpu': return database.cpus.length;
+            case 'gpu': return database.gpus.length;
+            case 'ssd': return database.ssds.length;
+            case 'ram': return database.ram.length;
+            default: return database.cpus.length + database.gpus.length + database.ssds.length + database.ram.length;
+        }
+    };
+
     return (
         <div className="flex flex-col h-full animate-in slide-in-from-bottom duration-500">
             {/* Header */}
@@ -256,7 +267,7 @@ const ComparePanel = () => {
                             </button>
                         )}
                     </div>
-                    <span className="text-xs text-gray-500">{database.total} items</span>
+                    <span className="text-xs text-gray-500">{getFilteredCount()} items</span>
                 </div>
 
                 {/* Database List */}
@@ -291,8 +302,8 @@ const CompareSlot = ({ item, index, onRemove, onSelect, isSelected, maxScore }) 
             <div
                 onClick={onSelect}
                 className={`border-2 border-dashed rounded-lg h-32 flex flex-col items-center justify-center bg-black/20 cursor-pointer transition-all relative group ${isSelected
-                        ? 'border-jarvis-cyan bg-jarvis-cyan/10'
-                        : 'border-gray-700 hover:border-gray-500'
+                    ? 'border-jarvis-cyan bg-jarvis-cyan/10'
+                    : 'border-gray-700 hover:border-gray-500'
                     }`}
             >
                 {/* Remove button for empty slot */}

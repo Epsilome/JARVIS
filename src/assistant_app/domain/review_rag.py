@@ -26,7 +26,11 @@ class ReviewIntelligence:
     def __init__(self):
         try:
             self.chroma = chromadb.PersistentClient(path=r"d:\JARVIS\data\chroma_db")
-            self.collection = self.chroma.get_or_create_collection("product_reviews")
+            # No embedding function (manual handling)
+            self.collection = self.chroma.get_or_create_collection(
+                "product_reviews",
+                embedding_function=None
+            )
         except Exception as e:
             logger.error(f"ChromaDB init failed: {e}")
             self.collection = None
@@ -49,11 +53,27 @@ class ReviewIntelligence:
             
         # 1. Retrieve
         try:
-            results = self.collection.query(
-                query_texts=[f"{product_name} reviews opinion"],
-                n_results=15,
-                where={"product": product_name}
-            )
+            # Manual embedding for query
+            import requests
+            def _get_emb(t):
+                try:
+                    r = requests.post("http://127.0.0.1:11434/api/embeddings", json={"model": "qwen2.5:3b", "prompt": t}, timeout=5)
+                    if r.status_code==200: return r.json().get("embedding")
+                except: pass
+                return None
+            
+            q_emb = _get_emb(f"{product_name} reviews opinion")
+            
+            if q_emb:
+                results = self.collection.query(
+                    query_embeddings=[q_emb],
+                    n_results=15,
+                    where={"product": product_name}
+                )
+            else:
+                logger.warning("Failed to embed query.")
+                return None
+
         except Exception as e:
             logger.warning(f"Chroma query failed: {e}")
             return None

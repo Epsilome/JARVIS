@@ -398,6 +398,36 @@ def get_weather(city: str, country: str = "") -> str:
     except Exception as e:
         return f"Could not get weather for {city}: {e}"
 
+def get_joke(category: str = "Any") -> str:
+    """
+    Fetches a joke from the JokeAPI.
+    Categories: 'Any', 'Dark', 'Programming', 'Misc', 'Pun', 'Spooky', 'Christmas'.
+    Use 'Dark' ONLY if the user explicitly asks for dark/nsfw/edgy jokes.
+    """
+    logger.info(f"Tool Call: get_joke('{category}')")
+    import requests
+    
+    try:
+        # Determine URL based on category request
+        if category.lower() in ["dark", "nsfw", "dirty", "adult"]:
+            # Unfiltered
+            url = "https://v2.jokeapi.dev/joke/Dark?type=single"
+        else:
+            # Safe Mode (Default)
+            url = "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single"
+            
+        resp = requests.get(url, timeout=5)
+        if resp.status_code == 200:
+            data = resp.json()
+            joke = data.get("joke", "I can't think of a joke right now.")
+            return joke
+        else:
+            return "I tried to fetch a joke, but the internet didn't laugh back."
+            
+    except Exception as e:
+        logger.error(f"Joke API failed: {e}")
+        return "Why did the AI cross the road? To get to the other side... of the firewall. (Fallback Joke)"
+
 def get_product_opinions(product_name: str) -> str:
     """
     Gets qualitative "Pros & Cons" by analyzing Reddit/YouTube reviews.
@@ -405,26 +435,40 @@ def get_product_opinions(product_name: str) -> str:
     """
     logger.info(f"Tool Call: get_product_opinions('{product_name}')")
     try:
-        rag = ReviewIntelligence.get_instance()
-        opinions = rag.get_opinions(product_name)
+        # Use simple file-based storage (avoids ChromaDB crashes)
+        from assistant_app.services.simple_reviews import (
+            get_reviews, ingest_reviews, analyze_reviews
+        )
         
-        if not opinions:
+        # Check if we have reviews stored
+        reviews = get_reviews(product_name)
+        
+        if not reviews:
             logger.info(f"Ingesting fresh reviews for {product_name}...")
-            ingestor = ReviewIngestor()
-            ingestor.ingest_product(product_name)
-            opinions = rag.get_opinions(product_name)
-            
-        if opinions:
-            # Format nicely
+            success = ingest_reviews(product_name)
+            if success:
+                reviews = get_reviews(product_name)
+        
+        if not reviews:
+            return "No sufficient user reviews found to form an opinion."
+        
+        # Analyze reviews with LLM
+        analysis = analyze_reviews(product_name, reviews)
+        
+        if analysis:
             md = f"### Opinions on {product_name}\n"
-            md += f"**Verdict**: {opinions.verdict} (Confidence: {opinions.confidence})\n\n"
-            md += "**Pros**:\n" + "\n".join([f"- {p}" for p in opinions.pros]) + "\n\n"
-            md += "**Cons**:\n" + "\n".join([f"- {c}" for c in opinions.cons])
+            md += f"**Verdict**: {analysis.get('verdict', 'N/A')}\n\n"
+            pros = analysis.get('pros', [])
+            cons = analysis.get('cons', [])
+            md += "**Pros**:\n" + "\n".join([f"- {p}" for p in pros]) + "\n\n"
+            md += "**Cons**:\n" + "\n".join([f"- {c}" for c in cons])
             return md
-            
-        return "No sufficient user reviews found to form an opinion."
+        
+        # Fallback: just return raw review snippets
+        return f"Found {len(reviews)} reviews for {product_name}. Sample: {reviews[0][:200]}..."
+        
     except Exception as e:
-        logger.error(f"Opinion RAG failed: {e}")
+        logger.error(f"Opinion analysis failed: {e}")
         return f"Could not analyze opinions: {e}"
 
 def open_application(app_name: str) -> str:
@@ -737,5 +781,6 @@ AVAILABLE_TOOLS = {
     "add_movie_watched": add_movie_watched,
     "remove_movie_watched": remove_movie_watched,
     "get_weather": get_weather,
+    "get_joke": get_joke,
 }
 
