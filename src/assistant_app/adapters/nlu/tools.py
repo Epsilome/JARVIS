@@ -61,11 +61,12 @@ from assistant_app.adapters.scrapers.specs import search_specs
 from assistant_app.domain.cpu_registry import LaptopCPUBase
 from assistant_app.domain.ram_registry import RAMRegistry
 from assistant_app.domain.ssd_registry import SSDRegistry
-from assistant_app.domain.review_rag import ReviewIntelligence
-from assistant_app.services.ingestion.review_ingest import ReviewIngestor
+
+
 from assistant_app.adapters.system_control import (
     set_volume, lock_screen, minimize_all, open_app as sys_open_app, focus_window,
-    control_media as sys_media, control_browser as sys_browser, read_clipboard as sys_read_clipboard, set_power_mode as sys_power
+    control_media as sys_media, control_browser as sys_browser, read_clipboard as sys_read_clipboard, 
+    set_power_mode as sys_power, get_installed_applications as sys_get_apps
 )
 from assistant_app.services.reminders import add_once
 from assistant_app.adapters.nlu.time_parse import parse_when
@@ -477,6 +478,17 @@ def open_application(app_name: str) -> str:
     sys_open_app(app_name)
     return f"Opening {app_name}..."
 
+def list_installed_applications() -> str:
+    """Lists all installed applications found in the Start Menu."""
+    logger.info("Tool Call: list_installed_applications()")
+    apps = sys_get_apps()
+    if not apps:
+        return "No applications found in the Start Menu."
+    
+    # Return a comma-separated list, limited to first 100 to avoid token overflow
+    return f"Found {len(apps)} applications. Here are some potentially openable apps:\n" + ", ".join(apps)
+
+
 def set_system_volume(level: int) -> str:
     """Sets system volume (0-100)."""
     logger.info(f"Tool Call: set_system_volume({level})")
@@ -761,6 +773,7 @@ AVAILABLE_TOOLS = {
     "get_active_reminders": get_active_reminders,
     "get_system_health": get_system_health,
     "open_application": open_application,
+    "list_installed_applications": list_installed_applications,
     "set_system_volume": set_system_volume,
     "system_lock": system_lock,
     "minimize_windows": minimize_windows,

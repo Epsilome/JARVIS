@@ -10,9 +10,9 @@ os.environ["HF_HUB_DISABLE_SYMLINKS"] = "1"
 logger = logging.getLogger(__name__)
 
 # Initialize Whisper Model (Lazy loading or global)
-# "base.en" is fast and decent. "small.en" is better. "medium.en" is very accurate.
-# Let's start with "small.en" for a balance of speed and accuracy on GPU.
-MODEL_SIZE = "distil-small.en"
+# User requested "large-v3-turbo" for best balance of accuracy and speed.
+# We are already using 'faster-whisper' backend, so this will run efficiently.
+MODEL_SIZE = "large-v3-turbo"
 _model = None
 
 def get_model():
@@ -73,7 +73,9 @@ class VoiceListener:
                 tmp_path = tmp_file.name
             
             model = get_model()
-            segments, info = model.transcribe(tmp_path, beam_size=5)
+            # Context prompting: Biases the model to recognize specific terms
+            prompt = "JARVIS context: eFootball, Steam, Valorant, Discord, launch application, Spotify, Chrome, system status."
+            segments, info = model.transcribe(tmp_path, beam_size=5, initial_prompt=prompt)
             text = " ".join([segment.text for segment in segments]).strip()
             
             if text:

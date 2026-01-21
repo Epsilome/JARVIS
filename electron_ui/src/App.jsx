@@ -7,6 +7,9 @@ import MovieCard from './components/MovieCard';
 import NotesPanel from './components/NotesPanel';
 import RemindersPanel from './components/RemindersPanel';
 import WeatherWidget from './components/WeatherWidget';
+import MiniResourceGraph from './components/MiniResourceGraph';
+import QuickNotes from './components/QuickNotes';
+import NextReminder from './components/NextReminder';
 import SystemPanel from './components/SystemPanel';
 import PricesPanel from './components/PricesPanel';
 import ComparePanel from './components/ComparePanel';
@@ -472,9 +475,12 @@ const App = () => {
 
                     {activeTab === 'home' && (
                         <>
-                            {/* Weather Widget - Top Right */}
-                            <div className="absolute top-6 right-6 w-72 z-10">
+                            {/* Right Side Dashboard */}
+                            <div className="absolute top-6 right-6 w-72 z-10 space-y-4 max-h-[calc(100vh-180px)] overflow-y-auto scrollbar-thin scrollbar-thumb-jarvis-cyan/20 scrollbar-track-transparent">
                                 <WeatherWidget />
+                                <MiniResourceGraph />
+                                <NextReminder />
+                                <QuickNotes />
                             </div>
 
                             <div className="flex-1 min-h-0 flex flex-col pr-80">

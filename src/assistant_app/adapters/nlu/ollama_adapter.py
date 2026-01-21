@@ -213,8 +213,20 @@ TOOLS_SCHEMA = [
     {
         "type": "function",
         "function": {
+            "name": "list_installed_applications",
+            "description": "List all applications currently installed on the PC. Use this to verify if an app exists before trying to open it.",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "open_application",
-            "description": "Opens a Windows application (e.g. 'Spotify', 'Notepad', 'Chrome').",
+            "description": "Opens a Windows application (e.g. 'Spotify', 'Notepad', 'Chrome'). If not sure if installed, verify with list_installed_applications first.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -474,6 +486,24 @@ TOOLS_SCHEMA = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_joke",
+            "description": "Get a random joke. Use for 'tell me a joke', 'make me laugh', 'funny story'.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "description": "Category: 'Any' (default), 'Dark', 'Programming', 'Pun', 'Spooky', 'Christmas'.",
+                        "enum": ["Any", "Dark", "Programming", "Pun", "Spooky", "Christmas"]
+                    }
+                },
+                "required": [],
+            },
+        },
+    },
 ]
 
 
@@ -515,6 +545,8 @@ def ask_ollama(text: str) -> str | None:
         "3. TECHNICAL SPECS: Use 'lookup_detailed_specs' for VRAM, TDP, or architectural details.\n"
         "4. SENTIMENT: Use 'get_product_opinions' for reviews or pros/cons.\n"
         "5. SYSTEM CONTROL: Use native tools for Volume ('set_system_volume'), Locking, and Power Plans. "
+        "Use 'open_application' to launch programs. If unsure if installed, check 'list_installed_applications' FIRST. "
+        "NEVER open a browser tab (new_tab) to 'launch' a game or app; always use open_application. "
         "For Browser Navigation: "
         "- 'new_tab': Use this for NEW topics or switching context (e.g. 'Search for X', 'Open Y'). url_only=True.\n"
         "- 'close_multiple_tabs': MANDATORY for multiple tabs. Params: indices=[1, 2].\n"
@@ -534,6 +566,8 @@ def ask_ollama(text: str) -> str | None:
         "- SEARCH OUTPUT: When providing search results, output a Markdown list of the Top 3-5 results in this format: '- [Title](URL)'. Do NOT read snippets. Do NOT summarize the content unless explicitly asked. JUST THE LIST.\n"
         "- Always consider the USER_CONTEXT (Budget, Region) when making hardware recommendations.\n"
         "- Reply ONLY to the user's specific request.\n"
+        "- NO PLEASANTRIES: For jokes, fun requests, and informal queries, DO NOT start with 'Sure', 'Certainly', 'Of course', 'Here you go', or similar filler phrases. Deliver the content directly.\n"
+        "- ONE JOKE ONLY: When asked for a joke, provide exactly ONE joke. Do not offer multiple jokes or ask if the user wants more. Keep it simple.\n"
         "</CORE_CONSTRAINTS>"
     )
     

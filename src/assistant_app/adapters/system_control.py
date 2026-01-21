@@ -105,18 +105,107 @@ def minimize_all():
 
 def open_app(app_name: str):
     """
-    Opens an app by typing its name in the system search.
+    Opens an app by finding its shortcut in Start Menu or Desktop and launching directly.
+    Falls back to Windows Search if shortcut not found.
     """
+    import os
+    import fnmatch
+    
+    logger.info(f"Opening app: {app_name}")
+    
+    # Common locations for shortcuts
+    paths = [
+        os.path.join(os.environ["ProgramData"], r"Microsoft\Windows\Start Menu\Programs"),
+        os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs"),
+        os.path.join(os.environ["USERPROFILE"], "Desktop"),
+        os.path.join(os.environ["PUBLIC"], "Desktop")
+    ]
+    
+    app_lower = app_name.lower()
+    best_match = None
+    best_score = 0
+    
+    # Search for matching shortcuts
+    for base_path in paths:
+        if not os.path.exists(base_path):
+            continue
+        for root, dirs, files in os.walk(base_path):
+            for file in files:
+                if not file.lower().endswith(('.lnk', '.url')):
+                    continue
+                    
+                name = os.path.splitext(file)[0].lower()
+                
+                # Skip uninstallers and help files
+                if any(skip in name for skip in ['uninstall', 'help', 'readme']):
+                    continue
+                
+                # Score the match
+                score = 0
+                if app_lower == name:
+                    score = 100  # Exact match
+                elif app_lower in name or name in app_lower:
+                    score = 50 + len(app_lower)  # Partial match
+                elif all(word in name for word in app_lower.split()):
+                    score = 40  # All words match
+                
+                if score > best_score:
+                    best_score = score
+                    best_match = os.path.join(root, file)
+    
+    if best_match:
+        logger.info(f"Found shortcut: {best_match}")
+        try:
+            os.startfile(best_match)
+            return
+        except Exception as e:
+            logger.error(f"Failed to launch via shortcut: {e}")
+    
+    # Fallback to pyautogui Windows Search method
     if not pyautogui:
         logger.error("PyAutoGUI not installed.")
         return
-
-    logger.info(f"Opening app: {app_name}")
+        
+    logger.info(f"No shortcut found, falling back to Windows Search for: {app_name}")
     pyautogui.press('win')
     time.sleep(0.3)
     pyautogui.write(app_name, interval=0.05)
     time.sleep(0.5)
     pyautogui.press('enter')
+
+def get_installed_applications() -> list[str]:
+    """
+    Scans Windows Start Menu for installed applications (.lnk files).
+    Returns a sorted list of application names (e.g. ['Chrome', 'Spotify', 'Steam']).
+    """
+    import os
+    if platform.system() != "Windows":
+        return ["Not supported on non-Windows OS"]
+        
+    apps = set()
+    
+    # Common Start Menu locations AND Desktop (for game shortcuts)
+    paths = [
+        os.path.join(os.environ["ProgramData"], r"Microsoft\Windows\Start Menu\Programs"),
+        os.path.join(os.environ["APPDATA"], r"Microsoft\Windows\Start Menu\Programs"),
+        os.path.join(os.environ["USERPROFILE"], "Desktop"),
+        os.path.join(os.environ["PUBLIC"], "Desktop")
+    ]
+    
+    for p in paths:
+        if not os.path.exists(p): continue
+        for root, dirs, files in os.walk(p):
+            for file in files:
+                # Include .lnk (Shortcuts) and .url (Steam/Web links)
+                if file.lower().endswith((".lnk", ".url")):
+                    # Get filename without extension
+                    name = os.path.splitext(file)[0]
+                    # Filter out uninstallers and help files
+                    if "uninstall" in name.lower() or "help" in name.lower() or "readme" in name.lower():
+                        continue
+                    apps.add(name)
+                    
+    return sorted(list(apps))
 
 def control_media(action: str):
     """

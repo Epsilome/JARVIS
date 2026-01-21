@@ -71,6 +71,7 @@ class SystemHealth(BaseModel):
     ram_total_gb: float
     battery: str
     disk: float
+    gpu: Optional[float] = None
 
 # ==================== ENDPOINTS ====================
 
@@ -100,13 +101,29 @@ async def get_system_stats():
         
         disk = psutil.disk_usage('/')
         
+        # GPU Usage (NVIDIA via pynvml - more reliable than GPUtil)
+        gpu_pct = None
+        try:
+            import pynvml
+            pynvml.nvmlInit()
+            device_count = pynvml.nvmlDeviceGetCount()
+            if device_count > 0:
+                # Get the last GPU (usually the dedicated NVIDIA GPU if Intel iGPU is GPU 0)
+                handle = pynvml.nvmlDeviceGetHandleByIndex(device_count - 1)
+                util = pynvml.nvmlDeviceGetUtilizationRates(handle)
+                gpu_pct = util.gpu
+            pynvml.nvmlShutdown()
+        except Exception as e:
+            logger.debug(f"GPU monitoring unavailable: {e}")
+        
         return SystemHealth(
             cpu=cpu_pct,
             ram=ram_pct,
             ram_used_gb=ram_used_gb,
             ram_total_gb=ram_total_gb,
             battery=batt_str,
-            disk=disk.percent
+            disk=disk.percent,
+            gpu=gpu_pct
         )
     except Exception as e:
         logger.error(f"System stats error: {e}")
@@ -1019,6 +1036,8 @@ class ConfigResponse(BaseModel):
     tts_voice: str
     theme_accent: str
     ollama_model: str
+    stt_model: str
+    tts_model: str
     api_keys_status: Dict[str, bool]
 
 class ConfigUpdate(BaseModel):
@@ -1060,6 +1079,8 @@ async def get_config():
             tts_voice=env_dict.get('TTS_VOICE', 'af_bella'),
             theme_accent=env_dict.get('THEME_ACCENT', 'cyan'),
             ollama_model=env_dict.get('OLLAMA_MODEL', 'qwen2.5:3b'),
+            stt_model='large-v3-turbo',  # Faster Whisper model
+            tts_model='Kokoro',  # Kokoro TTS engine
             api_keys_status={
                 "tmdb": bool(env_dict.get('TMDB_API_KEY')),
                 "weather": bool(env_dict.get('DEFAULT_CITY')),  # Weather works via wttr.in without API key

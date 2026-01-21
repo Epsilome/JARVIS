@@ -251,7 +251,7 @@ const ConfigPanel = () => {
 
                 {/* Model Info */}
                 <SettingSection icon={Settings} title="SYSTEM INFO" variants={itemVariants}>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-4">
                         <motion.div
                             className="px-4 py-4 bg-black/40 backdrop-blur rounded-xl border border-white/5"
                             whileHover={{ borderColor: 'rgba(var(--accent-color-rgb), 0.3)' }}
@@ -259,6 +259,24 @@ const ConfigPanel = () => {
                             <div className="text-xs text-gray-500 font-orbitron mb-1">LLM Model</div>
                             <div className="text-sm font-mono font-bold" style={{ color: 'var(--accent-color)' }}>
                                 {config?.ollama_model || 'Unknown'}
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            className="px-4 py-4 bg-black/40 backdrop-blur rounded-xl border border-white/5"
+                            whileHover={{ borderColor: 'rgba(var(--accent-color-rgb), 0.3)' }}
+                        >
+                            <div className="text-xs text-gray-500 font-orbitron mb-1">STT Model</div>
+                            <div className="text-sm font-mono font-bold" style={{ color: 'var(--accent-color)' }}>
+                                {config?.stt_model || 'Unknown'}
+                            </div>
+                        </motion.div>
+                        <motion.div
+                            className="px-4 py-4 bg-black/40 backdrop-blur rounded-xl border border-white/5"
+                            whileHover={{ borderColor: 'rgba(var(--accent-color-rgb), 0.3)' }}
+                        >
+                            <div className="text-xs text-gray-500 font-orbitron mb-1">TTS Model</div>
+                            <div className="text-sm font-mono font-bold" style={{ color: 'var(--accent-color)' }}>
+                                {config?.tts_model || 'Unknown'}
                             </div>
                         </motion.div>
                     </div>
